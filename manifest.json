@@ -1,0 +1,17 @@
+{
+  "name": "Home Workout Planner",
+  "short_name": "WorkoutPlanner",
+  "start_url": "./home-workout-planner.html",
+  "display": "standalone",
+  "background_color": "#f7f6f2",
+  "theme_color": "#01696f",
+  "description": "Simple home workout planner with weekly logging and progressive overload guidance.",
+  "icons": [
+    {
+      "src": "./assets/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
