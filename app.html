@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#01696f">
   <title>Home Workout Coach</title>
-  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="./assets/icon.svg">
+  <link rel="icon" href="./assets/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="./assets/icon-180.png">
   <link rel="manifest" href="./manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -47,33 +47,58 @@
     .view{flex:1;padding:1rem 1.1rem calc(6rem + env(safe-area-inset-bottom))}
     .hiddenview{display:none}
 
-    /* top strip */
-    .topstrip{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.1rem .2rem}
+    .topstrip{display:flex;align-items:center;justify-content:space-between;padding:0 0 .2rem}
     .wordmark{font-family:var(--font-display);font-size:1.15rem;letter-spacing:.01em}
     .daylabel{font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-faint)}
 
-    /* coach card */
     .coach{background:var(--color-surface);border:1px solid var(--color-line);border-radius:1.25rem;padding:1.25rem;box-shadow:var(--shadow);margin-top:.75rem}
-    .modechip{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .7rem;border-radius:999px;background:var(--color-primary-soft);color:var(--color-primary);font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+    .modechip{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .7rem;border-radius:999px;background:var(--color-primary-soft);color:var(--color-primary);font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:0}
+    button.modechip{cursor:pointer}
     .coach h1{font-size:var(--text-2xl);margin:.5rem 0 .35rem}
     .coach .say{color:var(--color-text-muted);margin:0 0 1rem;font-size:var(--text-sm)}
     .startbig{width:100%;min-height:60px;border-radius:999px;border:0;background:var(--color-primary);color:var(--color-text-inverse);font-weight:800;font-size:var(--text-lg)}
     .startbig:active{background:var(--color-primary-hover)}
-    .sessionmeta{display:flex;gap:.9rem;margin:.9rem 0 0;font-size:var(--text-xs);color:var(--color-text-faint);font-weight:600;letter-spacing:.02em}
+    .startsecondary{width:100%;min-height:54px;border-radius:999px;border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);font-weight:700;font-size:var(--text-base);margin-top:.6rem}
+    .sessionmeta{display:flex;gap:.9rem;margin:.9rem 0 0;font-size:var(--text-xs);color:var(--color-text-faint);font-weight:600;letter-spacing:.02em;flex-wrap:wrap}
 
-    /* beer check */
     .beercheck{margin-top:.9rem;background:var(--color-amber-soft);border:1px solid var(--color-line);border-radius:1rem;padding:.9rem 1rem;display:flex;gap:.75rem;align-items:center}
     .beercheck p{margin:0;font-size:var(--text-sm);color:var(--color-text)}
     .beercheck strong{color:var(--color-amber)}
     .beercheck button{margin-left:auto;flex-shrink:0;border:0;background:var(--color-amber);color:var(--color-text-inverse);border-radius:999px;padding:.55rem .9rem;font-weight:700;font-size:var(--text-sm)}
 
-    /* mode list */
-    .modes{margin-top:1.4rem;display:grid;gap:.6rem}
-    .modes h2{font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-faint);margin-bottom:.2rem}
-    .modebtn{display:flex;align-items:center;gap:.9rem;width:100%;text-align:left;background:var(--color-surface);border:1px solid var(--color-line);border-radius:1rem;padding:.9rem 1rem;color:var(--color-text)}
-    .modebtn .t{font-weight:700}
-    .modebtn .d{font-size:var(--text-xs);color:var(--color-text-muted)}
-    .modebtn .mins{margin-left:auto;font-size:var(--text-xs);font-weight:700;color:var(--color-primary);flex-shrink:0}
+    /* quiz */
+    .quiz h1{font-size:var(--text-xl);margin:.6rem 0 .2rem}
+    .quiz .qnote{font-size:var(--text-sm);color:var(--color-text-muted);margin:0 0 1rem}
+    .qblock{margin-top:1.1rem}
+    .qblock h2{font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-faint);margin-bottom:.5rem}
+    .qopts{display:flex;flex-wrap:wrap;gap:.5rem}
+    .qopt{border:1px solid var(--color-line);background:var(--color-surface);color:var(--color-text);border-radius:999px;padding:.6rem 1rem;font-weight:600;font-size:var(--text-sm)}
+    .qopt[aria-pressed="true"]{background:var(--color-primary);border-color:var(--color-primary);color:var(--color-text-inverse)}
+    .quizgo{margin-top:1.4rem}
+
+    /* preview */
+    .preview h1{font-size:var(--text-xl);margin:.5rem 0 .2rem}
+    .preview .say{font-size:var(--text-sm);color:var(--color-text-muted);margin:0 0 .8rem}
+    .circuit{background:var(--color-surface);border:1px solid var(--color-line);border-radius:1.25rem;padding:.4rem 1.1rem;box-shadow:var(--shadow)}
+    .cblock{padding:.7rem 0 .2rem;font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-primary)}
+    .cx{display:flex;justify-content:space-between;gap:.8rem;padding:.55rem 0;border-bottom:1px solid var(--color-line);font-size:var(--text-sm)}
+    .cx:last-child{border-bottom:0}
+    .cx .nm{font-weight:600}
+    .cx .tg{color:var(--color-text-muted);text-align:right;flex-shrink:0}
+    .previewbtns{display:flex;flex-direction:column;gap:.6rem;margin-top:1rem}
+
+    /* library */
+    .filters{display:flex;gap:.5rem;flex-wrap:wrap;margin:.8rem 0 1rem}
+    .fchip{border:1px solid var(--color-line);background:var(--color-surface);color:var(--color-text-muted);border-radius:999px;padding:.45rem .9rem;font-weight:700;font-size:var(--text-xs);letter-spacing:.04em;text-transform:uppercase}
+    .fchip[aria-pressed="true"]{background:var(--color-primary);border-color:var(--color-primary);color:var(--color-text-inverse)}
+    .exlist{display:grid;gap:.5rem}
+    .ex{background:var(--color-surface);border:1px solid var(--color-line);border-radius:1rem;overflow:hidden}
+    .ex summary{list-style:none;display:flex;align-items:center;gap:.7rem;padding:.85rem 1rem;cursor:pointer;font-weight:600;font-size:var(--text-sm)}
+    .ex summary::-webkit-details-marker{display:none}
+    .ex .cat{margin-left:auto;flex-shrink:0;font-size:var(--text-xs);font-weight:700;color:var(--color-primary);letter-spacing:.04em;text-transform:uppercase}
+    .ex .body{padding:0 1rem .9rem;font-size:var(--text-sm);color:var(--color-text-muted)}
+    .ex .body a{display:inline-block;margin-top:.5rem;color:var(--color-primary);font-weight:700;text-decoration:none}
+    .ex[open] summary{border-bottom:1px solid var(--color-line);margin-bottom:.6rem}
 
     /* player */
     .timerbar{position:sticky;top:0;z-index:40;display:none;align-items:center;gap:.9rem;padding:.7rem 1.1rem;padding-top:calc(.7rem + env(safe-area-inset-top));background:var(--color-primary);color:var(--color-text-inverse)}
@@ -109,19 +134,22 @@
     .liftrow .hint{display:block;font-weight:500;font-size:var(--text-xs);color:var(--color-text-faint)}
     .liftrow input{width:6.5rem;padding:.6rem .6rem;border-radius:.6rem;border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);text-align:center}
 
-    /* plan view */
+    /* plan */
+    .goalrow{display:flex;align-items:center;gap:.7rem;background:var(--color-surface);border:1px solid var(--color-line);border-radius:1rem;padding:.8rem 1rem;margin-top:.9rem}
+    .goalrow label{font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-faint)}
+    .goalrow select{margin-left:auto;border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);border-radius:.6rem;padding:.5rem .6rem;font-weight:600;font-size:var(--text-sm)}
     .phase{background:var(--color-surface);border:1px solid var(--color-line);border-radius:1rem;padding:1rem;margin-top:.7rem}
     .phase.now{border-color:var(--color-primary)}
     .phase .wk{font-size:var(--text-xs);font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--color-primary)}
     .phase h3{font-size:var(--text-lg);margin:.15rem 0 .25rem;font-family:var(--font-display);font-weight:400}
     .phase p{margin:0;font-size:var(--text-sm);color:var(--color-text-muted)}
     .keylifts{margin-top:1.4rem}
-    .keylifts h2, .plan-head h2, .streak-head h2{font-family:var(--font-display);font-weight:400;font-size:var(--text-xl)}
+    .keylifts h2, .plan-head h2, .streak-head h2, .lib-head h2{font-family:var(--font-display);font-weight:400;font-size:var(--text-xl)}
     .kl{display:flex;justify-content:space-between;align-items:baseline;padding:.7rem 0;border-bottom:1px solid var(--color-line);font-size:var(--text-sm)}
     .kl .best{font-weight:800;font-variant-numeric:tabular-nums}
     .kl .next{font-size:var(--text-xs);color:var(--color-amber);font-weight:700;margin-left:.6rem}
 
-    /* streak view */
+    /* streak */
     .streakhero{text-align:center;padding:1.6rem 0 .6rem}
     .streakhero .n{font-family:var(--font-display);font-size:clamp(4rem,20vw,6.5rem);line-height:1;display:block}
     .streakhero .cap{font-size:var(--text-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-text-faint)}
@@ -133,7 +161,6 @@
     .streakrules{margin-top:1.3rem;font-size:var(--text-sm);color:var(--color-text-muted)}
     .streakrules li{margin-bottom:.3rem}
 
-    /* tab bar */
     .tabbar{position:fixed;bottom:0;left:0;right:0;z-index:50;display:flex;max-width:560px;margin:0 auto;background:color-mix(in srgb, var(--color-surface) 92%, transparent);backdrop-filter:blur(12px);border-top:1px solid var(--color-line);padding-bottom:env(safe-area-inset-bottom)}
     .tab{flex:1;background:none;border:0;padding:.7rem 0 .6rem;color:var(--color-text-faint);font-size:var(--text-xs);font-weight:700;display:grid;gap:.15rem;justify-items:center}
     .tab svg{width:22px;height:22px}
@@ -151,22 +178,23 @@
 
     <div class="timerbar" id="timerbar" role="timer" aria-live="off">
       <span class="elapsed" id="elapsedTxt">0:00</span>
-      <span class="phase" id="phaseTxt">Warm-up</span>
+      <span class="phase" id="phaseTxt">Session</span>
       <button class="quit" id="quitBtn" type="button">End</button>
     </div>
 
     <!-- TODAY -->
     <section class="view" id="view-today">
-      <div class="topstrip" style="padding:0 0 .2rem">
+      <div class="topstrip">
         <span class="wordmark">Home Workout Coach</span>
         <span class="daylabel" id="dayLabel">PM full</span>
       </div>
 
       <div class="coach" id="coachCard">
-        <span class="modechip" id="suggestChip">Standard</span>
+        <button class="modechip" id="goalChip" type="button">Goal: Visible abs</button>
         <h1 class="display" id="coachHeadline">Twenty minutes. Then the evening is yours.</h1>
-        <p class="say" id="coachSay">Warm up, three blocks, log two numbers. Done before dinner.</p>
-        <button class="startbig" id="startSuggested" type="button">Start session</button>
+        <p class="say" id="coachSay">Answer three quick questions, or let the coach roll one for you.</p>
+        <button class="startbig" id="quizBtn" type="button">Check in — 3 questions</button>
+        <button class="startsecondary" id="quickStartBtn" type="button">Quick start</button>
         <div class="sessionmeta" id="sessionMeta"></div>
       </div>
 
@@ -174,25 +202,63 @@
         <p><strong>Beer check.</strong> Eight minutes first — keep the streak, then decide.</p>
         <button id="beerStart" type="button">8-min reset</button>
       </div>
+    </section>
 
-      <div class="modes">
-        <h2>Or pick a mode</h2>
-        <button class="modebtn" data-mode="standard" type="button">
-          <span><span class="t">Standard</span><br><span class="d">Strength + anti-core, the default</span></span>
-          <span class="mins">~20 min</span>
-        </button>
-        <button class="modebtn" data-mode="fallback" type="button">
-          <span><span class="t">Momentum reset</span><br><span class="d">Low-motivation day. One round earns the streak</span></span>
-          <span class="mins">6–10 min</span>
-        </button>
-        <button class="modebtn" data-mode="travel" type="button">
-          <span><span class="t">Travel</span><br><span class="d">Bodyweight only, any room</span></span>
-          <span class="mins">~15 min</span>
-        </button>
-        <button class="modebtn" data-mode="harder" type="button">
-          <span><span class="t">Harder day</span><br><span class="d">Energy is high. Shorter rests, tougher variants</span></span>
-          <span class="mins">~22 min</span>
-        </button>
+    <!-- QUIZ -->
+    <section class="view hiddenview" id="view-quiz">
+      <div class="quiz">
+        <span class="modechip" id="quizGoalChip">Goal: Visible abs</span>
+        <h1 class="display">How are we showing up today?</h1>
+        <p class="qnote">Honest answers get better sessions. There are no wrong ones.</p>
+
+        <div class="qblock">
+          <h2>Mood</h2>
+          <div class="qopts" data-q="mood">
+            <button class="qopt" data-v="0" type="button" aria-pressed="false">Rough</button>
+            <button class="qopt" data-v="1" type="button" aria-pressed="false">Okay</button>
+            <button class="qopt" data-v="2" type="button" aria-pressed="false">Good</button>
+          </div>
+        </div>
+
+        <div class="qblock">
+          <h2>Energy</h2>
+          <div class="qopts" data-q="energy">
+            <button class="qopt" data-v="0" type="button" aria-pressed="false">Running on fumes</button>
+            <button class="qopt" data-v="1" type="button" aria-pressed="false">Normal</button>
+            <button class="qopt" data-v="2" type="button" aria-pressed="false">Plenty in the tank</button>
+          </div>
+        </div>
+
+        <div class="qblock">
+          <h2>What do you feel like training?</h2>
+          <div class="qopts" data-q="train">
+            <button class="qopt" data-v="goal" type="button" aria-pressed="false">Whatever serves the goal</button>
+            <button class="qopt" data-v="legs" type="button" aria-pressed="false">Legs &amp; glutes</button>
+            <button class="qopt" data-v="push" type="button" aria-pressed="false">Push &amp; upper</button>
+            <button class="qopt" data-v="core" type="button" aria-pressed="false">Core</button>
+            <button class="qopt" data-v="travel" type="button" aria-pressed="false">No kit today</button>
+          </div>
+        </div>
+
+        <div class="quizgo">
+          <button class="startbig" id="quizGo" type="button" disabled>Build my session</button>
+          <button class="startsecondary" id="quizCancel" type="button">Back</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PREVIEW -->
+    <section class="view hiddenview" id="view-preview">
+      <div class="preview">
+        <span class="modechip" id="previewChip">Standard · week 1</span>
+        <h1 class="display" id="previewTitle">Your circuit tonight</h1>
+        <p class="say" id="previewSay">This is everything. Nothing else to think about.</p>
+        <div class="circuit" id="circuitList"></div>
+        <div class="previewbtns">
+          <button class="startbig" id="beginBtn" type="button">Begin session</button>
+          <button class="startsecondary" id="reshuffleBtn" type="button" hidden>Roll another</button>
+          <button class="startsecondary" id="previewBack" type="button">Back</button>
+        </div>
       </div>
     </section>
 
@@ -203,8 +269,8 @@
         <h1 class="display" id="stepName">March + band pull-aparts</h1>
         <div class="target" id="stepTarget">60 seconds, easy pace</div>
         <div class="resttimer" id="restTimer">0:30</div>
-        <p class="cue" id="stepCue">Rhythmic, not explosive. You are warming the engine, not racing it.</p>
-        <a class="demo" id="stepDemo" href="#" target="_blank" rel="noopener noreferrer" hidden>Watch form demo</a>
+        <p class="cue" id="stepCue">Rhythmic, not explosive.</p>
+        <a class="demo" id="stepDemo" href="#" target="_blank" rel="noopener noreferrer" hidden>Watch technique video</a>
         <button class="swap" id="stepSwap" type="button" hidden>Swap exercise</button>
         <div class="stepdots" id="stepDots"></div>
       </div>
@@ -227,12 +293,32 @@
     <!-- PLAN -->
     <section class="view hiddenview" id="view-plan">
       <div class="plan-head"><h2 class="display">Eight weeks to visible change</h2></div>
-      <p style="font-size:var(--text-sm);color:var(--color-text-muted);margin:.4rem 0 0">Abs first, then the chains. 2–4 completed sessions a week is the honest target.</p>
+      <div class="goalrow">
+        <label for="goalSelect">Global goal</label>
+        <select id="goalSelect">
+          <option value="abs">Visible abs</option>
+          <option value="chain">Anterior &amp; posterior chain</option>
+          <option value="upper">Upper body</option>
+        </select>
+      </div>
       <div id="phaseList"></div>
       <div class="keylifts">
         <h2 class="display">Key lifts</h2>
         <div id="keyliftList"></div>
       </div>
+    </section>
+
+    <!-- LIBRARY -->
+    <section class="view hiddenview" id="view-library">
+      <div class="lib-head"><h2 class="display">Technique library</h2></div>
+      <div class="filters" id="libFilters" role="group" aria-label="Filter by category">
+        <button class="fchip" data-cat="all" type="button" aria-pressed="true">All</button>
+        <button class="fchip" data-cat="Warm-up" type="button" aria-pressed="false">Warm-up</button>
+        <button class="fchip" data-cat="Strength" type="button" aria-pressed="false">Strength</button>
+        <button class="fchip" data-cat="Core" type="button" aria-pressed="false">Core</button>
+        <button class="fchip" data-cat="Burst" type="button" aria-pressed="false">Burst</button>
+      </div>
+      <div class="exlist" id="exList"></div>
     </section>
 
     <!-- STREAK -->
@@ -259,6 +345,10 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
         Plan
       </button>
+      <button class="tab" data-view="library" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h5a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H5zM19 4h-5a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h5z"/></svg>
+        Library
+      </button>
       <button class="tab" data-view="streak" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3c1 4-4 6-4 10a4 4 0 0 0 8 0c0-2-1-3-1-3s3 1 3 5a7 7 0 0 1-14 0C4 9 10 8 12 3z"/></svg>
         Streak
@@ -270,7 +360,7 @@
         <svg id="pauseIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
         <svg id="playIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><path d="M7 4l13 8-13 8z"/></svg>
       </button>
-      <button class="bignext" id="nextBtn" type="button">Start warm-up</button>
+      <button class="bignext" id="nextBtn" type="button">Done — next</button>
     </div>
 
     <div class="toast" id="toast" role="status"></div>
@@ -280,63 +370,62 @@
   (function(){
   'use strict';
   const KEY = 'hwc_state_v1';
-  const SIGNALS_KEY = 'hwc_signals'; // optional: {dateISO, steps, alcoholUnits} fed by phone automation (e.g. iOS Shortcut); never entered manually in-app
+  const SIGNALS_KEY = 'hwc_signals'; // optional: {dateISO, steps, alcoholUnits} fed by phone automation; never entered manually in-app
   const $ = id => document.getElementById(id);
+  const yt = q => 'https://www.youtube.com/results?search_query=' + q;
 
-  /* ---------- exercise library ---------- */
-  // pattern: push | squat | lunge | hinge | anticore | opener | warmup | burst
-  const LIB = {
-    push: [
-      {name:'Push-ups', target:r=>`${r} reps`, cue:'Ribs down, reach the chest fully between the hands.', demo:'push+up+form', key:'push'},
-      {name:'Band-resisted push-ups', target:r=>`${r} reps`, cue:'Band across the upper back. Same strict shape, harder press.', demo:'band+resisted+push+up', key:'push'},
-      {name:'Incline push-ups', target:r=>`${r} reps`, cue:'Hands on the bench. Full range still — chest to the edge.', demo:'incline+push+up', key:'push'},
-      {name:'Tempo push-ups', target:r=>`${r} reps, 3-second lowers`, cue:'Three seconds down, one hard press up.', demo:'tempo+push+up', key:'push', hard:true}
-    ],
-    squat: [
-      {name:'Goblet squat', target:(r,kg)=>`${r} reps @ ${kg} kg`, cue:'Dumbbell at the chest. Sit between the hips, stay tall.', demo:'goblet+squat+form', key:'squat', stable:true},
-      {name:'Tempo goblet squat', target:(r,kg)=>`${r} reps @ ${kg} kg, slow lowers`, cue:'Three seconds down. Drive up evenly through both feet.', demo:'tempo+goblet+squat', key:'squat', hard:true},
-      {name:'Pause goblet squat', target:(r,kg)=>`${r} reps @ ${kg} kg, 2-s pause`, cue:'Pause at the bottom, stay braced, then stand.', demo:'pause+squat', key:'squat', hard:true}
-    ],
-    lunge: [
-      {name:'Reverse lunges', target:(r,kg)=>`${r} per leg @ ${kg} kg`, cue:'Step back long enough that the front foot stays planted.', demo:'reverse+lunge+form', key:'lunge'},
-      {name:'Split-stance lunges', target:(r,kg)=>`${r} per leg @ ${kg} kg`, cue:'Feet stay set; drop and drive without stepping.', demo:'split+squat+form', key:'lunge'}
-    ],
-    hinge: [
-      {name:'Glute bridge', target:r=>`${r} reps`, cue:'Pause at the top for two seconds. Ribs stacked, glutes doing the work.', key:'bridge'},
-      {name:'Hip thrust (bench)', target:r=>`${r} reps`, cue:'Shoulders on the bench, chin tucked, full squeeze at the top.', key:'bridge'},
-      {name:'Band hinge', target:r=>`${r} reps`, cue:'Hamstring-friendly. Push the hips back, band gives the load.', key:'bridge'}
-    ],
-    anticore: [
-      {name:'Forearm plank', target:s=>`${s} seconds`, cue:'Glutes tight, chin lightly tucked, no sagging hips.', demo:'forearm+plank+form', key:'plank'},
-      {name:'High-plank shoulder taps', target:()=>'10–16 per side', cue:'Widen the feet, keep the hips as quiet as possible.', demo:'plank+shoulder+taps', key:'plank'},
-      {name:'Side plank', target:()=>'20–30 seconds per side', cue:'Press the floor away; straight line from ankle to ear.', demo:'side+plank+form', key:'plank'},
-      {name:'Pallof press', target:()=>'8–10 per side, slow', cue:'Band anchored to the side. Press out, refuse the twist.', key:'plank'}
-    ],
-    burst: [
-      {name:'Rope sprint', target:()=>'20–30 seconds', cue:'Crisp and powerful. Stop before technique breaks.'},
-      {name:'Band high knees', target:()=>'20–30 seconds', cue:'Band around the feet or thighs; fast, punchy knees.'},
-      {name:'DB thrusters', target:()=>'20–30 seconds, light', cue:'Light dumbbells. Smooth rhythm, full lockout overhead.'}
-    ],
-    carry: {name:'Farmer’s walk (optional)', target:()=>'2 × 20 m, heavy-ish', cue:'Only if the hamstrings feel warm and happy. Tall posture, quiet steps.', optional:true}
+  /* ---------- exercise library ----------
+     Every exercise: name, cat, how (brief explainer), demo (YouTube search), cue (in-session) */
+  const EX = {
+    march:      {name:'March + band pull-aparts', cat:'Warm-up', demo:'band+pull+apart+form', cue:'Rhythmic, not explosive. You are warming the engine, not racing it.', how:'March on the spot while pulling a light band apart at chest height, arms long. Wakes the upper back and raises temperature with zero strain.'},
+    walkout:    {name:'Walk-out to plank', cat:'Warm-up', demo:'inchworm+walkout+exercise', cue:'Brace the ribs down before each walk-out.', how:'From standing, hinge at the hips and walk the hands out to a high plank, pause, walk back and stand tall. Opens hamstrings and switches the trunk on.'},
+    lightgoblet:{name:'Light goblet squats', cat:'Warm-up', demo:'goblet+squat+form', cue:'Light load, controlled tempo. Activation, not fatigue.', how:'A few easy reps with a light dumbbell held at the chest. Grooves the squat pattern before you load it properly.'},
+    pushup:     {name:'Push-ups', cat:'Strength', key:'push', demo:'push+up+form', cue:'Ribs down, reach the chest fully between the hands.', how:'Hands just outside the shoulders, body one straight line from ankles to ears. Lower the chest between the hands, press the floor away hard.'},
+    bandpush:   {name:'Band-resisted push-ups', cat:'Strength', key:'push', demo:'band+resisted+push+up', cue:'Same strict shape; the band makes the top harder.', how:'Loop the band across the upper back and pin the ends under the palms. Identical strict push-up — the band adds resistance right where you are strongest.'},
+    inclinepush:{name:'Incline push-ups', cat:'Strength', key:'push', demo:'incline+push+up', cue:'Full range still — chest to the bench edge.', how:'Hands on the bench, body straight. The incline scales the load, not the standard: same full range, same brace.'},
+    tempopush:  {name:'Tempo push-ups', cat:'Strength', key:'push', demo:'tempo+push+up', cue:'Three seconds down, one hard press up.', how:'A normal push-up lowered on a slow three-count, then pressed up fast. Kills momentum and doubles what each rep is worth.', hard:true},
+    goblet:     {name:'Goblet squat', cat:'Strength', key:'squat', demo:'goblet+squat+form', cue:'Sit between the hips, stay tall, drive evenly through both feet.', how:'Hold one dumbbell vertically at the chest, elbows tucked. Sit down between the hips with a tall chest, then stand through the whole foot.', stable:true},
+    tempogoblet:{name:'Tempo goblet squat', cat:'Strength', key:'squat', demo:'tempo+goblet+squat', cue:'Three seconds down. Drive up evenly.', how:'A goblet squat with a slow three-second descent. More time under tension from the same dumbbell.', hard:true},
+    pausegoblet:{name:'Pause goblet squat', cat:'Strength', key:'squat', demo:'pause+squat+benefits', cue:'Pause at the bottom, stay braced, then stand.', how:'Goblet squat with a full two-second pause at the bottom. No bounce to help you — the legs do all of it.', hard:true},
+    revlunge:   {name:'Reverse lunges', cat:'Strength', key:'lunge', demo:'reverse+lunge+form', cue:'Step back long enough that the front foot stays planted.', how:'Step one leg back, drop the back knee toward the floor, then drive through the planted front foot to stand. Easier on the knees than forward lunges.'},
+    splitlunge: {name:'Split-stance lunges', cat:'Strength', key:'lunge', demo:'split+squat+form', cue:'Feet stay set; drop and drive without stepping.', how:'Set a stride stance and keep both feet planted. Drop straight down until the back knee hovers, then drive up. All tension, no stepping.'},
+    bridge:     {name:'Glute bridge', cat:'Strength', key:'bridge', demo:'glute+bridge+form', cue:'Pause at the top for two seconds. Ribs stacked.', how:'On your back, heels close to the hips. Drive the hips up until the body is a straight line, squeeze for two seconds, lower with control.'},
+    hipthrust:  {name:'Hip thrust (bench)', cat:'Strength', key:'bridge', demo:'hip+thrust+form', cue:'Chin tucked, full squeeze at the top.', how:'Upper back on the bench, feet planted. Drive the hips to full extension with the chin tucked, squeeze hard, lower slow. Add a dumbbell on the hips to progress.'},
+    bandhinge:  {name:'Band hinge', cat:'Strength', key:'bridge', demo:'banded+good+morning', cue:'Push the hips back, flat back, stand tall against the band.', how:'Stand on the band, handles at the shoulders. Push the hips straight back with a flat back, then stand tall against the tension. The hamstring-friendly hinge.'},
+    carry:      {name:'Farmer’s walk', cat:'Strength', demo:'farmers+walk+form', cue:'Tall posture, quiet steps. Only when hamstrings feel warm and happy.', how:'A heavy dumbbell in each hand, walk tall with quiet steps. Optional — programmed only when the hamstrings are warm and feeling good.', optional:true},
+    bandrow:    {name:'Band rows', cat:'Strength', demo:'resistance+band+row+form', cue:'Pull to the ribs, squeeze the shoulder blades.', how:'Anchor the band at chest height, pull the handles to the lower ribs and squeeze the shoulder blades together. Balances all the pushing.'},
+    bwsquat:    {name:'Bodyweight squats', cat:'Strength', key:'squat', demo:'air+squat+form', cue:'Control down, drive up. Long sets are fine today.', how:'No load, full control. Sit between the hips with a tall chest; on travel days volume replaces weight.'},
+    plank:      {name:'Forearm plank', cat:'Core', key:'plank', demo:'forearm+plank+form', cue:'Glutes tight, chin lightly tucked, no sagging hips.', how:'Elbows under shoulders, glutes tight, chin softly tucked. Hold a straight, quiet line — the moment the hips sag, the set is over.'},
+    taps:       {name:'High-plank shoulder taps', cat:'Core', key:'plank', demo:'plank+shoulder+taps', cue:'Widen the feet, keep the hips as quiet as possible.', how:'From a high plank with feet wide, lift one hand and tap the opposite shoulder. The work is refusing to let the hips sway.'},
+    sideplank:  {name:'Side plank', cat:'Core', key:'plank', demo:'side+plank+form', cue:'Press the floor away; straight line from ankle to ear.', how:'Elbow under the shoulder, feet stacked or staggered. Press the floor away and hold a straight line from ankle to ear. Swap sides evenly.'},
+    pallof:     {name:'Pallof press', cat:'Core', key:'plank', demo:'pallof+press+form', cue:'Press out, refuse the twist.', how:'Band anchored to the side at chest height. Press the hands straight out and hold — the band tries to twist you, you refuse. Anti-rotation gold.'},
+    rope:       {name:'Rope sprint', cat:'Burst', demo:'jump+rope+basics', cue:'Crisp and powerful. Stop before technique breaks.', how:'20–30 seconds of fast skipping. Soft knees, small bounces, wrists doing the spinning. Stop before the form frays.'},
+    bandknees:  {name:'Band high knees', cat:'Burst', demo:'high+knees+exercise+form', cue:'Fast, punchy knees.', how:'Band around the thighs or feet, run on the spot with fast, punchy knees. Short, sharp, done.'},
+    thrusters:  {name:'DB thrusters', cat:'Burst', demo:'dumbbell+thruster+form', cue:'Smooth rhythm, full lockout overhead.', how:'Light dumbbells at the shoulders. Squat, then drive them overhead in one motion as you stand. Smooth rhythm beats frantic speed.'},
+    pogo:       {name:'Fast march / low pogo hops', cat:'Burst', demo:'pogo+hops+exercise', cue:'Quiet and springy, twenty seconds.', how:'Quiet, springy little hops on the spot — or a hard, fast march if hopping isn’t friendly today. Low impact, high heart rate.'}
   };
-  const SUBS = { 'Farmer’s walk (optional)':'Band hinge', 'Pallof press':'Forearm plank', 'Side plank':'Forearm plank', 'Rope sprint':'Fast march', 'DB thrusters':'Band high knees' };
+  const SUBS = { carry:'bandhinge', pallof:'plank', sideplank:'plank', rope:'pogo', thrusters:'bandknees' };
+  const ALL_CATS = ['Warm-up','Strength','Core','Burst'];
 
   /* ---------- state ---------- */
   function todayISO(d){ const x=d||new Date(); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); }
   function defaultState(){
-    return { startDate: todayISO(), sessions: [], lifts: {push:{reps:8}, squat:{reps:12, kg:12.5}, lunge:{reps:8, kg:7.5}, plank:{sec:30}, bridge:{reps:12}}, lastHashes: [] };
+    return { startDate: todayISO(), goal:'abs', sessions: [], lifts: {push:{reps:8}, squat:{reps:12, kg:12.5}, lunge:{reps:8, kg:7.5}, plank:{sec:30}, bridge:{reps:12}}, lastHashes: [] };
   }
   function load(){ try{ const raw=localStorage.getItem(KEY); return raw ? Object.assign(defaultState(), JSON.parse(raw)) : defaultState(); }catch(e){ return defaultState(); } }
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
   let state = load();
 
+  const GOALS = {abs:'Visible abs', chain:'Anterior & posterior chain', upper:'Upper body'};
+
   function readSignals(){
     try{
       const s = JSON.parse(localStorage.getItem(SIGNALS_KEY) || 'null');
-      if (!s || s.dateISO !== todayISO()) return null; // stale signals are ignored
+      if (!s || s.dateISO !== todayISO()) return null;
       return s;
     }catch(e){ return null; }
   }
+  function signalsBad(){ const s = readSignals(); return !!(s && ((s.steps != null && s.steps < 4000) || (s.alcoholUnits != null && s.alcoholUnits > 0))); }
 
   /* ---------- program facts ---------- */
   function weekNumber(){
@@ -351,12 +440,11 @@
     {wks:'Week 7', from:7, to:7, name:'Density', desc:'Same work, slightly less rest — about 5 seconds per exercise.'},
     {wks:'Week 8', from:8, to:8, name:'Consolidation', desc:'Maintain strength, ease volume slightly, look in the mirror.'}
   ];
-  function phaseFor(wk){ return PHASES.find(p => wk >= p.from && wk <= p.to); }
 
   function streakCount(){
     const days = new Set(state.sessions.map(s => s.date));
     let n = 0; const d = new Date();
-    if (!days.has(todayISO(d))) d.setDate(d.getDate()-1); // streak survives until today ends
+    if (!days.has(todayISO(d))) d.setDate(d.getDate()-1);
     while (days.has(todayISO(d))){ n++; d.setDate(d.getDate()-1); }
     return n;
   }
@@ -370,7 +458,7 @@
     return best;
   }
 
-  /* ---------- targets from phase rules ---------- */
+  /* ---------- targets ---------- */
   function targets(){
     const wk = weekNumber(), L = state.lifts;
     const t = { push: L.push.reps, squatReps: L.squat.reps, squatKg: L.squat.kg, lungeReps: L.lunge.reps, lungeKg: L.lunge.kg, plank: L.plank.sec, bridge: L.bridge.reps, restCut: 0 };
@@ -384,93 +472,149 @@
   function hourNow(){ return new Date().getHours(); }
   function timeOfDay(){ const h = hourNow(); return h < 11 ? 'am' : (h >= 17 ? 'pm' : 'day'); }
 
-  function pickVariant(list, n, opts){
-    const pool = list.filter(e => (opts && opts.hard) ? true : !e.hard);
-    const stable = pool.find(e => e.stable);
-    if (opts && opts.stable && stable) return stable;
-    return pool[n % pool.length];
-  }
-
-  function buildSession(mode){
-    const t = targets(), wk = weekNumber(), n = state.sessions.length, tod = timeOfDay();
+  function buildSession(mode, opts){
+    opts = opts || {};
+    const t = targets(), wk = weekNumber(), tod = timeOfDay();
+    const n = opts.seed != null ? opts.seed : state.sessions.length;
+    const emphasis = opts.emphasis || 'goal';
     const hard = mode === 'harder';
     const steps = [];
-    const add = (block, ex, target, restSec) => steps.push({block, name:ex.name, target, cue:ex.cue, demo:ex.demo||null, key:ex.key||null, rest:restSec||0});
-
+    const add = (ex, target, restSec, block) => steps.push({exId: Object.keys(EX).find(k=>EX[k]===ex) || null, block: block || ex.cat, name:ex.name, target, cue:ex.cue, demo:ex.demo||null, how:ex.how||'', rest:restSec||0});
     const restBase = (hard ? 20 : 25) - t.restCut;
+    const morning = tod === 'am';
+
+    const pushPool = [EX.pushup, EX.bandpush, EX.inclinepush].concat(hard ? [EX.tempopush] : []);
+    const squatPool = hard ? [EX.tempogoblet, EX.pausegoblet] : [EX.goblet];
+    const lungePool = [EX.revlunge, EX.splitlunge];
+    const hingePool = [EX.bridge, EX.hipthrust];
+    const corePool = [EX.taps, EX.sideplank, EX.pallof];
+    const burstPool = [EX.rope, EX.bandknees, EX.thrusters];
 
     if (mode === 'travel'){
-      add('Warm-up', {name:'March + arm circles', cue:'Two easy minutes. Raise the temperature, open the shoulders.'}, '2 minutes');
-      add('Opener', {name:'Slow bodyweight squats', cue:'Ten easy reps. Feel the pattern before you load it.'}, '10 reps');
-      add('Strength', LIB.push[(n%2)?2:0], LIB.push[0].target(t.push), restBase);
-      add('Strength', {name:'Bodyweight squats', cue:'Control down, drive up. Long sets are fine today.', demo:'air+squat+form', key:'squat'}, `${t.squatReps + 5} reps`, restBase);
-      add('Strength', {name:'Reverse lunges', cue:'Bodyweight. Step back long, stay tall.', demo:'reverse+lunge+form', key:'lunge'}, `${t.lungeReps} per leg`, restBase);
-      add('Anti-core', LIB.anticore[0], LIB.anticore[0].target(t.plank), restBase);
-      add('Anti-core', LIB.anticore[2], LIB.anticore[2].target(), 0);
-      add('Burst', {name:'Fast march or low pogo hops', cue:'Twenty seconds, quiet and springy.'}, '20–30 seconds');
+      add(EX.march, '2 minutes', 0, 'Warm-up');
+      add(EX.walkout, '4–6 slow reps', 0, 'Warm-up');
+      add(pushPool[n % 2 ? 2 : 0], `${t.push} reps`, restBase, 'Strength');
+      add(EX.bwsquat, `${t.squatReps + 5} reps`, restBase, 'Strength');
+      add(EX.revlunge, `${t.lungeReps} per leg, bodyweight`, restBase, 'Strength');
+      add(EX.plank, `${t.plank} seconds`, restBase, 'Core');
+      add(EX.sideplank, '20–30 seconds per side', restBase, 'Core');
+      add(EX.pogo, '20–30 seconds', 0, 'Burst');
     } else if (mode === 'fallback'){
-      add('Warm-up', {name:'March + band pull-aparts', cue:'Two minutes, easy and rhythmic. This is the whole ask.'}, '2 minutes');
-      const sq = pickVariant(LIB.squat, n, {stable:true});
-      add('Mini-circuit', sq, sq.target(t.squatReps, t.squatKg), 20);
-      const ac = n % 2 ? LIB.anticore[3] : LIB.anticore[0];
-      add('Mini-circuit', ac, ac.key==='plank' && ac.name==='Forearm plank' ? ac.target(t.plank) : ac.target(), 0);
-      steps.push({block:'Done', name:'One round done? That counts.', target:'Repeat 1–2 more rounds only if you want to', cue:'The streak is already yours. Anything extra is a bonus.', rest:0});
+      add(EX.march, '2 minutes — this is the whole ask', 0, 'Warm-up');
+      add(EX.goblet, `${t.squatReps} reps @ ${t.squatKg} kg`, 20, 'Mini-circuit');
+      add(n % 2 ? EX.pallof : EX.plank, n % 2 ? '8–10 per side, slow' : `${t.plank} seconds`, 0, 'Mini-circuit');
+      steps.push({block:'Done', name:'One round done? That counts.', target:'Repeat 1–2 more rounds only if you want to', cue:'The streak is already yours. Anything extra is a bonus.', how:'', demo:null, rest:0});
     } else {
-      // standard / harder — evening default, morning-adjusted
-      const morning = tod === 'am';
-      add('Warm-up', {name: morning ? 'Short warm-up: march + pull-aparts' : 'March + band pull-aparts', cue: morning ? 'Pre-breakfast: keep it light, three minutes is enough.' : 'A minute of each: march, pull-aparts, easy goblet squat, walk-out to plank.'}, morning ? '3 minutes' : '5 minutes');
-      add('Opener', {name:'Band pull-aparts + light goblet squats', cue:'Easy pump, quick win. Two light minutes and you are in.'}, '2 minutes');
+      add(EX.march, morning ? '3 minutes, light' : '2 minutes', 0, 'Warm-up');
+      if (!morning) add(EX.walkout, '4 slow reps + 4–6 band rows', 0, 'Warm-up');
+      add(EX.lightgoblet, '2 easy minutes — quick win', 0, 'Opener');
 
-      const push = pickVariant(LIB.push, n, {hard});
-      add('Strength', push, push.target(t.push), restBase);
-      const sq = pickVariant(LIB.squat, n, {hard, stable: !hard});
-      add('Strength', sq, sq.target(t.squatReps, t.squatKg), restBase);
-      const lg = LIB.lunge[n % LIB.lunge.length];
-      add('Strength', lg, lg.target(t.lungeReps, t.lungeKg), restBase);
-      const hg = LIB.hinge[n % 2];
-      if (!morning) add('Strength', hg, hg.target(t.bridge), restBase);
-      if (hard) add('Strength', LIB.carry, LIB.carry.target(), restBase);
+      const push = pushPool[n % pushPool.length];
+      add(push, `${t.push} reps`, restBase, 'Strength');
+      const sq = squatPool[n % squatPool.length];
+      add(sq, `${t.squatReps} reps @ ${t.squatKg} kg`, restBase, 'Strength');
+      add(lungePool[n % lungePool.length], `${t.lungeReps} per leg @ ${t.lungeKg} kg`, restBase, 'Strength');
+      if (!morning) add(hingePool[n % hingePool.length], `${t.bridge} reps`, restBase, 'Strength');
+      if (hard) add(EX.carry, '2 × 20 m, heavy-ish — optional', restBase, 'Strength');
 
-      add('Anti-core', LIB.anticore[0], LIB.anticore[0].target(t.plank), restBase);
-      add('Anti-core', LIB.anticore[(n % 3) + 1], LIB.anticore[(n % 3) + 1].target(), restBase);
+      // emphasis / goal shaping
+      if (emphasis === 'legs'){ add(EX.bandhinge, '12–15 reps', restBase, 'Strength'); }
+      if (emphasis === 'push'){ add(pushPool[(n+1) % pushPool.length], `${Math.max(4, t.push - 2)} reps`, restBase, 'Strength'); }
+      if (emphasis === 'goal' && state.goal === 'chain'){ add(EX.bandhinge, '12–15 reps', restBase, 'Strength'); }
+      if (emphasis === 'goal' && state.goal === 'upper'){ add(EX.bandrow, '10–12 reps', restBase, 'Strength'); }
 
-      if (!morning || hard){
-        const b = LIB.burst[n % LIB.burst.length];
-        add('Finisher', morning ? LIB.burst[1] : b, b.target(), 0);
+      add(EX.plank, `${t.plank} seconds`, restBase, 'Core');
+      add(corePool[n % corePool.length], corePool[n % corePool.length] === EX.taps ? '10–16 per side' : (corePool[n % corePool.length] === EX.pallof ? '8–10 per side, slow' : '20–30 seconds per side'), restBase, 'Core');
+      if (emphasis === 'core' || (emphasis === 'goal' && state.goal === 'abs' && !morning)){
+        const extra = corePool[(n+1) % corePool.length];
+        add(extra, extra === EX.taps ? '10–16 per side' : (extra === EX.pallof ? '8–10 per side, slow' : '20–30 seconds per side'), restBase, 'Core');
       }
+
+      if (!morning || hard){ add(burstPool[n % burstPool.length], '20–30 seconds', 0, 'Burst'); }
     }
 
-    // never the identical full session more than twice in a row
     const hash = steps.map(s=>s.name).join('|') + '|' + mode;
     if (state.lastHashes.length >= 2 && state.lastHashes.slice(-2).every(h => h === hash) && mode !== 'fallback'){
-      const i = steps.findIndex(s => s.block === 'Strength' && s.key === 'push');
-      if (i >= 0){ const alt = LIB.push[(LIB.push.indexOf(LIB.push.find(p=>p.name===steps[i].name)) + 1) % 3]; steps[i] = Object.assign({}, steps[i], {name:alt.name, cue:alt.cue, demo:alt.demo, target:alt.target(t.push)}); }
+      const i = steps.findIndex(s => s.block === 'Strength');
+      if (i >= 0){ const alt = pushPool[(n+1) % pushPool.length]; steps[i] = Object.assign({}, steps[i], {name:alt.name, cue:alt.cue, demo:alt.demo, how:alt.how}); }
     }
     return {mode, steps, hash, week:wk};
   }
 
-  /* ---------- suggestion logic ---------- */
-  function suggestMode(){
-    const sig = readSignals(), tod = timeOfDay(), streak = streakCount();
-    if (sig){
-      if ((sig.steps != null && sig.steps < 4000) || (sig.alcoholUnits != null && sig.alcoholUnits > 0)) return {mode:'fallback', why:'Quiet day so far — protect the streak with a short one.'};
-      if (sig.steps != null && sig.steps > 8000 && (sig.alcoholUnits == null || sig.alcoholUnits === 0)) return {mode: tod === 'pm' ? 'harder' : 'standard', why:'You’ve been moving today. Cash it in.'};
-    }
-    if (tod === 'am') return {mode:'standard', why:'Pre-breakfast: lighter warm-up, trimmed volume. Bank it early.'};
-    if (streak === 0 && state.sessions.length > 0) return {mode:'fallback', why:'Restart cheap. One short round rebuilds the habit.'};
-    return {mode:'standard', why:'Warm up, three blocks, log two numbers. Done before dinner.'};
+  /* ---------- quiz + quick start ---------- */
+  const MODE_LABEL = {standard:'Standard', fallback:'Momentum reset', travel:'Travel', harder:'Harder day'};
+
+  const quiz = {mood:null, energy:null, train:null};
+  document.querySelectorAll('.qopts').forEach(group => {
+    group.addEventListener('click', e => {
+      const btn = e.target.closest('.qopt'); if (!btn) return;
+      group.querySelectorAll('.qopt').forEach(b => b.setAttribute('aria-pressed','false'));
+      btn.setAttribute('aria-pressed','true');
+      quiz[group.dataset.q] = btn.dataset.v;
+      $('quizGo').disabled = !(quiz.mood != null && quiz.energy != null && quiz.train != null);
+    });
+  });
+
+  function modeFromQuiz(){
+    if (quiz.train === 'travel') return 'travel';
+    const score = Number(quiz.mood) + Number(quiz.energy);
+    if (score <= 1) return 'fallback';
+    if (score >= 4 && timeOfDay() === 'pm' && !signalsBad()) return 'harder';
+    return 'standard';
   }
 
-  const MODE_LABEL = {standard:'Standard', fallback:'Momentum reset', travel:'Travel', harder:'Harder day'};
-  const MODE_HEADLINE = {
-    standard:'Twenty minutes. Then the evening is yours.',
-    fallback:'Six minutes buys back the day.',
-    travel:'No kit, no excuses, fifteen minutes.',
-    harder:'Feeling good? Spend it here.'
-  };
+  let pending = null, pendingQuick = false;
+
+  $('quizBtn').addEventListener('click', () => {
+    quiz.mood = quiz.energy = quiz.train = null;
+    document.querySelectorAll('.qopt').forEach(b => b.setAttribute('aria-pressed','false'));
+    $('quizGo').disabled = true;
+    $('quizGoalChip').textContent = 'Goal: ' + GOALS[state.goal];
+    show('quiz');
+  });
+  $('quizCancel').addEventListener('click', () => show('today'));
+  $('quizGo').addEventListener('click', () => {
+    const mode = modeFromQuiz();
+    const emphasis = (quiz.train === 'travel' || quiz.train === 'goal') ? 'goal' : quiz.train;
+    pending = buildSession(mode, {emphasis});
+    pendingQuick = false;
+    renderPreview('Built from your check-in. This is the whole session — nothing else today.');
+    show('preview');
+  });
+
+  function quickStart(){
+    const tod = timeOfDay();
+    let pool = tod === 'am' ? ['standard','standard','fallback'] : tod === 'pm' ? ['standard','standard','harder','fallback'] : ['standard','standard','fallback'];
+    if (signalsBad()) pool = pool.filter(m => m !== 'harder').concat('fallback');
+    const mode = pool[Math.floor(Math.random()*pool.length)];
+    const emphs = state.goal === 'abs' ? ['goal','goal','core','legs','push'] : state.goal === 'chain' ? ['goal','goal','legs','core','push'] : ['goal','goal','push','core','legs'];
+    const emphasis = emphs[Math.floor(Math.random()*emphs.length)];
+    pending = buildSession(mode, {emphasis, seed: Math.floor(Math.random()*97)});
+    pendingQuick = true;
+    renderPreview('Rolled inside your limits, pointed at the goal. Don’t overthink it.');
+    show('preview');
+  }
+  $('quickStartBtn').addEventListener('click', quickStart);
+  $('reshuffleBtn').addEventListener('click', quickStart);
+
+  function renderPreview(sayText){
+    $('previewChip').textContent = MODE_LABEL[pending.mode] + ' · week ' + pending.week + ' · ' + GOALS[state.goal];
+    $('previewTitle').textContent = pending.mode === 'fallback' ? 'Your six minutes' : (timeOfDay() === 'am' ? 'Your circuit this morning' : 'Your circuit tonight');
+    $('previewSay').textContent = sayText;
+    let html = '', lastBlock = null;
+    pending.steps.forEach(s => {
+      if (s.block !== lastBlock){ html += `<div class="cblock">${s.block}</div>`; lastBlock = s.block; }
+      html += `<div class="cx"><span class="nm">${s.name}</span><span class="tg">${s.target}</span></div>`;
+    });
+    $('circuitList').innerHTML = html;
+    $('reshuffleBtn').hidden = !pendingQuick;
+  }
+  $('previewBack').addEventListener('click', () => { pending = null; show('today'); });
+  $('beginBtn').addEventListener('click', () => { if (pending) startSession(pending); });
+  $('beerStart').addEventListener('click', () => { startSession(buildSession('fallback', {})); });
 
   /* ---------- views ---------- */
-  const views = ['today','player','finish','plan','streak'];
+  const views = ['today','quiz','preview','player','finish','plan','library','streak'];
   function show(v){
     views.forEach(x => $('view-'+x).classList.toggle('hiddenview', x !== v));
     document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.view === v));
@@ -483,19 +627,18 @@
   function renderToday(){
     const tod = timeOfDay();
     $('dayLabel').textContent = tod === 'am' ? 'AM reset' : tod === 'pm' ? 'PM full' : 'Daytime';
-    const sug = suggestMode();
-    $('suggestChip').textContent = MODE_LABEL[sug.mode] + ' · week ' + weekNumber();
-    $('coachHeadline').textContent = MODE_HEADLINE[sug.mode];
-    $('coachSay').textContent = sug.why;
-    $('startSuggested').dataset.mode = sug.mode;
+    $('goalChip').textContent = 'Goal: ' + GOALS[state.goal];
+    $('coachHeadline').textContent = tod === 'am' ? 'Bank it before breakfast.' : tod === 'pm' ? 'Twenty minutes. Then the evening is yours.' : 'A gap in the day is all this needs.';
     const t = targets();
-    $('sessionMeta').innerHTML = `<span>Push ${t.push}</span><span>Squat ${t.squatReps}×${t.squatKg} kg</span><span>Plank ${t.plank}s</span>`;
+    $('sessionMeta').innerHTML = `<span>Week ${weekNumber()}</span><span>Push ${t.push}</span><span>Squat ${t.squatReps}×${t.squatKg} kg</span><span>Plank ${t.plank}s</span>`;
     const doneToday = state.sessions.some(s => s.date === todayISO());
     $('beerCheck').hidden = !(tod === 'pm' && !doneToday);
   }
+  $('goalChip').addEventListener('click', () => { show('plan'); });
 
   function renderPlan(){
     const wk = weekNumber();
+    $('goalSelect').value = state.goal;
     $('phaseList').innerHTML = PHASES.map(p => `
       <div class="phase ${wk >= p.from && wk <= p.to ? 'now' : ''}">
         <span class="wk">${p.wks}${wk >= p.from && wk <= p.to ? ' · you are here' : ''}</span>
@@ -511,11 +654,31 @@
     ];
     $('keyliftList').innerHTML = rows.map(r => `<div class="kl"><span>${r[0]}</span><span><span class="best">${r[1]}</span><span class="next">${r[2]}</span></span></div>`).join('');
   }
+  $('goalSelect').addEventListener('change', e => { state.goal = e.target.value; save(); renderToday(); toast('Goal set: ' + GOALS[state.goal]); });
+
+  /* ---------- library ---------- */
+  let libFilter = 'all';
+  function renderLibrary(){
+    const items = Object.values(EX).filter(e => libFilter === 'all' || e.cat === libFilter);
+    $('exList').innerHTML = items.map(e => `
+      <details class="ex">
+        <summary>${e.name}<span class="cat">${e.cat}</span></summary>
+        <div class="body">${e.how}
+          ${e.demo ? `<br><a href="${yt(e.demo)}" target="_blank" rel="noopener noreferrer">Watch technique video</a>` : ''}
+        </div>
+      </details>`).join('');
+  }
+  $('libFilters').addEventListener('click', e => {
+    const chip = e.target.closest('.fchip'); if (!chip) return;
+    libFilter = chip.dataset.cat;
+    document.querySelectorAll('.fchip').forEach(c => c.setAttribute('aria-pressed', String(c === chip)));
+    renderLibrary();
+  });
 
   function renderStreak(){
     const cur = streakCount(), best = Math.max(bestStreak(), cur);
     $('streakBig').textContent = cur;
-    $('streakCap').textContent = (cur === 1 ? 'day streak' : 'day streak') + ' · best ' + best;
+    $('streakCap').textContent = 'day streak · best ' + best;
     const days = new Set(state.sessions.map(s=>s.date));
     const cells = ['M','T','W','T','F','S','S'].map(d=>`<span class="dh">${d}</span>`);
     const today = new Date();
@@ -534,30 +697,19 @@
 
   function fmt(s){ return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
 
-  function startSession(mode){
-    session = buildSession(mode);
-    stepIdx = -1; elapsed = 0; paused = false; resting = false;
+  function startSession(built){
+    session = built;
+    stepIdx = 0; elapsed = 0; paused = false; resting = false;
     document.body.classList.add('in-session');
-    $('phaseTxt').textContent = MODE_LABEL[mode];
-    $('nextBtn').textContent = 'Start warm-up';
+    $('phaseTxt').textContent = MODE_LABEL[session.mode];
     show('player');
-    renderStepIntro();
+    renderStep();
     clearInterval(ticker);
     ticker = setInterval(() => {
       if (paused) return;
       elapsed++; $('elapsedTxt').textContent = fmt(elapsed);
       if (resting && --restLeft <= 0){ endRest(); } else if (resting){ $('restTimer').textContent = fmt(restLeft); }
     }, 1000);
-  }
-
-  function renderStepIntro(){
-    const first = session.steps[0];
-    $('stepBlock').textContent = MODE_LABEL[session.mode] + ' · ' + session.steps.length + ' steps';
-    $('stepName').textContent = 'Ready?';
-    $('stepTarget').textContent = 'First up: ' + first.name;
-    $('stepCue').textContent = 'One exercise at a time. Big button when you’re done with each.';
-    $('stepDemo').hidden = true; $('stepSwap').hidden = true;
-    drawDots();
   }
 
   function drawDots(){
@@ -567,17 +719,16 @@
 
   function renderStep(){
     const st = session.steps[stepIdx];
-    const card = $('stepCard');
-    card.classList.remove('resting');
+    $('stepCard').classList.remove('resting');
     resting = false;
     $('stepBlock').textContent = st.block + ' · step ' + (stepIdx+1) + ' of ' + session.steps.length;
     $('stepName').textContent = st.name;
     $('stepTarget').textContent = st.target;
     $('stepCue').textContent = st.cue || '';
-    if (st.demo){ $('stepDemo').href = 'https://www.youtube.com/results?search_query=' + st.demo; $('stepDemo').hidden = false; } else $('stepDemo').hidden = true;
-    const sub = SUBS[st.name];
-    $('stepSwap').hidden = !sub;
-    $('stepSwap').textContent = sub ? 'Swap: ' + sub : '';
+    if (st.demo){ $('stepDemo').href = yt(st.demo); $('stepDemo').hidden = false; } else $('stepDemo').hidden = true;
+    const subId = st.exId && SUBS[st.exId];
+    $('stepSwap').hidden = !subId;
+    $('stepSwap').textContent = subId ? 'Swap: ' + EX[subId].name : '';
     $('nextBtn').textContent = stepIdx === session.steps.length - 1 ? 'Finish session' : 'Done — next';
     drawDots();
   }
@@ -597,7 +748,7 @@
   $('nextBtn').addEventListener('click', () => {
     if (!session) return;
     if (resting){ endRest(); return; }
-    const prev = stepIdx >= 0 ? session.steps[stepIdx] : null;
+    const prev = session.steps[stepIdx];
     if (stepIdx >= session.steps.length - 1){ completeSession(); return; }
     stepIdx++;
     if (prev && prev.rest > 0){ startRest(prev.rest); } else { renderStep(); }
@@ -609,17 +760,18 @@
     toast(paused ? 'Paused' : 'Running');
   });
   $('quitBtn').addEventListener('click', () => {
-    if (stepIdx >= 1 && session.mode === 'fallback'){ completeSession(); return; } // one round already earns it
+    if (stepIdx >= 2 && session.mode === 'fallback'){ completeSession(); return; }
     teardownSession(); show('today'); renderToday(); toast('Session ended — no judgement.');
   });
   $('stepSwap').addEventListener('click', () => {
-    const st = session.steps[stepIdx], sub = SUBS[st.name];
-    if (!sub) return;
-    st.name = sub; st.cue = 'Substitution locked in. Same intent, friendlier variant.'; st.demo = null;
+    const st = session.steps[stepIdx], subId = st.exId && SUBS[st.exId];
+    if (!subId) return;
+    const sub = EX[subId];
+    st.name = sub.name; st.cue = sub.cue; st.demo = sub.demo; st.exId = subId; st.how = sub.how;
     renderStep(); toast('Swapped');
   });
 
-  function teardownSession(){ clearInterval(ticker); session = null; document.body.classList.remove('in-session'); }
+  function teardownSession(){ clearInterval(ticker); session = null; pending = null; document.body.classList.remove('in-session'); }
 
   function completeSession(){
     const rec = {date: todayISO(), mode: session.mode, seconds: elapsed, week: session.week};
@@ -629,7 +781,8 @@
     const mode = session.mode;
     teardownSession();
     $('finishChip').textContent = MODE_LABEL[mode] + ' complete · ' + fmt(rec.seconds);
-    $('streakAward').textContent = 'Streak: ' + streakCount() + (streakCount() === 1 ? ' day' : ' days') + ' ✓';
+    const sc = streakCount();
+    $('streakAward').textContent = 'Streak: ' + sc + (sc === 1 ? ' day' : ' days') + ' ✓';
     renderLiftLog();
     show('finish');
   }
@@ -637,13 +790,13 @@
   function renderLiftLog(){
     const L = state.lifts;
     const rows = [
-      {id:'push', label:'Push-up variant', hint:'best set, reps', val:L.push.reps, unit:'reps'},
-      {id:'squatReps', label:'Goblet squat', hint:'best set, reps', val:L.squat.reps, unit:'reps'},
-      {id:'squatKg', label:'Goblet squat load', hint:'kg used', val:L.squat.kg, unit:'kg', step:2.5},
-      {id:'lungeReps', label:'Reverse lunge', hint:'best set, per leg', val:L.lunge.reps, unit:'reps'},
-      {id:'lungeKg', label:'Lunge load', hint:'kg per hand', val:L.lunge.kg, unit:'kg', step:2.5},
-      {id:'plank', label:'Longest plank / hold', hint:'seconds', val:L.plank.sec, unit:'s'},
-      {id:'bridge', label:'Glute bridge / hip thrust', hint:'best set, reps', val:L.bridge.reps, unit:'reps'}
+      {id:'push', label:'Push-up variant', hint:'best set, reps', val:L.push.reps},
+      {id:'squatReps', label:'Goblet squat', hint:'best set, reps', val:L.squat.reps},
+      {id:'squatKg', label:'Goblet squat load', hint:'kg used', val:L.squat.kg, step:2.5},
+      {id:'lungeReps', label:'Reverse lunge', hint:'best set, per leg', val:L.lunge.reps},
+      {id:'lungeKg', label:'Lunge load', hint:'kg per hand', val:L.lunge.kg, step:2.5},
+      {id:'plank', label:'Longest plank / hold', hint:'seconds', val:L.plank.sec},
+      {id:'bridge', label:'Glute bridge / hip thrust', hint:'best set, reps', val:L.bridge.reps}
     ];
     $('liftLog').innerHTML = rows.map(r => `
       <div class="liftrow">
@@ -668,22 +821,15 @@
     toast('Logged. See you tomorrow.');
   });
 
-  /* ---------- start buttons ---------- */
-  $('startSuggested').addEventListener('click', e => startSession(e.currentTarget.dataset.mode || 'standard'));
-  $('beerStart').addEventListener('click', () => startSession('fallback'));
-  document.querySelectorAll('.modebtn').forEach(b => b.addEventListener('click', () => startSession(b.dataset.mode)));
-
   /* ---------- theme: time-of-day is the feature ---------- */
   (function(){
     const h = hourNow();
     document.documentElement.setAttribute('data-theme', (h >= 17 || h < 6) ? 'dark' : 'light');
   })();
 
-  /* ---------- service worker ---------- */
   if ('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
 
-  /* ---------- init ---------- */
-  renderToday(); renderPlan(); renderStreak(); show('today');
+  renderToday(); renderPlan(); renderLibrary(); renderStreak(); show('today');
   })();
   </script>
 </body>

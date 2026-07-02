@@ -11,6 +11,10 @@ Files:
 - sw.js / version.json — service worker cache + deploy versioning
 
 App features:
+- 3-question check-in (mood, energy, what to train) that builds the one circuit you need, shaped by the current global goal
+- Quick start: a random session within your tolerances, pointed at the goal, with a reshuffle option
+- Global goal, changeable on the Plan tab (visible abs / anterior & posterior chain / upper body)
+- Technique library tab: every exercise, filterable by category, tap to expand a brief explainer with its technique video
 - Session generator: standard / momentum-reset / travel / harder-day modes, block-based, with exercise variant rotation and phase-aware targets
 - 8-week progression map with key-lift tracking (push-up, goblet squat, reverse lunge, plank, glute bridge)
 - Streak mechanic — any completed session counts, fallback included

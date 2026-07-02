@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hwp-cache-20260702T130000Z';
+const CACHE_NAME = 'hwp-cache-20260702T171500Z';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
@@ -7,6 +7,7 @@ const PRECACHE_URLS = [
   '/manifest.json',
   '/version.json',
   '/assets/icon.svg',
+  '/assets/icon-180.png',
   '/assets/icon-192.png',
   '/assets/icon-512.png'
 ];
