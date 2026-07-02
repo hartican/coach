@@ -86,6 +86,9 @@
     .cx .nm{font-weight:600}
     .cx .tg{color:var(--color-text-muted);text-align:right;flex-shrink:0}
     .previewbtns{display:flex;flex-direction:column;gap:.6rem;margin-top:1rem}
+    @media (min-width:720px){
+      .previewbtns{flex-direction:row}
+    }
 
     /* library */
     .filters{display:flex;gap:.5rem;flex-wrap:wrap;margin:.8rem 0 1rem}
@@ -169,6 +172,10 @@
     .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(6rem + env(safe-area-inset-bottom));background:var(--color-text);color:var(--color-bg);padding:.6rem 1rem;border-radius:999px;font-size:var(--text-sm);font-weight:600;z-index:99;opacity:0;transition:opacity .25s}
     .toast.show{opacity:1}
 
+    /* small theme toggle */
+    .themebtn{border:0;background:transparent;color:var(--color-text-faint);padding:.35rem .5rem;border-radius:.6rem;font-weight:700;font-size:var(--text-xs)}
+    .themebtn:active{transform:translateY(1px)}
+
     :focus-visible{outline:3px solid var(--color-amber);outline-offset:2px}
     @media (prefers-reduced-motion: reduce){ *{transition:none !important;animation:none !important} }
   </style>
@@ -186,13 +193,17 @@
     <section class="view" id="view-today">
       <div class="topstrip">
         <span class="wordmark">Coach</span>
-        <span class="daylabel" id="dayLabel">PM full</span>
+        <div style="display:flex;align-items:center;gap:.6rem">
+          <button id="themeToggle" class="themebtn" type="button" aria-label="Theme">Theme</button>
+          <span class="daylabel" id="dayLabel">PM full</span>
+        </div>
       </div>
 
       <div class="coach" id="coachCard">
         <button class="modechip" id="goalChip" type="button">Goal: Visible abs</button>
         <h1 class="display" id="coachHeadline">Twenty minutes. Then the evening is yours.</h1>
         <p class="say" id="coachSay">Answer three quick questions, or let the coach roll one for you.</p>
+        <div style="margin-top:.6rem;font-size:var(--text-xs);color:var(--color-text-faint);font-weight:700">Vibe coded by Jack Hartican, 2026(C)</div>
         <button class="startbig" id="quizBtn" type="button">Check in — 3 questions</button>
         <button class="startsecondary" id="quickStartBtn" type="button">Quick start</button>
         <div class="sessionmeta" id="sessionMeta"></div>
@@ -212,20 +223,20 @@
         <p class="qnote">Honest answers get better sessions. There are no wrong ones.</p>
 
         <div class="qblock">
-          <h2>Mood</h2>
-          <div class="qopts" data-q="mood">
-            <button class="qopt" data-v="0" type="button" aria-pressed="false">Rough</button>
-            <button class="qopt" data-v="1" type="button" aria-pressed="false">Okay</button>
-            <button class="qopt" data-v="2" type="button" aria-pressed="false">Good</button>
+          <h2>How are you feeling?</h2>
+          <div class="qopts" data-q="state">
+            <button class="qopt" data-v="0,0" type="button" aria-pressed="false">Rough · low energy</button>
+            <button class="qopt" data-v="1,1" type="button" aria-pressed="false">Okay · normal</button>
+            <button class="qopt" data-v="2,2" type="button" aria-pressed="false">Good · plenty in the tank</button>
           </div>
         </div>
 
         <div class="qblock">
-          <h2>Energy</h2>
-          <div class="qopts" data-q="energy">
-            <button class="qopt" data-v="0" type="button" aria-pressed="false">Running on fumes</button>
-            <button class="qopt" data-v="1" type="button" aria-pressed="false">Normal</button>
-            <button class="qopt" data-v="2" type="button" aria-pressed="false">Plenty in the tank</button>
+          <h2>Time available</h2>
+          <div class="qopts" data-q="time">
+            <button class="qopt" data-v="10" type="button" aria-pressed="false">10 min</button>
+            <button class="qopt" data-v="20" type="button" aria-pressed="false">20 min</button>
+            <button class="qopt" data-v="30" type="button" aria-pressed="false">30+ min</button>
           </div>
         </div>
 
@@ -476,11 +487,18 @@
     opts = opts || {};
     const t = targets(), wk = weekNumber(), tod = timeOfDay();
     const n = opts.seed != null ? opts.seed : state.sessions.length;
+    let timeBudget = opts.time || null;
     const emphasis = opts.emphasis || 'goal';
     const hard = mode === 'harder';
-    const steps = [];
+    let steps = [];
     const add = (ex, target, restSec, block) => steps.push({exId: Object.keys(EX).find(k=>EX[k]===ex) || null, block: block || ex.cat, name:ex.name, target, cue:ex.cue, demo:ex.demo||null, how:ex.how||'', rest:restSec||0});
-    const restBase = (hard ? 20 : 25) - t.restCut;
+    let restBase = (hard ? 20 : 25) - t.restCut;
+    // tune rests by available time: less time -> shorter rests
+    if (timeBudget){
+      if (timeBudget <= 10) restBase = Math.max(6, restBase - 12);
+      else if (timeBudget <= 20) restBase = Math.max(8, restBase - 6);
+      else if (timeBudget <= 30) restBase = Math.max(12, restBase - 2);
+    }
     const morning = tod === 'am';
 
     const pushPool = [EX.pushup, EX.bandpush, EX.inclinepush].concat(hard ? [EX.tempopush] : []);
@@ -533,6 +551,12 @@
       if (!morning || hard){ add(burstPool[n % burstPool.length], '20–30 seconds', 0, 'Burst'); }
     }
 
+    // shorten the plan if timeBudget is tight
+    if (timeBudget){
+      if (timeBudget <= 10) steps = steps.slice(0,3);
+      else if (timeBudget <= 20) steps = steps.slice(0,5);
+    }
+
     const hash = steps.map(s=>s.name).join('|') + '|' + mode;
     if (state.lastHashes.length >= 2 && state.lastHashes.slice(-2).every(h => h === hash) && mode !== 'fallback'){
       const i = steps.findIndex(s => s.block === 'Strength');
@@ -544,29 +568,43 @@
   /* ---------- quiz + quick start ---------- */
   const MODE_LABEL = {standard:'Standard', fallback:'Momentum reset', travel:'Travel', harder:'Harder day'};
 
-  const quiz = {mood:null, energy:null, train:null};
+  // quiz state: 'state' sets both mood and energy (keeps the flow to 3 starter questions)
+  const quiz = {mood:null, energy:null, time:null, train:null};
   document.querySelectorAll('.qopts').forEach(group => {
     group.addEventListener('click', e => {
       const btn = e.target.closest('.qopt'); if (!btn) return;
       group.querySelectorAll('.qopt').forEach(b => b.setAttribute('aria-pressed','false'));
       btn.setAttribute('aria-pressed','true');
-      quiz[group.dataset.q] = btn.dataset.v;
-      $('quizGo').disabled = !(quiz.mood != null && quiz.energy != null && quiz.train != null);
+      const key = group.dataset.q;
+      if (key === 'state') {
+        // data-v is formatted as "mood,energy"
+        const parts = (btn.dataset.v || '').split(',');
+        quiz.mood = parts[0] != null ? parts[0] : null;
+        quiz.energy = parts[1] != null ? parts[1] : null;
+      } else {
+        quiz[key] = btn.dataset.v;
+      }
+      // enable when all required fields are set (state -> mood+energy counts as one question)
+      $('quizGo').disabled = !(quiz.mood != null && quiz.energy != null && quiz.time != null && quiz.train != null);
     });
   });
 
   function modeFromQuiz(){
     if (quiz.train === 'travel') return 'travel';
     const score = Number(quiz.mood) + Number(quiz.energy);
+    const t = Number(quiz.time || 0);
+    // very short time -> momentum reset (keeps streak without overcommitting)
+    if (t > 0 && t <= 10) return 'fallback';
     if (score <= 1) return 'fallback';
-    if (score >= 4 && timeOfDay() === 'pm' && !signalsBad()) return 'harder';
+    // plenty of time + high energy in the evening -> harder day
+    if (score >= 4 && t >= 30 && timeOfDay() === 'pm' && !signalsBad()) return 'harder';
     return 'standard';
   }
 
   let pending = null, pendingQuick = false;
 
   $('quizBtn').addEventListener('click', () => {
-    quiz.mood = quiz.energy = quiz.train = null;
+    quiz.mood = quiz.energy = quiz.time = quiz.train = null;
     document.querySelectorAll('.qopt').forEach(b => b.setAttribute('aria-pressed','false'));
     $('quizGo').disabled = true;
     $('quizGoalChip').textContent = 'Goal: ' + GOALS[state.goal];
@@ -576,7 +614,8 @@
   $('quizGo').addEventListener('click', () => {
     const mode = modeFromQuiz();
     const emphasis = (quiz.train === 'travel' || quiz.train === 'goal') ? 'goal' : quiz.train;
-    pending = buildSession(mode, {emphasis});
+    // pass time budget to the session builder so it can tune rests and length
+    pending = buildSession(mode, {emphasis, time: Number(quiz.time)});
     pendingQuick = false;
     renderPreview('Built from your check-in. This is the whole session — nothing else today.');
     show('preview');
@@ -821,10 +860,28 @@
     toast('Logged. See you tomorrow.');
   });
 
-  /* ---------- theme: time-of-day is the feature ---------- */
+  /* ---------- theme: time-of-day with manual toggle ---------- */
   (function(){
-    const h = hourNow();
-    document.documentElement.setAttribute('data-theme', (h >= 17 || h < 6) ? 'dark' : 'light');
+    const prefKey = 'hwc_theme_pref';
+    const btn = $('themeToggle');
+    const apply = (mode) => {
+      if (mode === 'auto'){
+        const h = hourNow();
+        document.documentElement.setAttribute('data-theme', (h >= 17 || h < 6) ? 'dark' : 'light');
+        btn.textContent = 'Auto';
+      } else {
+        document.documentElement.setAttribute('data-theme', mode);
+        btn.textContent = mode === 'dark' ? 'Night' : 'Day';
+      }
+    };
+    let pref = localStorage.getItem(prefKey) || 'auto';
+    apply(pref);
+    btn.addEventListener('click', () => {
+      pref = pref === 'auto' ? 'light' : pref === 'light' ? 'dark' : 'auto';
+      localStorage.setItem(prefKey, pref);
+      apply(pref);
+      toast(pref === 'auto' ? 'Theme: Auto' : (pref === 'dark' ? 'Theme: Night' : 'Theme: Day'));
+    });
   })();
 
   /* ---------- updates: check version.json, offer refresh ---------- */
