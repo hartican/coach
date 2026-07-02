@@ -12,13 +12,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root, [data-theme="light"] {
+    :root, [data-theme="light"] { /* colors omitted for brevity; unchanged from prior */
       --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
       --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
       --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
       --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
       --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
-      --text-2xl: clamp(2rem, 1.2rem + 2.5vw, 3.5rem);
       --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem;
       --color-bg:#f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-surface-offset:#f3f0ec; --color-border:#d4d1ca;
       --color-text:#28251d; --color-text-muted:#66645f; --color-text-faint:#8e8b84; --color-text-inverse:#f9f8f4;
@@ -27,7 +26,7 @@
       --shadow-sm:0 1px 2px rgba(0,0,0,.05); --shadow-md:0 8px 24px rgba(0,0,0,.08); --content:1100px;
       --font-display:'Instrument Serif', Georgia, serif; --font-body:'Inter', system-ui, sans-serif;
     }
-    [data-theme="dark"] {
+    [data-theme="dark"] { /* same as before */
       --color-bg:#171614; --color-surface:#1c1b19; --color-surface-2:#201f1d; --color-surface-offset:#22211f; --color-border:#393836;
       --color-text:#e1dfda; --color-text-muted:#b0aca4; --color-text-faint:#8a857d; --color-text-inverse:#171614;
       --color-primary:#4f98a3; --color-primary-hover:#227f8b; --color-primary-highlight:#313b3b; --color-success:#6daa45; --color-warning:#bb653b;
@@ -42,6 +41,7 @@
     button,input,select{font:inherit}
     .skip-link{position:absolute;left:-9999px;top:auto}.skip-link:focus{left:1rem;top:1rem;background:var(--color-surface);padding:.5rem 1rem;border-radius:.5rem;z-index:999}
     .shell{max-width:var(--content);margin:0 auto;padding:var(--space-4)}
+    .hidden{display:none}
     .topbar{position:sticky;top:0;z-index:50;background:color-mix(in srgb, var(--color-bg) 88%, transparent);backdrop-filter:blur(10px);border-bottom:1px solid color-mix(in srgb, var(--color-text) 10%, transparent)}
     .topbar-inner{max-width:var(--content);margin:0 auto;padding:var(--space-3) var(--space-4);display:flex;align-items:center;justify-content:space-between;gap:var(--space-4)}
     .brand{display:flex;align-items:center;gap:.6rem;font-weight:700;color:var(--color-text)}
@@ -55,8 +55,6 @@
     .eyebrow{display:inline-block;padding:.35rem .7rem;border-radius:var(--radius-full);background:var(--color-primary-highlight);color:var(--color-primary);font-size:var(--text-xs);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
     h1,h2,h3{line-height:1.1;margin:0 0 .5rem 0}
     h1{font-family:var(--font-display);font-size:var(--text-2xl);font-weight:400}
-    h2{font-size:var(--text-xl)}
-    h3{font-size:var(--text-lg)}
     p{margin:0 0 1rem 0;max-width:68ch}
     .hero-copy{display:grid;gap:var(--space-4)}
     .hero-panel,.card{background:var(--color-surface);border:1px solid color-mix(in srgb, var(--color-text) 10%, transparent);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm)}
@@ -64,44 +62,10 @@
     .meta-grid,.stats,.controls,.video-grid,.week-grid{display:grid;gap:var(--space-4)}
     .meta-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     .meta{padding:var(--space-4);background:var(--color-surface-2);border-radius:var(--radius-lg)}
-    .meta .label{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.04em;color:var(--color-text-faint);font-weight:700}
-    .meta .value{font-size:var(--text-sm);font-weight:600}
-    .section{padding:var(--space-8) 0}
-    .section-head{display:flex;justify-content:space-between;gap:var(--space-4);align-items:end;margin-bottom:var(--space-5);flex-wrap:wrap}
-    .cards-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-5)}
-    .card{padding:var(--space-5)}
-    .warmup-list,.tips-list,.video-list{padding:0;margin:0;list-style:none;display:grid;gap:var(--space-3)}
-    .warmup-list li,.tips-list li,.video-item{padding:var(--space-4);background:var(--color-surface-2);border-radius:var(--radius-lg)}
-    .pill{display:inline-flex;align-items:center;padding:.3rem .6rem;border-radius:var(--radius-full);background:var(--color-surface-offset);color:var(--color-text-muted);font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
     .table-wrap{overflow:auto;border-radius:var(--radius-xl);border:1px solid color-mix(in srgb, var(--color-text) 10%, transparent);background:var(--color-surface)}
-    table{width:100%;border-collapse:collapse;font-size:var(--text-sm)}
-    th,td{padding:0.85rem;border-bottom:1px solid color-mix(in srgb, var(--color-text) 8%, transparent);vertical-align:top;text-align:left}
-    th{background:var(--color-surface-offset);font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.04em}
-    tr:last-child td{border-bottom:none}
-    .badge{display:inline-block;padding:.25rem .55rem;border-radius:var(--radius-full);font-size:var(--text-xs);font-weight:700}
-    .b-strength{background:var(--color-primary-highlight);color:var(--color-primary)}
-    .b-burst{background:color-mix(in srgb, var(--color-warning) 12%, var(--color-surface));color:var(--color-warning)}
-    .b-core{background:color-mix(in srgb, var(--color-success) 12%, var(--color-surface));color:var(--color-success)}
     .controls{grid-template-columns:repeat(4,minmax(0,1fr))}
-    .control{padding:var(--space-4);background:var(--color-surface);border:1px solid color-mix(in srgb, var(--color-text) 10%, transparent);border-radius:var(--radius-lg)}
-    .control label{display:block;font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--color-text-faint);margin-bottom:.4rem}
-    .control input,.control select{width:100%;padding:.7rem .8rem;border-radius:var(--radius-md);border:1px solid var(--color-border);background:var(--color-surface-2);color:var(--color-text)}
-    .stats{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:var(--space-4)}
-    .stat{padding:var(--space-4);background:var(--color-surface-2);border-radius:var(--radius-lg)}
-    .stat .k{font-size:var(--text-xs);text-transform:uppercase;letter-spacing:.04em;color:var(--color-text-faint);font-weight:700}
-    .stat .v{font-size:var(--text-lg);font-weight:800}
     .week-grid{grid-template-columns:repeat(8,minmax(0,1fr))}
-    .week-grid .head{font-size:var(--text-xs);font-weight:700;text-transform:uppercase;color:var(--color-text-faint)}
-    .week-grid input{width:100%;padding:.65rem .55rem;border-radius:var(--radius-md);border:1px solid var(--color-border);background:var(--color-surface-2);color:var(--color-text)}
     .actions{display:flex;gap:var(--space-3);flex-wrap:wrap;margin-top:var(--space-4)}
-    .btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:.8rem 1rem;border-radius:var(--radius-full);border:1px solid transparent;font-weight:700;cursor:pointer}
-    .btn-primary{background:var(--color-primary);color:var(--color-text-inverse)}
-    .btn-primary:hover{background:var(--color-primary-hover)}
-    .btn-secondary{background:var(--color-surface);color:var(--color-text);border-color:color-mix(in srgb, var(--color-text) 10%, transparent)}
-    .subtle{color:var(--color-text-muted)}
-    .video-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-    .video-item h3{margin-bottom:.35rem}
-    .footer{padding:var(--space-8) 0 var(--space-12);color:var(--color-text-muted);font-size:var(--text-sm)}
 
     /* Mobile tweaks */
     .mobile-cta{display:none;position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:60;width:calc(100% - 48px);max-width:520px}
@@ -128,7 +92,7 @@
   <header class="topbar">
     <div class="topbar-inner">
       <div style="display:flex;align-items:center;gap:.5rem">
-        <button class="mobile-toggle" id="mobileNavToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Toggle navigation">
+        <button class="mobile-toggle" id="mobileNavToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Toggle navigation" type="button">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
         </button>
         <div class="brand" aria-label="Home Workout Planner">
@@ -150,7 +114,7 @@
         <a href="#videos">Videos</a>
       </nav>
       <div style="display:flex;align-items:center;gap:.5rem">
-        <button class="theme-btn" data-theme-toggle aria-label="Switch theme">
+        <button class="theme-btn" data-theme-toggle aria-label="Switch theme" type="button">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
         </button>
       </div>
@@ -158,6 +122,7 @@
   </header>
 
   <main id="main" class="shell">
+    <!-- Pipeline flow: only one of warmup/circuit/progress visible at a time for easy step-through -->
     <section class="hero" id="overview">
       <div class="hero-copy">
         <span class="eyebrow">25 minutes total</span>
@@ -165,8 +130,8 @@
         <p>This interactive plan combines a 5-minute dynamic warmup with a 20-minute circuit built around push-ups, lunges, squats, planks, short-burst conditioning, plus dumbbells and bands for progressive overload.</p>
         <p class="subtle">Use it as a repeatable full-body session, log your results weekly, and increase reps, load, band tension, tempo, or density once performance becomes consistent.</p>
         <div class="actions">
-          <a class="btn btn-primary" href="#circuit">Start the routine</a>
-          <a class="btn btn-secondary" href="#progress">Open tracking sheet</a>
+          <button class="btn btn-primary" id="beginBtn" type="button">Start (Warmup)</button>
+          <button class="btn btn-secondary" id="openProgressBtn" type="button">Open tracking sheet</button>
         </div>
       </div>
       <aside class="hero-panel" aria-label="Session summary">
@@ -177,16 +142,13 @@
           <div class="meta"><div class="label">Focus</div><div class="value">Strength, core, body composition</div></div>
         </div>
         <div class="actions">
-          <button class="btn btn-secondary" id="fillExampleBtn">Load sample week</button>
-          <button class="btn btn-secondary" id="clearLogBtn">Clear log</button>
+          <button class="btn btn-secondary" id="fillExampleBtn" type="button">Load sample week</button>
+          <button class="btn btn-secondary" id="clearLogBtn" type="button">Clear log</button>
         </div>
       </aside>
     </section>
 
-    <!-- ... rest of content unchanged (table, warmup, circuit, progress, videos, footer) ... -->
-
-    <!-- Keeping the original content below for brevity; JS-driven UX improvements will augment behavior -->
-
+    <!-- Warmup (first step) -->
     <section class="section" id="warmup">
       <div class="section-head">
         <div>
@@ -213,12 +175,15 @@
             <li>On the walk-out, brace your ribs down before stepping into plank.</li>
             <li>If skipping feels awkward, swap for a fast march or low pogo hops.</li>
           </ul>
+          <div class="actions" style="margin-top:1rem">
+            <button class="btn btn-primary" id="warmupNext" type="button">I'm warmed up — Start circuit</button>
+          </div>
         </article>
       </div>
     </section>
 
-    <!-- circuit table copied verbatim to preserve content and accessibility -->
-    <section class="section" id="circuit">
+    <!-- Circuit (second step) -->
+    <section class="section hidden" id="circuit">
       <div class="section-head">
         <div>
           <span class="pill">Main session</span>
@@ -227,18 +192,117 @@
         <p class="subtle">Complete 3 rounds. Rest 20-30 seconds between exercises and 60-90 seconds between rounds.</p>
       </div>
       <div class="table-wrap">
-        <!-- original table content preserved -->
-        <!-- full table omitted from this write for brevity — unchanged from previous version -->
+        <table>
+          <thead>
+            <tr>
+              <th>Block</th>
+              <th>Exercise</th>
+              <th>Category</th>
+              <th>Suggested reps / time</th>
+              <th>Rest</th>
+              <th>Load ideas</th>
+              <th>Form cue</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>A1</td>
+              <td>Push-ups (band-resisted or incline if needed)</td>
+              <td><span class="badge b-strength">Strength</span></td>
+              <td>8-12 reps</td>
+              <td>20-30 s</td>
+              <td>Band over upper back; incline on bench to scale</td>
+              <td>Keep ribs down and reach chest fully between hands.</td>
+            </tr>
+            <tr>
+              <td>A2</td>
+              <td>Goblet squat</td>
+              <td><span class="badge b-strength">Strength</span></td>
+              <td>10-15 reps</td>
+              <td>20-30 s</td>
+              <td>1 dumbbell at chest; add tempo before heavier load</td>
+              <td>Sit between the hips, stay tall, drive evenly through feet.</td>
+            </tr>
+            <tr>
+              <td>A3</td>
+              <td>Forearm plank</td>
+              <td><span class="badge b-core">Core</span></td>
+              <td>25-40 s</td>
+              <td>20-30 s</td>
+              <td>Band around upper arms or bodyweight</td>
+              <td>Glutes tight, chin tucked lightly, no sagging hips.</td>
+            </tr>
+            <tr>
+              <td>B1</td>
+              <td>Reverse lunges</td>
+              <td><span class="badge b-strength">Strength</span></td>
+              <td>8-12 / leg</td>
+              <td>20-30 s</td>
+              <td>Dumbbells at sides or goblet hold</td>
+              <td>Step back long enough to keep front foot planted and stable.</td>
+            </tr>
+            <tr>
+              <td>B2</td>
+              <td>Push-ups variation 2</td>
+              <td><span class="badge b-strength">Strength</span></td>
+              <td>6-10 reps</td>
+              <td>20-30 s</td>
+              <td>Narrow grip, tempo push-up, or band assistance</td>
+              <td>Lower under control for 3 seconds before pressing hard.</td>
+            </tr>
+            <tr>
+              <td>B3</td>
+              <td>High-plank shoulder taps</td>
+              <td><span class="badge b-core">Core</span></td>
+              <td>10-16 / side</td>
+              <td>20-30 s</td>
+              <td>Band around wrists for added tension</td>
+              <td>Widen the feet and keep hips as quiet as possible.</td>
+            </tr>
+            <tr>
+              <td>C1</td>
+              <td>Short-burst move</td>
+              <td><span class="badge b-burst">Burst</span></td>
+              <td>20-30 s</td>
+              <td>30-40 s</td>
+              <td>Rope sprint, band-resisted high knees, or DB thrusters</td>
+              <td>Stay powerful, crisp, and stop before technique breaks.</td>
+            </tr>
+            <tr>
+              <td>C2</td>
+              <td>Glute bridge / hip thrust</td>
+              <td><span class="badge b-strength">Strength</span></td>
+              <td>12-20 reps</td>
+              <td>20-30 s</td>
+              <td>Dumbbell on hips or loop band over hips</td>
+              <td>Pause at the top for 1-2 seconds and keep ribs stacked.</td>
+            </tr>
+            <tr>
+              <td>C3</td>
+              <td>Side plank</td>
+              <td><span class="badge b-core">Core</span></td>
+              <td>20-30 s / side</td>
+              <td>20-30 s</td>
+              <td>Bodyweight, light DB on top hip, or mini-band around thighs</td>
+              <td>Press the floor away and keep a straight line from ankle to ear.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="actions" style="margin-top:1rem">
+        <button class="btn btn-primary" id="circuitDone" type="button">Finish session &amp; Log</button>
+        <button class="btn btn-secondary" id="circuitBack" type="button">Back to warmup</button>
       </div>
     </section>
 
-    <section class="section" id="progress">
+    <!-- Progress & weekly sheet (third step) -->
+    <section class="section hidden" id="progress">
       <div class="section-head">
         <div>
           <span class="pill">Weekly logging</span>
           <h2>Progress tracker</h2>
         </div>
-        <p class="subtle">Use this sheet to track completion, reps, difficulty, and overload. Save a screenshot or print to PDF after each week.</p>
+        <p class="subtle">Enter your session notes for Monday through Sunday. Check the box for completed sessions, then log the main variable you progressed.</p>
       </div>
 
       <div class="controls" aria-label="Progress controls">
@@ -278,21 +342,29 @@
 
       <article class="card" style="margin-top: var(--space-5)">
         <h3>Weekly sheet</h3>
-        <p class="subtle">Enter your session notes for Monday through Sunday. Check the box for completed sessions, then log the main variable you progressed.</p>
         <div class="week-grid" role="group" aria-label="Weekly log">
           <div class="head">Day</div><div class="head">Done</div><div class="head">Push-ups</div><div class="head">Squat</div><div class="head">Lunge</div><div class="head">Plank</div><div class="head">Burst</div><div class="head">Notes</div>
 
-          <div>Mon</div><input class="done" type="checkbox"><input class="log" placeholder="10"><input class="log" placeholder="12 @ 15kg"><input class="log" placeholder="8/leg"><input class="log" placeholder="30s"><input class="log" placeholder="20s"><input class="log note" placeholder="Tempo slow">
-          <!-- other days omitted for brevity in this write; original file had full grid -->
+          <!-- 7 rows, inputs named by day index 0..6 -->
+          <div>Mon</div><input data-day="0" class="done" type="checkbox" data-field="done"><input data-day="0" class="log" data-field="push" placeholder=""><input data-day="0" class="log" data-field="squat" placeholder=""><input data-day="0" class="log" data-field="lunge" placeholder=""><input data-day="0" class="log" data-field="plank" placeholder=""><input data-day="0" class="log" data-field="burst" placeholder=""><input data-day="0" class="log note" data-field="notes" placeholder="">
+          <div>Tue</div><input data-day="1" class="done" type="checkbox" data-field="done"><input data-day="1" class="log" data-field="push" placeholder=""><input data-day="1" class="log" data-field="squat" placeholder=""><input data-day="1" class="log" data-field="lunge" placeholder=""><input data-day="1" class="log" data-field="plank" placeholder=""><input data-day="1" class="log" data-field="burst" placeholder=""><input data-day="1" class="log note" data-field="notes" placeholder="">
+          <div>Wed</div><input data-day="2" class="done" type="checkbox" data-field="done"><input data-day="2" class="log" data-field="push" placeholder=""><input data-day="2" class="log" data-field="squat" placeholder=""><input data-day="2" class="log" data-field="lunge" placeholder=""><input data-day="2" class="log" data-field="plank" placeholder=""><input data-day="2" class="log" data-field="burst" placeholder=""><input data-day="2" class="log note" data-field="notes" placeholder="">
+          <div>Thu</div><input data-day="3" class="done" type="checkbox" data-field="done"><input data-day="3" class="log" data-field="push" placeholder=""><input data-day="3" class="log" data-field="squat" placeholder=""><input data-day="3" class="log" data-field="lunge" placeholder=""><input data-day="3" class="log" data-field="plank" placeholder=""><input data-day="3" class="log" data-field="burst" placeholder=""><input data-day="3" class="log note" data-field="notes" placeholder="">
+          <div>Fri</div><input data-day="4" class="done" type="checkbox" data-field="done"><input data-day="4" class="log" data-field="push" placeholder=""><input data-day="4" class="log" data-field="squat" placeholder=""><input data-day="4" class="log" data-field="lunge" placeholder=""><input data-day="4" class="log" data-field="plank" placeholder=""><input data-day="4" class="log" data-field="burst" placeholder=""><input data-day="4" class="log note" data-field="notes" placeholder="">
+          <div>Sat</div><input data-day="5" class="done" type="checkbox" data-field="done"><input data-day="5" class="log" data-field="push" placeholder=""><input data-day="5" class="log" data-field="squat" placeholder=""><input data-day="5" class="log" data-field="lunge" placeholder=""><input data-day="5" class="log" data-field="plank" placeholder=""><input data-day="5" class="log" data-field="burst" placeholder=""><input data-day="5" class="log note" data-field="notes" placeholder="">
+          <div>Sun</div><input data-day="6" class="done" type="checkbox" data-field="done"><input data-day="6" class="log" data-field="push" placeholder=""><input data-day="6" class="log" data-field="squat" placeholder=""><input data-day="6" class="log" data-field="lunge" placeholder=""><input data-day="6" class="log" data-field="plank" placeholder=""><input data-day="6" class="log" data-field="burst" placeholder=""><input data-day="6" class="log note" data-field="notes" placeholder="">
+
         </div>
-        <div class="actions">
-          <button class="btn btn-primary" id="recalcBtn">Recalculate progress</button>
-          <button class="btn btn-secondary" onclick="window.print()">Print / save PDF</button>
+        <div class="actions" style="margin-top:1rem">
+          <button class="btn btn-primary" id="saveBtn" type="button">Save</button>
+          <button class="btn btn-secondary" id="backToCircuit" type="button">Back to circuit</button>
+          <button class="btn btn-secondary" id="resetBtn" type="button">Reset week</button>
         </div>
       </article>
 
     </section>
 
+    <!-- Videos and footer remain visible but not part of the pipeline -->
     <section class="section" id="videos">
       <div class="section-head">
         <div>
@@ -307,7 +379,6 @@
           <p>Strong setup, full range, and core bracing.</p>
           <a target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/results?search_query=push+up+form">Open YouTube results</a>
         </article>
-        <!-- more videos... -->
       </div>
     </section>
 
@@ -319,26 +390,183 @@
 
   <!-- Mobile sticky CTA for quick session start -->
   <div class="mobile-cta">
-    <a class="btn btn-primary" href="#circuit" style="width:100%;display:inline-block;text-align:center;">Start session</a>
+    <button class="btn btn-primary" id="mobileStart" type="button" style="width:100%;display:inline-block;text-align:center;">Start session</button>
   </div>
 
   <script>
+    // Simple UI flow + client-side persistence using localStorage
     (function(){
-      const btn=document.querySelector('[data-theme-toggle]');
+      const stateKey = 'hwp_state_v1';
+      const sections = { warmup: document.getElementById('warmup'), circuit: document.getElementById('circuit'), progress: document.getElementById('progress') };
+      const beginBtn = document.getElementById('beginBtn');
+      const warmupNext = document.getElementById('warmupNext');
+      const mobileStart = document.getElementById('mobileStart');
+      const circuitDone = document.getElementById('circuitDone');
+      const circuitBack = document.getElementById('circuitBack');
+      const backToCircuit = document.getElementById('backToCircuit');
+      const openProgressBtn = document.getElementById('openProgressBtn');
+      const saveBtn = document.getElementById('saveBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const fillExampleBtn = document.getElementById('fillExampleBtn');
+      const clearLogBtn = document.getElementById('clearLogBtn');
+
+      // fields
+      const weeksComplete = document.getElementById('weeksComplete');
+      const currentWeight = document.getElementById('currentWeight');
+      const bandLevel = document.getElementById('bandLevel');
+      const densityGoal = document.getElementById('densityGoal');
+      const plannedSessions = document.getElementById('plannedSessions');
+      const loggedSessions = document.getElementById('loggedSessions');
+      const progressScore = document.getElementById('progressScore');
+      const nextOverload = document.getElementById('nextOverload');
+
+      function showStep(step){
+        Object.keys(sections).forEach(k => { if (k === step) sections[k].classList.remove('hidden'); else sections[k].classList.add('hidden'); });
+        // scroll top of the visible section for better mobile UX
+        setTimeout(()=>{ sections[step].scrollIntoView({behavior:'smooth',block:'start'}); }, 50);
+      }
+
+      // Persistence: weekly data = array of 7 objects {done, push, squat, lunge, plank, burst, notes}
+      function defaultState(){
+        return {
+          weeksComplete: 0,
+          currentWeight: 12.5,
+          bandLevel: 'Medium',
+          densityGoal: '3 rounds',
+          week: Array.from({length:7}).map(()=>({done:false,push:'',squat:'',lunge:'',plank:'',burst:'',notes:''}))
+        };
+      }
+
+      function loadState(){
+        try{
+          const raw = localStorage.getItem(stateKey);
+          if (!raw) return defaultState();
+          return JSON.parse(raw);
+        }catch(e){ console.warn('Failed to load state', e); return defaultState(); }
+      }
+      function saveState(state){
+        try{ localStorage.setItem(stateKey, JSON.stringify(state)); showSavedToast(); }catch(e){ console.warn('Save failed', e); }
+      }
+
+      function showSavedToast(){
+        // tiny ephemeral feedback
+        const t = document.createElement('div');
+        t.textContent = 'Saved locally';
+        t.style.position='fixed'; t.style.right='16px'; t.style.bottom='16px'; t.style.background='var(--color-surface)'; t.style.color='var(--color-text)'; t.style.padding='8px 12px'; t.style.borderRadius='8px'; t.style.boxShadow='var(--shadow-md)'; t.style.zIndex='9999';
+        document.body.appendChild(t);
+        setTimeout(()=>t.remove(),1200);
+      }
+
+      function applyStateToUI(state){
+        weeksComplete.value = state.weeksComplete || 0;
+        currentWeight.value = state.currentWeight || 12.5;
+        bandLevel.value = state.bandLevel || 'Medium';
+        densityGoal.value = state.densityGoal || '3 rounds';
+
+        // fill week inputs
+        const inputs = document.querySelectorAll('.week-grid [data-day]');
+        inputs.forEach(inp => {
+          const day = Number(inp.getAttribute('data-day'));
+          const field = inp.getAttribute('data-field');
+          if (!state.week || !state.week[day]) return;
+          if (inp.type === 'checkbox') inp.checked = !!state.week[day][field]; else inp.value = state.week[day][field] || '';
+        });
+      }
+
+      function readUIState(){
+        const state = { weeksComplete: Number(weeksComplete.value||0), currentWeight: Number(currentWeight.value||0), bandLevel: bandLevel.value, densityGoal: densityGoal.value, week: Array.from({length:7}).map(()=>({})) };
+        const inputs = document.querySelectorAll('.week-grid [data-day]');
+        inputs.forEach(inp => {
+          const day = Number(inp.getAttribute('data-day'));
+          const field = inp.getAttribute('data-field');
+          if (inp.type === 'checkbox') state.week[day][field] = !!inp.checked; else state.week[day][field] = inp.value || '';
+        });
+        return state;
+      }
+
+      function computeProgressFromState(state){
+        const planned = 4;
+        let done = 0;
+        (state.week||[]).forEach(d => { if (d.done) done++; });
+        const progress = Math.min(100, Math.round((done / planned) * 100));
+        let suggestion = 'Add 1-2 reps';
+        if (done >= 4 && (state.currentWeight||0) < 25) suggestion = 'Increase DB load by 1-2 kg';
+        if (done >= 4 && state.bandLevel === 'Light') suggestion = 'Move to medium band';
+        if (done >= 4 && state.bandLevel === 'Medium' && (state.weeksComplete||0) >= 2) suggestion = 'Try heavy band or slower tempo';
+        if (state.densityGoal === 'Shorter rests') suggestion = 'Cut 5 seconds per exercise';
+        return {planned, done, progress, suggestion};
+      }
+
+      // attach listeners to week inputs to auto-save
+      function wireInputs(state){
+        const inputs = document.querySelectorAll('.week-grid [data-day]');
+        inputs.forEach(i => i.addEventListener('input', ()=>{ const s = readUIState(); saveState(s); refreshProgressUI(s); }));
+        const checkboxes = document.querySelectorAll('.week-grid input[type=checkbox]');
+        checkboxes.forEach(cb => cb.addEventListener('change', ()=>{ const s = readUIState(); saveState(s); refreshProgressUI(s); }));
+        [weeksComplete,currentWeight,bandLevel,densityGoal].forEach(el => { if (el) el.addEventListener('input', ()=>{ const s = readUIState(); saveState(s); refreshProgressUI(s); }); });
+      }
+
+      function refreshProgressUI(state){
+        const st = state || readUIState();
+        const r = computeProgressFromState(st);
+        plannedSessions.textContent = r.planned;
+        loggedSessions.textContent = r.done;
+        progressScore.textContent = r.progress + '%';
+        nextOverload.textContent = r.suggestion;
+      }
+
+      // basic button wiring
+      beginBtn && beginBtn.addEventListener('click', ()=> showStep('warmup'));
+      warmupNext && warmupNext.addEventListener('click', ()=> showStep('circuit'));
+      mobileStart && mobileStart.addEventListener('click', ()=> showStep('warmup'));
+      circuitDone && circuitDone.addEventListener('click', ()=> { showStep('progress'); const s = readUIState(); // mark today as done if none
+        // default: mark next unchecked day as done to make logging easy
+        for (let i=0;i<7;i++){ if (!s.week[i].done){ s.week[i].done = true; break; } }
+        saveState(s); applyStateToUI(s); refreshProgressUI(s);
+      });
+      circuitBack && circuitBack.addEventListener('click', ()=> showStep('warmup'));
+      backToCircuit && backToCircuit.addEventListener('click', ()=> showStep('circuit'));
+      openProgressBtn && openProgressBtn.addEventListener('click', ()=> showStep('progress'));
+
+      saveBtn && saveBtn.addEventListener('click', ()=>{ const s = readUIState(); saveState(s); refreshProgressUI(s); });
+      resetBtn && resetBtn.addEventListener('click', ()=>{ if (!confirm('Reset this week? This clears local data.')) return; const s = defaultState(); saveState(s); applyStateToUI(s); refreshProgressUI(s); });
+
+      fillExampleBtn && fillExampleBtn.addEventListener('click', ()=>{
+        const s = defaultState();
+        s.week[0] = {done:true,push:'10',squat:'12 @ 15kg',lunge:'8/leg',plank:'30s',burst:'20s',notes:'Solid baseline'};
+        s.week[1] = {done:true,push:'11',squat:'12 @ 15kg',lunge:'9/leg',plank:'30s',burst:'20s',notes:'Added rep'};
+        s.week[2] = {done:true,push:'10',squat:'13 @ 15kg',lunge:'9/leg',plank:'35s',burst:'25s',notes:'Better plank'};
+        s.week[3] = {done:true,push:'12',squat:'14 @ 17.5kg',lunge:'10/leg',plank:'35s',burst:'25s',notes:'Load up'};
+        s.weeksComplete = 2; s.currentWeight = 17.5; s.bandLevel='Medium'; s.densityGoal='3 rounds + 5 extra reps';
+        saveState(s); applyStateToUI(s); refreshProgressUI(s);
+      });
+
+      clearLogBtn && clearLogBtn.addEventListener('click', ()=>{
+        const s = defaultState(); saveState(s); applyStateToUI(s); refreshProgressUI(s);
+      });
+
+      // init
+      const initial = loadState(); applyStateToUI(initial); wireInputs(initial); refreshProgressUI(initial);
+
+      // show warmup by default for a clear pipeline start
+      showStep('warmup');
+
+      // simple theme toggle (kept from earlier)
+      const themeBtn=document.querySelector('[data-theme-toggle]');
       const root=document.documentElement;
       let theme=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
       root.setAttribute('data-theme',theme);
-      const renderIcon=()=>{btn.innerHTML=theme==='dark'
+      const renderIcon=()=>{themeBtn.innerHTML=theme==='dark'
         ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
         : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
       };
       renderIcon();
-      btn.addEventListener('click',()=>{theme=theme==='dark'?'light':'dark';root.setAttribute('data-theme',theme);renderIcon();});
+      themeBtn && themeBtn.addEventListener('click',()=>{theme=theme==='dark'?'light':'dark';root.setAttribute('data-theme',theme);renderIcon();});
 
-      // Mobile nav toggle
+      // mobile nav
       const mobileToggle = document.getElementById('mobileNavToggle');
       const primaryNav = document.getElementById('primaryNav');
-      mobileToggle.addEventListener('click', () => {
+      mobileToggle && mobileToggle.addEventListener('click', () => {
         const expanded = mobileToggle.getAttribute('aria-expanded') === 'true';
         mobileToggle.setAttribute('aria-expanded', String(!expanded));
         if (!expanded) {
@@ -361,78 +589,7 @@
           primaryNav.style.padding = '';
         }
       });
-    })();
 
-    // Lightweight UX scripts (preserve existing behavior and improve small touches)
-    (function(){
-      const doneBoxes = Array.from(document.querySelectorAll('.done'));
-      const recalcBtn = document.getElementById('recalcBtn');
-      const fillExampleBtn = document.getElementById('fillExampleBtn');
-      const clearLogBtn = document.getElementById('clearLogBtn');
-      const plannedSessions = document.getElementById('plannedSessions');
-      const loggedSessions = document.getElementById('loggedSessions');
-      const progressScore = document.getElementById('progressScore');
-      const nextOverload = document.getElementById('nextOverload');
-      const weeksComplete = document.getElementById('weeksComplete');
-      const currentWeight = document.getElementById('currentWeight');
-      const bandLevel = document.getElementById('bandLevel');
-      const densityGoal = document.getElementById('densityGoal');
-      const allLogs = Array.from(document.querySelectorAll('.log'));
-
-      function computeProgress(){
-        const planned = 4;
-        const done = doneBoxes.filter(b => b.checked).length;
-        plannedSessions.textContent = planned;
-        loggedSessions.textContent = done;
-        progressScore.textContent = Math.min(100, Math.round((done / planned) * 100)) + '%';
-
-        const weight = parseFloat(currentWeight.value || '0');
-        const weeks = parseInt(weeksComplete.value || '0', 10);
-        const band = bandLevel.value;
-        let suggestion = 'Add 1-2 reps';
-        if (done >= 4 && weight < 25) suggestion = 'Increase DB load by 1-2 kg';
-        if (done >= 4 && band === 'Light') suggestion = 'Move to medium band';
-        if (done >= 4 && band === 'Medium' && weeks >= 2) suggestion = 'Try heavy band or slower tempo';
-        if (densityGoal && densityGoal.value === 'Shorter rests') suggestion = 'Cut 5 seconds per exercise';
-        nextOverload.textContent = suggestion;
-      }
-
-      if (recalcBtn) recalcBtn.addEventListener('click', computeProgress);
-      doneBoxes.forEach(box => box.addEventListener('change', computeProgress));
-      [weeksComplete, currentWeight, bandLevel, densityGoal].forEach(el => { if (el) el.addEventListener('input', computeProgress); });
-
-      if (fillExampleBtn) fillExampleBtn.addEventListener('click', () => {
-        const rows = [
-          ['10','12 @ 15kg','8/leg','30s','20s','Solid baseline'],
-          ['11','12 @ 15kg','9/leg','30s','20s','Added rep'],
-          ['10','13 @ 15kg','9/leg','35s','25s','Better plank'],
-          ['12','14 @ 17.5kg','10/leg','35s','25s','Load up']
-        ];
-        doneBoxes.forEach((b, i) => b.checked = i < 4);
-        const fields = Array.from(document.querySelectorAll('.week-grid input.log'));
-        fields.forEach(f => f.value = '');
-        rows.forEach((row, i) => {
-          const offset = i * 6;
-          row.forEach((value, j) => { if (fields[offset + j]) fields[offset + j].value = value; });
-        });
-        weeksComplete.value = 2;
-        currentWeight.value = 17.5;
-        if (bandLevel) bandLevel.value = 'Medium';
-        if (densityGoal) densityGoal.value = '3 rounds + 5 extra reps';
-        computeProgress();
-      });
-
-      if (clearLogBtn) clearLogBtn.addEventListener('click', () => {
-        doneBoxes.forEach(b => b.checked = false);
-        allLogs.forEach(i => i.value = '');
-        if (weeksComplete) weeksComplete.value = 0;
-        if (currentWeight) currentWeight.value = 12.5;
-        if (bandLevel) bandLevel.value = 'Medium';
-        if (densityGoal) densityGoal.value = '3 rounds';
-        computeProgress();
-      });
-
-      computeProgress();
     })();
   </script>
 </body>
