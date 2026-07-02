@@ -340,6 +340,9 @@
         <div class="stat"><div class="k">Next overload</div><div class="v" id="nextOverload">Add 1-2 reps</div></div>
       </div>
 
+      <!-- Recent date-stamped sessions -->
+      <div id="recentLogs" class="card" style="margin-top:var(--space-5);padding:var(--space-4)"></div>
+
       <article class="card" style="margin-top: var(--space-5)">
         <h3>Weekly sheet</h3>
         <div class="week-grid" role="group" aria-label="Weekly log">
@@ -545,8 +548,44 @@
         const s = defaultState(); saveState(s); applyStateToUI(s); refreshProgressUI(s);
       });
 
+      // date-stamped logs helper (stored separately from weekly state)
+      const logsKey = 'hwp_logs_v1';
+      function loadLogs(){ try{ return JSON.parse(localStorage.getItem(logsKey) || '[]'); }catch(e){ return []; } }
+      function saveLogs(logs){ try{ localStorage.setItem(logsKey, JSON.stringify(logs)); showSavedToast(); } catch(e){ console.warn('saveLogs failed',e); } }
+      function renderLogs(){
+        const container = document.getElementById('recentLogs');
+        if(!container) return;
+        const logs = loadLogs();
+        container.innerHTML = '<h4 style="margin-top:0;margin-bottom:.5rem">Recent sessions</h4>';
+        if(!logs.length){ container.innerHTML += '<p class="subtle">No sessions logged yet.</p>'; return; }
+        const list = document.createElement('ul');
+        list.style.listStyle='none'; list.style.padding='0'; list.style.margin='0';
+        logs.slice().reverse().slice(0,7).forEach(l => {
+          const li = document.createElement('li');
+          li.style.padding='6px 0';
+          const when = l.date || (l.timestamp ? l.timestamp.split('T')[0] : 'unknown');
+          const summary = l.summary || (l.state ? (`Done:${(l.state.week||[]).filter(d=>d.done).length} DB:${l.state.currentWeight || ''}kg`) : '');
+          li.textContent = `${when} — ${summary}`;
+          list.appendChild(li);
+        });
+        container.appendChild(list);
+      }
+
+      // whenever a circuit is finished, also create a date-stamped log entry
+      if(circuitDone){
+        circuitDone.addEventListener('click', ()=>{
+          const s = readUIState();
+          const date = new Date().toISOString().split('T')[0];
+          const logs = loadLogs();
+          const summary = `Done:${(s.week||[]).filter(d=>d.done).length} DB:${s.currentWeight || ''}kg`;
+          logs.push({date, timestamp:new Date().toISOString(), state: s, summary});
+          saveLogs(logs);
+          renderLogs();
+        });
+      }
+
       // init
-      const initial = loadState(); applyStateToUI(initial); wireInputs(initial); refreshProgressUI(initial);
+      const initial = loadState(); applyStateToUI(initial); wireInputs(initial); refreshProgressUI(initial); renderLogs();
 
       // show warmup by default for a clear pipeline start
       showStep('warmup');
@@ -589,6 +628,58 @@
           primaryNav.style.padding = '';
         }
       });
+
+      // check deployed version and prompt for refresh if changed
+      async function checkVersion(){
+        try{
+          const resp = await fetch('/version.json', {cache:'no-store'});
+          if(!resp.ok) return;
+          const v = await resp.json();
+          const deployed = v.version;
+          const stored = localStorage.getItem('hwp_deployed_version');
+          if(!stored) { localStorage.setItem('hwp_deployed_version', deployed); return; }
+          if(stored !== deployed){
+            // show banner and provide refresh button that clears caches and reloads
+            if(!document.getElementById('hwp-refresh-banner')){
+              const bar = document.createElement('div');
+              bar.id = 'hwp-refresh-banner';
+              bar.style.position='fixed'; bar.style.left='0'; bar.style.right='0'; bar.style.top='0'; bar.style.background='var(--color-primary)'; bar.style.color='white'; bar.style.padding='8px 12px'; bar.style.display='flex'; bar.style.justifyContent='space-between'; bar.style.alignItems='center'; bar.style.zIndex='99999';
+              const txt = document.createElement('div'); txt.textContent = 'A new version is available';
+              const btn = document.createElement('button'); btn.textContent = 'Refresh'; btn.style.marginLeft='12px'; btn.style.padding='8px 10px'; btn.style.border='none'; btn.style.borderRadius='6px'; btn.style.background='white'; btn.style.color='var(--color-primary)'; btn.style.fontWeight='700';
+              btn.addEventListener('click', async ()=>{
+                // clear caches
+                const keys = await caches.keys();
+                await Promise.all(keys.map(k=>caches.delete(k)));
+                // update stored version and reload
+                localStorage.setItem('hwp_deployed_version', deployed);
+                const reg = await navigator.serviceWorker.getRegistration();
+                if(reg && reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
+                window.location.reload();
+              });
+              bar.appendChild(txt); bar.appendChild(btn); document.body.appendChild(bar);
+            }
+          }
+        }catch(e){ console.warn('version check failed', e); }
+      }
+
+      // register service worker
+      if('serviceWorker' in navigator){
+        navigator.serviceWorker.register('/sw.js').then(reg=>{
+          // listen for updates
+          reg.addEventListener('updatefound', ()=>{
+            const nw = reg.installing;
+            nw && nw.addEventListener('statechange', ()=>{
+              if(nw.state === 'installed' && navigator.serviceWorker.controller){
+                // new SW installed while a previous one controls the page
+                checkVersion();
+              }
+            });
+          });
+        }).catch(e=>console.warn('sw register failed', e));
+      }
+
+      // initial version check
+      checkVersion();
 
     })();
   </script>
