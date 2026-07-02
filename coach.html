@@ -180,8 +180,10 @@
 
     /* small theme toggle */
     /* Make the theme toggle easier to see and hit on touch devices */
-    .themebtn{border:0;background:transparent;color:var(--color-text);padding:.35rem .5rem;border-radius:.6rem;font-weight:700;font-size:var(--text-xs);min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+    .themebtn{border:0;background:transparent;color:var(--color-text-faint);padding:.35rem .5rem;border-radius:.6rem;font-weight:700;font-size:var(--text-xs)}
     .themebtn:active{transform:translateY(1px)}
+    .dayhelp{margin-top:.45rem;display:block;background:var(--color-surface);border:1px solid var(--color-line);padding:.6rem 1rem;border-radius:.9rem;font-size:var(--text-sm);color:var(--color-text-muted);max-width:760px;margin-left:auto;margin-right:auto}
+    .daylabel{cursor:pointer}
 
     :focus-visible{outline:3px solid var(--color-amber);outline-offset:2px}
     @media (prefers-reduced-motion: reduce){ *{transition:none !important;animation:none !important} }
@@ -202,9 +204,10 @@
         <span class="wordmark">Coach</span>
         <div style="display:flex;align-items:center;gap:.6rem">
           <button id="themeToggle" class="themebtn" type="button" aria-label="Theme">Theme</button>
-          <span class="daylabel" id="dayLabel">PM full</span>
+          <button id="dayLabel" class="daylabel" aria-expanded="false" aria-controls="dayHelp">PM full</button>
         </div>
       </div>
+      <div id="dayHelp" class="dayhelp" hidden role="region" aria-live="polite"></div>
 
       <div class="coach" id="coachCard">
         <button class="modechip" id="goalChip" type="button">Goal: Visible abs</button>
@@ -825,29 +828,33 @@
     state.lastHashes.push(session.hash); state.lastHashes = state.lastHashes.slice(-4);
     save();
     const mode = session.mode;
+    // Capture the built session so we can use it to pre-populate finish inputs if needed
+    const finished = session;
     teardownSession();
     $('finishChip').textContent = MODE_LABEL[mode] + ' complete · ' + fmt(rec.seconds);
     const sc = streakCount();
     $('streakAward').textContent = 'Streak: ' + sc + (sc === 1 ? ' day' : ' days') + ' ✓';
-    renderLiftLog();
+    renderLiftLog(finished);
     show('finish');
   }
 
-  function renderLiftLog(){
+  function renderLiftLog(expectedSession){
     const L = state.lifts;
+    const t = targets();
+    // Pre-populate with expected targets for this week/session; user may delete or overwrite
     const rows = [
-      {id:'push', label:'Push-up variant', hint:'best set, reps', val:L.push.reps},
-      {id:'squatReps', label:'Goblet squat', hint:'best set, reps', val:L.squat.reps},
-      {id:'squatKg', label:'Goblet squat load', hint:'kg used', val:L.squat.kg, step:2.5},
-      {id:'lungeReps', label:'Reverse lunge', hint:'best set, per leg', val:L.lunge.reps},
-      {id:'lungeKg', label:'Lunge load', hint:'kg per hand', val:L.lunge.kg, step:2.5},
-      {id:'plank', label:'Longest plank / hold', hint:'seconds', val:L.plank.sec},
-      {id:'bridge', label:'Glute bridge / hip thrust', hint:'best set, reps', val:L.bridge.reps}
+      {id:'push', label:'Push-up variant', hint:'expected reps', val:t.push},
+      {id:'squatReps', label:'Goblet squat', hint:'expected reps', val:t.squatReps},
+      {id:'squatKg', label:'Goblet squat load', hint:'kg expected', val:t.squatKg, step:2.5},
+      {id:'lungeReps', label:'Reverse lunge', hint:'expected reps / leg', val:t.lungeReps},
+      {id:'lungeKg', label:'Lunge load', hint:'kg per hand expected', val:t.lungeKg, step:2.5},
+      {id:'plank', label:'Longest plank / hold', hint:'seconds expected', val:t.plank},
+      {id:'bridge', label:'Glute bridge / hip thrust', hint:'expected reps', val:t.bridge}
     ];
     $('liftLog').innerHTML = rows.map(r => `
       <div class="liftrow">
         <label for="lift-${r.id}">${r.label}<span class="hint">${r.hint}</span></label>
-        <input id="lift-${r.id}" type="number" inputmode="decimal" min="0" step="${r.step||1}" placeholder="${r.val}">
+        <input id="lift-${r.id}" value="${r.val}" type="number" inputmode="decimal" min="0" step="${r.step||1}">
       </div>`).join('');
   }
 
