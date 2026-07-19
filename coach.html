@@ -164,11 +164,18 @@
     .streakhero{text-align:center;padding:1.6rem 0 .6rem}
     .streakhero .n{font-family:var(--font-display);font-size:clamp(4rem,20vw,6.5rem);line-height:1;display:block}
     .streakhero .cap{font-size:var(--text-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--color-text-faint)}
+    .streakdeadline{text-align:center;margin:.95rem 0 1.35rem;padding:.95rem 0;border-top:1px solid var(--color-line);border-bottom:1px solid var(--color-line)}
+    .streakdeadline strong{display:block;font-size:var(--text-lg);color:var(--color-primary)}
+    .streakdeadline span{display:block;margin-top:.15rem;font-size:var(--text-sm);color:var(--color-text-muted)}
     .dotcal{display:grid;grid-template-columns:repeat(7,1fr);gap:.45rem;margin-top:1.2rem}
     .dotcal .dh{text-align:center;font-size:var(--text-xs);color:var(--color-text-faint);font-weight:700}
     .dotcal .dd{aspect-ratio:1;border-radius:50%;background:var(--color-surface-2);border:1px solid var(--color-line);display:grid;place-items:center;font-size:var(--text-xs);color:var(--color-text-faint)}
+    .dotcal .dd.othermonth{opacity:.42}
+    .dotcal .dd.future{background:transparent}
+    .dotcal .dd.inwindow{border-color:color-mix(in srgb, var(--color-primary) 45%, var(--color-line))}
     .dotcal .dd.hit{background:var(--color-primary);border-color:var(--color-primary);color:var(--color-text-inverse);font-weight:700}
     .dotcal .dd.today{outline:2px solid var(--color-amber);outline-offset:2px}
+    .dotcal .dd.deadline{border:2px dashed var(--color-primary);font-weight:700;color:var(--color-primary)}
     .streakrules{margin-top:1.3rem;font-size:var(--text-sm);color:var(--color-text-muted)}
     .streakrules li{margin-bottom:.3rem}
 
@@ -356,11 +363,16 @@
       <div class="streak-head"><h2 class="display">Streak</h2></div>
       <div class="streakhero">
         <span class="n display" id="streakBig">0</span>
-        <span class="cap" id="streakCap">day streak · best 0</span>
+        <span class="cap" id="streakCap">session streak · best 0</span>
+      </div>
+      <div class="streakdeadline" aria-live="polite">
+        <strong id="streakTimeLeft">Complete a session to begin</strong>
+        <span id="streakDue">Your streak runs on a rolling seven-day window.</span>
       </div>
       <div id="dotCalHeader" style="text-align:center;margin-top:.4rem;font-weight:700;color:var(--color-text-muted)"></div>
-    <div class="dotcal" id="dotCal"></div>
+      <div class="dotcal" id="dotCal"></div>
       <ul class="streakrules">
+        <li>Complete at least one session every seven days to keep the streak alive.</li>
         <li>Any completed session counts — momentum resets count fully.</li>
         <li>Travel days count fully.</li>
         <li>The streak measures showing up, not intensity.</li>
@@ -433,6 +445,7 @@
   'use strict';
   const KEY = 'hwc_state_v1';
   const SIGNALS_KEY = 'hwc_signals'; // optional: {dateISO, steps, alcoholUnits} fed by phone automation; never entered manually in-app
+  const STREAK_WINDOW_DAYS = 7;
   const $ = id => document.getElementById(id);
   const yt = q => 'https://www.youtube.com/results?search_query=' + q;
 
@@ -503,38 +516,56 @@
     {wks:'Week 8', from:8, to:8, name:'Consolidation', desc:'Maintain strength, ease volume slightly, look in the mirror.'}
   ];
 
-  function streakCount(){
-    const days = new Set(state.sessions.map(s => s.date));
-    let n = 0; const d = new Date();
-    let localFreezes = state.streakFreezes || 0;
-    let offs = 0;
-    // if today isn't done, start from yesterday (we still count recent run)
-    if (!days.has(todayISO(d))) d.setDate(d.getDate()-1);
-    while (true){
-      const iso = todayISO(d);
-      if (days.has(iso)) { n++; d.setDate(d.getDate()-1); continue; }
-      // missed day
-      offs++;
-      if (offs <= 3){ d.setDate(d.getDate()-1); continue; }
-      if (localFreezes > 0){ localFreezes--; offs = 0; d.setDate(d.getDate()-1); continue; }
-      break;
-    }
-    if (localFreezes !== (state.streakFreezes || 0)) { state.streakFreezes = localFreezes; save(); }
-    // update max streak if necessary
-    if (!state.maxStreak) state.maxStreak = 0;
-    if (n > state.maxStreak){ state.maxStreak = n; save(); }
-    return n;
+  function parseISODate(iso){
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+    if (!match) return null;
+    const d = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12);
+    return todayISO(d) === iso ? d : null;
   }
-  function bestStreak(){
-    const days = [...new Set(state.sessions.map(s=>s.date))].sort();
-    let best=0, run=0, prev=null;
-    days.forEach(iso => {
-      if (prev){ const gap = (new Date(iso) - new Date(prev)) / 86400000; run = gap === 1 ? run+1 : 1; } else run = 1;
-      best = Math.max(best, run); prev = iso;
+  function calendarDayNumber(d){ return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000; }
+  function daysBetween(a, b){ return calendarDayNumber(b) - calendarDayNumber(a); }
+  function addDays(d, amount){ const next = new Date(d); next.setDate(next.getDate() + amount); return next; }
+  function sessionDates(referenceDate){
+    const refDay = calendarDayNumber(referenceDate || new Date());
+    return [...new Set(state.sessions.map(s => s.date))]
+      .map(parseISODate)
+      .filter(d => d && calendarDayNumber(d) <= refDay)
+      .sort((a, b) => calendarDayNumber(a) - calendarDayNumber(b));
+  }
+  function rollingBestStreak(dates){
+    let best = 0, run = 0, previous = null;
+    dates.forEach(d => {
+      run = previous && daysBetween(previous, d) <= STREAK_WINDOW_DAYS ? run + 1 : 1;
+      best = Math.max(best, run);
+      previous = d;
     });
     return best;
   }
+  function streakSnapshot(referenceDate){
+    const today = referenceDate || new Date();
+    const dates = sessionDates(today);
+    if (!dates.length) return {count:0, best:0, active:false, daysLeft:null, last:null, due:null};
 
+    const last = dates[dates.length - 1];
+    const due = addDays(last, STREAK_WINDOW_DAYS);
+    const daysLeft = STREAK_WINDOW_DAYS - daysBetween(last, today);
+    let count = 1;
+    for (let i = dates.length - 1; i > 0; i--){
+      if (daysBetween(dates[i - 1], dates[i]) > STREAK_WINDOW_DAYS) break;
+      count++;
+    }
+    const active = daysLeft >= 0;
+    const best = rollingBestStreak(dates);
+    return {count:active ? count : 0, best, active, daysLeft:Math.max(0, daysLeft), last, due};
+  }
+  function streakCount(){
+    const snapshot = streakSnapshot();
+    if (snapshot.best !== (Number(state.maxStreak) || 0)){
+      state.maxStreak = snapshot.best;
+      save();
+    }
+    return snapshot.count;
+  }
   /* ---------- targets ---------- */
   function targets(){
     const wk = weekNumber(), L = state.lifts;
@@ -888,24 +919,43 @@
   });
 
   function renderStreak(){
-    const cur = streakCount(), best = Math.max(bestStreak(), cur);
-    $('streakBig').textContent = cur;
-    $('streakCap').textContent = 'day streak · best ' + best;
+    const snapshot = streakSnapshot();
+    if (snapshot.best !== (Number(state.maxStreak) || 0)){
+      state.maxStreak = snapshot.best;
+      save();
+    }
+    $('streakBig').textContent = snapshot.count;
+    $('streakCap').textContent = 'session streak · best ' + snapshot.best;
+    if (!snapshot.last){
+      $('streakTimeLeft').textContent = 'Complete a session to begin';
+      $('streakDue').textContent = 'Your streak runs on a rolling seven-day window.';
+    } else if (!snapshot.active){
+      $('streakTimeLeft').textContent = 'Streak window ended';
+      $('streakDue').textContent = 'Complete a session today to start a new streak.';
+    } else {
+      $('streakTimeLeft').textContent = snapshot.daysLeft === 0 ? 'Last day to keep it' : snapshot.daysLeft + (snapshot.daysLeft === 1 ? ' day left' : ' days left');
+      $('streakDue').textContent = 'Complete your next session by ' + snapshot.due.toLocaleDateString(undefined, {weekday:'long', day:'numeric', month:'long'}) + '.';
+    }
     const days = new Set(state.sessions.map(s=>s.date));
     const cells = ['M','T','W','T','F','S','S'].map(d=>`<span class="dh">${d}</span>`);
     const today = new Date();
-    const start = new Date(today); start.setDate(today.getDate() - 27 - ((today.getDay()+6)%7));
-    // month/year header for the calendar (showing the start month)
-    try{
-      const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-      const header = monthNames[start.getMonth()] + ' ' + start.getFullYear();
-      const h = document.getElementById('dotCalHeader'); if (h) h.textContent = header;
-    }catch(e){}
-    for (let i=0;i<28+((today.getDay()+6)%7)+1;i++){
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1, 12);
+    const start = addDays(monthStart, -((monthStart.getDay() + 6) % 7));
+    const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0, 12);
+    const end = addDays(monthEnd, 6 - ((monthEnd.getDay() + 6) % 7));
+    $('dotCalHeader').textContent = today.toLocaleDateString(undefined, {month:'long', year:'numeric'});
+    const deadlineISO = snapshot.active && snapshot.due ? todayISO(snapshot.due) : '';
+    for (let i=0;i<=daysBetween(start, end);i++){
       const d = new Date(start); d.setDate(start.getDate()+i);
-      if (d > today) break;
       const iso = todayISO(d);
-      cells.push(`<span class="dd ${days.has(iso)?'hit':''} ${iso===todayISO()?'today':''}">${d.getDate()}</span>`);
+      const classes = ['dd'];
+      if (d.getMonth() !== today.getMonth()) classes.push('othermonth');
+      if (calendarDayNumber(d) > calendarDayNumber(today)) classes.push('future');
+      if (snapshot.active && calendarDayNumber(d) >= calendarDayNumber(today) && calendarDayNumber(d) <= calendarDayNumber(snapshot.due)) classes.push('inwindow');
+      if (days.has(iso)) classes.push('hit');
+      if (iso === todayISO()) classes.push('today');
+      if (iso === deadlineISO) classes.push('deadline');
+      cells.push(`<span class="${classes.join(' ')}">${d.getDate()}</span>`);
     }
     $('dotCal').innerHTML = cells.join('');
   }
@@ -1002,7 +1052,7 @@
     teardownSession();
     $('finishChip').textContent = MODE_LABEL[mode] + ' complete · ' + fmt(rec.seconds);
     const sc = streakCount();
-    $('streakAward').textContent = 'Streak: ' + sc + (sc === 1 ? ' day' : ' days') + ' ✓';
+    $('streakAward').textContent = 'Streak: ' + sc + (sc === 1 ? ' session' : ' sessions') + ' ✓';
     renderLiftLog(finished);
     show('finish');
   }

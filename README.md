@@ -21,7 +21,7 @@ no backend, and local browser persistence only.
 - Session generator with standard, momentum-reset, travel, and harder-day modes.
 - 8-week progression map with key-lift tracking.
 - Technique library with brief cues and video searches.
-- Streak tracking where any completed session counts, including fallback sessions.
+- Rolling seven-day streak tracking where any completed session counts, including fallback sessions, with a visible deadline.
 - Evening beer-check prompt and time-of-day behavior.
 - Local export/import/reset controls on the Profile tab.
 

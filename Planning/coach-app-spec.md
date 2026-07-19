@@ -188,11 +188,13 @@ You wanted both a prompt and streak mechanic to interrupt the after-work beer re
 
 Streak definition:
 
-- Completing any session type (including fallback) on a given day.
+- Complete any session type (including fallback) within seven calendar days of the previous completed session.
+- The active streak expires after the seventh calendar day without a completed session.
 
 Visual streak:
 
-- Shows consecutive days with any session.
+- Shows the number of qualifying completed sessions in the current rolling streak.
+- Shows how many days remain and the inclusive date by which the next session must be completed.
 - Encourages momentum and pattern disruption.
 
 Rules:
