@@ -1,4 +1,4 @@
-const CACHE_NAME = 'coach-cache-20260719T060619Z';
+const CACHE_NAME = 'do-less-cache-20260719T080155Z';
 const PRECACHE_URLS = [
   '/',
   '/index.html',

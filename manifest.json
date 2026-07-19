@@ -1,11 +1,12 @@
 {
-  "name": "Coach",
-  "short_name": "Coach",
+  "id": "/do-less",
+  "name": "Do Less",
+  "short_name": "Do Less",
   "start_url": "./coach.html",
   "display": "standalone",
   "background_color": "#f7f6f2",
   "theme_color": "#01696f",
-  "description": "Coach: daily movement, sport logging, streaks, and an 8-week strength progression.",
+  "description": "Low admin fitness with adaptive daily sessions, quick wins, and less thinking.",
   "icons": [
     {
       "src": "./assets/icon-192.png",

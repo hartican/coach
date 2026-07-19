@@ -1,13 +1,14 @@
-# Coach
+# Do Less
 
-Mobile-first workout coach app built from `Planning/coach-app-spec.md`.
+Mobile-first, low-admin movement app built from `Planning/coach-app-spec.md`.
 It is a standalone browser app: plain HTML/CSS/JS, no build step, no auth,
 no backend, and local browser persistence only.
 
 ## Files
 
-- `coach.html` - the Coach app, served at the site root.
+- `coach.html` - the Do Less app, served at the site root.
 - `Planning/coach-app-spec.md` - canonical product spec.
+- `context/marketing-site-hero-copy.md` - single source of truth for all Do Less marketing copy.
 - `assets/` - strong-arm app icons for the browser manifest and iOS home screen.
 - `manifest.json` - home-screen/PWA metadata.
 - `sw.js` and `version.json` - simple cache/update support for installed PWAs.
@@ -27,7 +28,7 @@ no backend, and local browser persistence only.
 
 ## Local Data
 
-Coach stores data only in this browser using `localStorage`. Nothing is sent to
+Do Less stores data only in this browser using `localStorage`. Nothing is sent to
 a cloud database, no login is required, and data does not sync across devices.
 
 The app stores session history, key lifts, profile fields, theme preference,
@@ -36,7 +37,7 @@ cleared by the user, browser privacy settings, or device cleanup tools.
 
 Use Profile -> Export backup before clearing site data or moving devices. Use
 Profile -> Import backup to restore that JSON file in another browser. Use
-Profile -> Reset Coach data to clear local Coach data in the current browser.
+Profile -> Reset Do Less data to clear local Do Less data in the current browser.
 
 Optional background signals can be written by phone automation to
 `localStorage["hwc_signals"]` in this shape:
@@ -47,7 +48,7 @@ Optional background signals can be written by phone automation to
 
 ## Hosting
 
-Coach is designed for static hosting on Vercel or similar free hosts. Deploy the
+Do Less is designed for static hosting on Vercel or similar free hosts. Deploy the
 folder at the site root. The root path, `/app.html`, and
 `/home-workout-planner.html` all rewrite to `/coach.html` so shared links keep
 working.
