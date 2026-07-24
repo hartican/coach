@@ -42,6 +42,7 @@
     }
     *,*::before,*::after{box-sizing:border-box}
     [hidden]{display:none !important}
+    .visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     html,body{height:100%}
     body{margin:0;font-family:var(--font-body);font-size:var(--text-base);line-height:1.55;background:var(--color-bg);color:var(--color-text);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
     button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}
@@ -56,6 +57,11 @@
     .topstrip{display:flex;align-items:center;justify-content:space-between;padding:0 0 .2rem}
     .wordmark{font-family:var(--font-display);font-size:1.3rem;letter-spacing:.01em}
     .daylabel{font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-faint)}
+    .topactions{display:flex;align-items:center;gap:.45rem}
+    .topaction{border:0;background:transparent;color:var(--color-text-muted);padding:.4rem .2rem;font-size:var(--text-xs);font-weight:750}
+    .aboutpanel{margin:.55rem 0 .2rem;padding:.9rem 0;border-top:1px solid var(--color-line);border-bottom:1px solid var(--color-line);font-size:var(--text-sm);color:var(--color-text-muted)}
+    .aboutpanel strong{display:block;color:var(--color-text);font-family:var(--font-display);font-size:var(--text-lg);font-weight:400}
+    .aboutpanel p{margin:.25rem 0}
 
     .coach{background:var(--color-surface);border:1px solid var(--color-line);border-radius:1.25rem;padding:1.25rem;box-shadow:var(--shadow);margin-top:.75rem}
     .modechip{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .7rem;border-radius:999px;background:var(--color-primary-soft);color:var(--color-primary);font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:0}
@@ -110,10 +116,13 @@
     .preview .reason{font-size:var(--text-sm);color:var(--color-text);background:var(--color-primary-soft);border-radius:.9rem;padding:.75rem .9rem;margin:.8rem 0 1rem}
     .circuit{background:var(--color-surface);border:1px solid var(--color-line);border-radius:1.25rem;padding:.4rem 1.1rem;box-shadow:var(--shadow)}
     .cblock{padding:.7rem 0 .2rem;font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-primary)}
-    .cx{display:flex;justify-content:space-between;gap:.8rem;padding:.55rem 0;border-bottom:1px solid var(--color-line);font-size:var(--text-sm)}
+    .cx{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.35rem .8rem;padding:.65rem 0;border-bottom:1px solid var(--color-line);font-size:var(--text-sm)}
     .cx:last-child{border-bottom:0}
     .cx .nm{font-weight:600}
     .cx .tg{color:var(--color-text-muted);text-align:right;flex-shrink:0}
+    .cxactions{grid-column:1/-1;display:flex;gap:.35rem;align-items:center}
+    .cxactions button,.cxactions select{border:0;background:var(--color-surface-2);color:var(--color-text-muted);border-radius:999px;padding:.32rem .62rem;font-size:var(--text-xs);font-weight:700}
+    .plansummary{display:flex;gap:.7rem;flex-wrap:wrap;margin:.4rem 0 .9rem;color:var(--color-text-muted);font-size:var(--text-xs);font-weight:700}
     .previewbtns{display:flex;flex-direction:column;gap:.6rem;margin-top:1rem}
     /* full-width buttons on narrow viewports for easy tapping */
     .previewbtns > button{width:100%}
@@ -151,13 +160,29 @@
     .step .cue{color:var(--color-text-muted);font-size:var(--text-sm);margin:.6rem 0 0;max-width:34ch}
     .step .demo{display:inline-block;margin-top:.6rem;font-size:var(--text-sm);color:var(--color-primary);font-weight:600;text-decoration:none}
     .step .swap{display:inline-block;margin-top:.6rem;margin-left:1rem;background:none;border:0;padding:0;font-size:var(--text-sm);color:var(--color-text-faint);font-weight:600;text-decoration:underline}
+    .exerciseclock{margin:.9rem 0 1rem;padding:1rem 0;border-top:1px solid var(--color-line);border-bottom:1px solid var(--color-line);display:grid;grid-template-columns:1fr auto;align-items:end;gap:.15rem .8rem}
+    .exerciseclock .clocklabel{font-size:var(--text-xs);font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-faint)}
+    .exerciseclock strong{grid-row:1/3;grid-column:2;font-size:clamp(2.7rem,14vw,4.5rem);line-height:.9;font-variant-numeric:tabular-nums;color:var(--color-primary)}
+    .exerciseclock .clockstatus{font-size:var(--text-sm);color:var(--color-text-muted)}
+    .exerciseclock.overtime strong,.exerciseclock.overtime .clockstatus{color:var(--color-amber)}
+    .exerciseclock.overtime strong{animation:overtimePulse 1.05s ease-in-out infinite}
+    .exerciseclock.paused strong{opacity:.58}
+    @keyframes overtimePulse{50%{transform:scale(1.045);text-shadow:0 0 22px color-mix(in srgb,var(--color-amber) 32%,transparent)}}
+    .exercise-start{grid-column:1/-1;justify-self:start;margin-top:.45rem;border:0;border-radius:999px;background:var(--color-primary);color:var(--color-text-inverse);padding:.48rem .85rem;font-size:var(--text-sm);font-weight:800}
+    .sessionovertime{font-variant-numeric:tabular-nums;font-size:var(--text-xs);font-weight:750;opacity:.9}
+    .sessiontools{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;margin-top:.8rem}
+    .difficulty{border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);border-radius:999px;padding:.42rem .65rem;font-size:var(--text-xs);font-weight:750}
+    .feedbackbtn{width:42px;height:42px;border:1px solid var(--color-line);border-radius:50%;background:var(--color-surface);color:var(--color-text);display:grid;place-items:center}
+    .feedbackbtn[aria-pressed="true"]{background:var(--color-primary-soft);border-color:var(--color-primary);color:var(--color-primary)}
+    .pbnote{margin:.55rem 0 0;color:var(--color-good);font-size:var(--text-xs);font-weight:750}
     .resttimer{margin-top:1rem;font-variant-numeric:tabular-nums;font-weight:800;font-size:2.6rem;color:var(--color-amber);display:none}
     .step.resting .resttimer{display:block}
-    .playerbtns{position:fixed;left:0;right:0;bottom:0;padding:0 1.1rem calc(1rem + env(safe-area-inset-bottom));display:none;gap:.6rem;max-width:560px;margin:0 auto}
+    .playerbtns{position:fixed;left:0;right:0;bottom:0;padding:.65rem 1.1rem calc(1rem + env(safe-area-inset-bottom));display:none;gap:.45rem;max-width:560px;margin:0 auto;background:color-mix(in srgb,var(--color-bg) 94%,transparent);backdrop-filter:blur(10px)}
     body.in-session .playerbtns{display:flex}
     body.in-session .tabbar{display:none}
     .bignext{flex:1;min-height:64px;border-radius:999px;border:0;background:var(--color-primary);color:var(--color-text-inverse);font-weight:800;font-size:var(--text-lg)}
     .pausebtn{min-width:64px;min-height:64px;border-radius:999px;border:1px solid var(--color-line);background:var(--color-surface);color:var(--color-text);font-weight:700;display:grid;place-items:center}
+    .flowbtn{min-width:54px;min-height:54px;align-self:center;border-radius:999px;border:1px solid var(--color-line);background:var(--color-surface);color:var(--color-text);font-size:var(--text-xs);font-weight:800}
     .stepdots{display:flex;gap:.3rem;margin-top:1.2rem;flex-wrap:wrap}
     .stepdots i{width:8px;height:8px;border-radius:50%;background:var(--color-line)}
     .stepdots i.done{background:var(--color-primary)}
@@ -172,11 +197,22 @@
     .liftrow label{flex:1;font-weight:600;font-size:var(--text-sm)}
     .liftrow .hint{display:block;font-weight:500;font-size:var(--text-xs);color:var(--color-text-faint)}
     .liftrow input{width:6.5rem;padding:.6rem .6rem;border-radius:.6rem;border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);text-align:center}
+    .sessionrecap{margin:1rem 0;display:grid;gap:.1rem}
+    .recaprow{padding:.7rem 0;border-bottom:1px solid var(--color-line);font-size:var(--text-sm)}
+    .recaprow strong{display:block}
+    .recapmeta{color:var(--color-text-muted);font-size:var(--text-xs)}
+    .recapinputs{display:flex;gap:.5rem;margin-top:.5rem}
+    .recapinputs label{font-size:var(--text-xs);color:var(--color-text-muted)}
+    .recapinputs input{display:block;width:6rem;margin-top:.2rem;padding:.45rem;border:1px solid var(--color-line);border-radius:.55rem;background:var(--color-surface-2);color:var(--color-text)}
 
     /* plan */
     .goalrow{display:flex;align-items:center;gap:.7rem;background:var(--color-surface);border:1px solid var(--color-line);border-radius:1rem;padding:.8rem 1rem;margin-top:.9rem}
     .goalrow label{font-size:var(--text-xs);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--color-text-faint)}
     .goalrow select{margin-left:auto;border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);border-radius:.6rem;padding:.5rem .6rem;font-weight:600;font-size:var(--text-sm)}
+    .plancontrols{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;margin-top:.9rem}
+    .plancontrols label{font-size:var(--text-xs);font-weight:750;color:var(--color-text-muted)}
+    .plancontrols select{display:block;width:100%;margin-top:.25rem;border:1px solid var(--color-line);background:var(--color-surface);color:var(--color-text);border-radius:.65rem;padding:.55rem}
+    .plancontrols .startsecondary{grid-column:1/-1}
     .phase{background:var(--color-surface);border:1px solid var(--color-line);border-radius:1rem;padding:1rem;margin-top:.7rem}
     .phase.now{border-color:var(--color-primary)}
     .phase .wk{font-size:var(--text-xs);font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--color-primary)}
@@ -262,6 +298,23 @@
     .sportsettingbody{padding:0 0 .8rem;display:grid;gap:.65rem}
     .sportsettingbody > label{display:grid;gap:.25rem;font-size:var(--text-xs);font-weight:700;color:var(--color-text-muted)}
     .sportsettingbody input[type="text"]{width:100%;border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);border-radius:.6rem;padding:.55rem}
+    .settingsform{margin-top:.8rem;display:grid;gap:.65rem}
+    .settingsform > label{display:grid;gap:.25rem;font-size:var(--text-xs);font-weight:750;color:var(--color-text-muted)}
+    .settingsform input,.settingsform select{width:100%;border:1px solid var(--color-line);background:var(--color-surface);color:var(--color-text);border-radius:.65rem;padding:.62rem}
+    .username-row{display:grid;grid-template-columns:1fr auto;gap:.45rem;align-items:end}
+    .username-row label{display:grid;gap:.25rem;font-size:var(--text-xs);font-weight:750;color:var(--color-text-muted)}
+    .smallaction{border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);border-radius:999px;padding:.5rem .8rem;font-size:var(--text-xs);font-weight:750}
+    .avatarpicker{display:flex;gap:.55rem;align-items:center;flex-wrap:wrap}
+    .avatarpreview,.avatarpreset{width:54px;height:54px;border-radius:50%;object-fit:cover;border:2px solid var(--color-line);background:var(--color-surface-2)}
+    button.avatarpreset{padding:0;overflow:hidden}
+    button.avatarpreset[aria-pressed="true"]{border-color:var(--color-primary);box-shadow:0 0 0 2px var(--color-primary-soft)}
+    .freezebenefit{padding:.7rem 0;color:var(--color-primary);font-size:var(--text-sm);font-weight:750}
+    .keyliftedit{display:grid;gap:.45rem}
+    .keyliftedit label{display:grid;grid-template-columns:minmax(0,1fr) 5.5rem;gap:.6rem;align-items:center;font-size:var(--text-sm)}
+    .keyliftedit input{width:100%;border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);border-radius:.55rem;padding:.5rem;text-align:right}
+    .keysuggestion{font-size:var(--text-xs);color:var(--color-amber)}
+    .historyitem{padding:.65rem 0;border-bottom:1px solid var(--color-line);font-size:var(--text-sm)}
+    .historyitem span{display:block;color:var(--color-text-muted);font-size:var(--text-xs)}
     .rangeline{display:grid;grid-template-columns:1fr auto;gap:.6rem;align-items:center}
     input[type="range"]{width:100%;accent-color:var(--color-primary)}
     .rangevalue{font-variant-numeric:tabular-nums;color:var(--color-primary);font-weight:800}
@@ -296,6 +349,7 @@
     <div class="timerbar" id="timerbar" role="timer" aria-live="off">
       <span class="elapsed" id="elapsedTxt">0:00</span>
       <span class="phase" id="phaseTxt">Session</span>
+      <span class="sessionovertime" id="sessionOvertime">OT 0:00</span>
       <button class="quit" id="quitBtn" type="button">End</button>
     </div>
 
@@ -303,11 +357,16 @@
     <section class="view" id="view-today">
       <div class="topstrip">
         <span class="wordmark">Do Less</span>
-        <div style="display:flex;align-items:center;gap:.6rem">
-          <button id="themeToggle" class="themebtn" type="button" aria-label="Theme">Theme</button>
+        <div class="topactions">
+          <button id="aboutToggle" class="topaction" type="button" aria-expanded="false" aria-controls="aboutPanel">About</button>
           <button id="dayLabel" class="daylabel" aria-expanded="false" aria-controls="dayHelp">PM full</button>
         </div>
       </div>
+      <aside class="aboutpanel" id="aboutPanel" hidden>
+        <strong>Just enough fitness to feel good about yourself.</strong>
+        <p>Do Less reduces the thinking between you and a useful bit of movement. Set it up once, train to today’s energy, and keep momentum without turning fitness into homework.</p>
+        <p>Built for distractible brains.</p>
+      </aside>
       <div id="dayHelp" class="dayhelp" hidden role="region" aria-live="polite"></div>
 
       <section class="todaystatus" aria-labelledby="todayStatusTitle" aria-live="polite">
@@ -393,6 +452,15 @@
           </div>
         </div>
 
+        <div class="qblock">
+          <h2>Where are you training?</h2>
+          <div class="qopts" data-q="environment">
+            <button class="qopt" data-v="indoor" type="button" aria-pressed="false">Indoor</button>
+            <button class="qopt" data-v="outdoor" type="button" aria-pressed="false">Outdoor</button>
+            <button class="qopt" data-v="both" type="button" aria-pressed="false">Both</button>
+          </div>
+        </div>
+
         <div class="quizgo">
           <button class="startbig" id="quizGo" type="button" disabled>Build my session</button>
           <button class="startsecondary" id="quizCancel" type="button">Back</button>
@@ -407,6 +475,7 @@
         <h1 class="display" id="previewTitle">Your circuit tonight</h1>
         <p class="say" id="previewSay">This is everything. Nothing else to think about.</p>
         <p class="reason" id="previewReason">Built for your time, energy, and goal.</p>
+        <div class="plansummary" id="planSummary"></div>
         <div class="circuit" id="circuitList"></div>
         <div class="previewbtns">
           <button class="startbig" id="beginBtn" type="button">Begin session</button>
@@ -422,10 +491,27 @@
         <span class="blocklabel" id="stepBlock">Warm-up</span>
         <h1 class="display" id="stepName">March + band pull-aparts</h1>
         <div class="target" id="stepTarget">60 seconds, easy pace</div>
+        <div class="exerciseclock" id="exerciseClock">
+          <span class="clocklabel">Exercise timer</span>
+          <strong id="exerciseTimer">1:00</strong>
+          <span class="clockstatus" id="exerciseClockStatus">Ready</span>
+          <button class="exercise-start" id="exerciseStart" type="button">Start exercise</button>
+        </div>
         <div class="resttimer" id="restTimer">0:30</div>
         <p class="cue" id="stepCue">Rhythmic, not explosive.</p>
         <a class="demo" id="stepDemo" href="#" target="_blank" rel="noopener noreferrer" hidden>Watch technique video</a>
         <button class="swap" id="stepSwap" type="button" hidden>Swap exercise</button>
+        <div class="sessiontools" id="sessionTools">
+          <label for="stepDifficulty" class="visually-hidden">Difficulty</label>
+          <select class="difficulty" id="stepDifficulty" aria-label="Exercise difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+          <button class="feedbackbtn" id="stepLike" type="button" aria-label="Like exercise" aria-pressed="false">↑</button>
+          <button class="feedbackbtn" id="stepDislike" type="button" aria-label="Dislike exercise" aria-pressed="false">↓</button>
+        </div>
+        <p class="pbnote" id="stepPBNote" hidden></p>
         <div class="stepdots" id="stepDots"></div>
       </div>
     </section>
@@ -436,10 +522,10 @@
         <span class="modechip" id="finishChip">Session complete</span>
         <h1 class="display">Good. Quick win banked. Today counts.</h1>
         <p class="won" id="streakAward">Streak: 1 day</p>
-        <p class="say" style="color:var(--color-text-muted);font-size:var(--text-sm)">Log your best sets for the key lifts only — leave anything you didn't do blank.</p>
-        <div class="liftlog" id="liftLog"></div>
+        <p class="say" id="finishTiming" style="color:var(--color-text-muted);font-size:var(--text-sm)"></p>
+        <div class="sessionrecap" id="sessionRecap"></div>
         <div style="display:flex;gap:.6rem;margin-top:1rem">
-          <button class="startbig" id="saveLifts" type="button" style="flex:1">Save &amp; finish</button>
+          <button class="startbig" id="saveLifts" type="button" style="flex:1">Save log &amp; finish</button>
         </div>
       </div>
     </section>
@@ -447,32 +533,22 @@
     <!-- PLAN -->
     <section class="view hiddenview" id="view-plan">
       <div class="plan-head"><h2 class="display">Your No Gym Plan</h2></div>
-      <div class="goalrow">
-        <label for="goalSelect">Global goal</label>
-        <select id="goalSelect">
-          <option value="abs">Visible abs</option>
-          <option value="chain">Anterior &amp; posterior chain</option>
-          <option value="upper">Upper body</option>
-        </select>
+      <div class="plancontrols">
+        <label>Progression week
+          <select id="progressionWeek">
+            <option value="1">Week 1</option><option value="2">Week 2</option><option value="3">Week 3</option><option value="4">Week 4</option>
+            <option value="5">Week 5</option><option value="6">Week 6</option><option value="7">Week 7</option><option value="8">Week 8</option>
+          </select>
+        </label>
+        <label>Session length
+          <select id="planTime"><option value="10">10 min</option><option value="20" selected>20 min</option><option value="30">30+ min</option></select>
+        </label>
+        <label>Environment
+          <select id="planEnvironment"><option value="indoor">Indoor</option><option value="outdoor">Outdoor</option><option value="both">Both</option></select>
+        </label>
+        <button class="startsecondary" id="buildPlanSession" type="button">Build this session</button>
       </div>
       <div id="phaseList"></div>
-      <div class="keylifts">
-        <h2 class="display">Key lifts</h2>
-        <div id="keyliftList"></div>
-      </div>
-    </section>
-
-    <!-- LIBRARY -->
-    <section class="view hiddenview" id="view-library">
-      <div class="lib-head"><h2 class="display">Technique library</h2></div>
-      <div class="filters" id="libFilters" role="group" aria-label="Filter by category">
-        <button class="fchip" data-cat="all" type="button" aria-pressed="true">All</button>
-        <button class="fchip" data-cat="Warm-up" type="button" aria-pressed="false">Warm-up</button>
-        <button class="fchip" data-cat="Strength" type="button" aria-pressed="false">Strength</button>
-        <button class="fchip" data-cat="Core" type="button" aria-pressed="false">Core</button>
-        <button class="fchip" data-cat="Burst" type="button" aria-pressed="false">Burst</button>
-      </div>
-      <div class="exlist" id="exList"></div>
     </section>
 
     <!-- STREAK -->
@@ -504,20 +580,54 @@
       </ul>
     </section>
 
-    <!-- PROFILE (inserted view) -->
-    <section class="view hiddenview" id="view-profile">
-      <div class="plan-head"><h2 class="display">Profile</h2></div>
-      <div style="margin-top:.8rem;display:grid;gap:.6rem">
-        <label>Name <input id="profileName" type="text" placeholder="Your name"></label>
-        <label>Avatar URL <input id="profileAvatar" type="url" placeholder="https://..."></label>
-        <label>Height (cm) <input id="profileHeight" type="number"></label>
-        <label>Age <input id="profileAge" type="number"></label>
-        <label>Sex <select id="profileSex"><option value="">Prefer not to say</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option></select></label>
-        <label>Weight (kg) <input id="profileWeight" type="number"></label>
-        <label>Fitness level <select id="profileLevel"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></label>
-        <label>Time zone <input id="profileTZ" type="text" placeholder="e.g. America/Los_Angeles"></label>
-        <label>Longitude <input id="profileLong" type="number" step="0.01"></label>
-        <div style="display:flex;gap:.6rem;margin-top:.6rem"><button class="startbig" id="saveProfile">Save profile</button><button class="startsecondary" id="cancelProfile">Cancel</button></div>
+    <!-- SETTINGS -->
+    <section class="view hiddenview" id="view-settings">
+      <div class="plan-head"><h2 class="display">Settings</h2></div>
+      <div class="settingsform">
+        <section class="settingsblock" aria-labelledby="appSettingsTitle">
+          <h3 id="appSettingsTitle">App</h3>
+          <label>Goal
+            <select id="goalSelect">
+              <option value="abs">Visible abs</option>
+              <option value="chain">Anterior &amp; posterior chain</option>
+              <option value="upper">Upper body</option>
+            </select>
+          </label>
+          <label>Appearance
+            <select id="themeSelect"><option value="auto">Auto</option><option value="light">Day</option><option value="dark">Night</option></select>
+          </label>
+        </section>
+
+        <section class="settingsblock" aria-labelledby="profileSettingsTitle">
+          <h3 id="profileSettingsTitle">Profile</h3>
+          <p>Set this once. Do Less uses it quietly in the background.</p>
+          <div class="username-row">
+            <label>Username <input id="profileUsername" type="text" autocomplete="nickname" placeholder="Your training name"></label>
+            <button class="smallaction" id="generateUsername" type="button">Surprise me</button>
+          </div>
+          <div class="avatarpicker">
+            <img class="avatarpreview" id="avatarPreview" alt="Selected avatar">
+            <label class="smallaction" for="avatarUpload">Upload picture</label>
+            <input id="avatarUpload" type="file" accept="image/*" hidden>
+            <div class="avatarpicker" id="avatarPresets" aria-label="Preset avatars"></div>
+          </div>
+          <label>Name <input id="profileName" type="text" placeholder="Your name"></label>
+          <label>Height (cm) <input id="profileHeight" type="number"></label>
+          <label>Age <input id="profileAge" type="number"></label>
+          <label>Sex <select id="profileSex"><option value="">Prefer not to say</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option></select></label>
+          <label>Weight (kg) <input id="profileWeight" type="number"></label>
+          <label>Fitness level <select id="profileLevel"><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="advanced">Advanced</option></select></label>
+          <p class="freezebenefit">New profiles start with two streak freezes—one useful buffer, granted once.</p>
+          <button class="startsecondary" id="saveProfile" type="button">Save profile</button>
+        </section>
+
+        <section class="settingsblock" aria-labelledby="keyLiftSettingsTitle">
+          <h3 id="keyLiftSettingsTitle">Key lifts</h3>
+          <p>Edit your baseline. Suggestions use only exercises you actually logged.</p>
+          <div class="keyliftedit" id="keyLiftEditor"></div>
+          <button class="smallaction" id="applyLiftSuggestions" type="button">Apply suggestions</button>
+        </section>
+
         <section class="settingsblock" aria-labelledby="reminderSettingsTitle">
           <h3 id="reminderSettingsTitle">Daily movement reminder</h3>
           <p>Do Less only nudges when today is still open. Browser notifications are used when you allow them.</p>
@@ -534,17 +644,26 @@
           <div id="sportSettings"></div>
           <button class="smallaction" id="addSport" type="button" style="margin-top:.8rem">Add sport</button>
         </section>
-        <section class="aboutcopy" aria-labelledby="aboutTitle">
-          <h3 id="aboutTitle">About Do Less</h3>
-          <p class="aboutlead">Just enough fitness to feel good about yourself.</p>
-          <p>An adaptive daily movement app that reduces cognitive friction, gives you quick-win workouts with less thinking, and helps you keep momentum without turning fitness into homework.</p>
-          <dl class="aboutsteps">
-            <div><dt>Set it up once</dt><dd>Add your basics once and let the app do the thinking in the background.</dd></div>
-            <div><dt>Train to your energy</dt><dd>Get a session that fits the day you are actually having.</dd></div>
-            <div><dt>Keep the streak alive</dt><dd>Build consistency with smart nudges, quick wins, daily dopamine, and less admin.</dd></div>
-          </dl>
-          <p class="aboutnote">Built for distractible brains.</p>
+
+        <section class="settingsblock" aria-labelledby="librarySettingsTitle">
+          <h3 id="librarySettingsTitle">Technique library</h3>
+          <p>Specific technique searches for the exact exercise being shown.</p>
+          <div class="filters" id="libFilters" role="group" aria-label="Filter by category">
+            <button class="fchip" data-cat="all" type="button" aria-pressed="true">All</button>
+            <button class="fchip" data-cat="Warm-up" type="button" aria-pressed="false">Warm-up</button>
+            <button class="fchip" data-cat="Strength" type="button" aria-pressed="false">Strength</button>
+            <button class="fchip" data-cat="Core" type="button" aria-pressed="false">Core</button>
+            <button class="fchip" data-cat="Burst" type="button" aria-pressed="false">Burst</button>
+          </div>
+          <div class="exlist" id="exList"></div>
         </section>
+
+        <section class="settingsblock" aria-labelledby="recentLogsTitle">
+          <h3 id="recentLogsTitle">Recent logs</h3>
+          <p>Completed work only. Skips and replaced exercises stay out.</p>
+          <div id="sessionHistory"></div>
+        </section>
+
         <div class="localdata">
           <h3>Local data</h3>
           <p>Do Less data lives only in this browser. Export a backup before clearing site data or moving phones.</p>
@@ -567,25 +686,23 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
         Plan
       </button>
-      <button class="tab" data-view="library" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 4h5a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H5zM19 4h-5a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h5z"/></svg>
-        Library
-      </button>
       <button class="tab" data-view="streak" type="button">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3c1 4-4 6-4 10a4 4 0 0 0 8 0c0-2-1-3-1-3s3 1 3 5a7 7 0 0 1-14 0C4 9 10 8 12 3z"/></svg>
         Streak
       </button>
-      <button class="tab" data-view="profile" type="button">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-4 0-8 2-8 4v2h16v-2c0-2-4-4-8-4z"/></svg>
-        Profile
+      <button class="tab" data-view="settings" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.6v-.1A1.7 1.7 0 0 0 8.5 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3V9.6h.1A1.7 1.7 0 0 0 4.6 8.5a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.5 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.14.38.36.72.66 1 .3.28.68.42 1.1.42H21v4h-.1A1.7 1.7 0 0 0 19.4 15z"/></svg>
+        Settings
       </button>
     </nav>
 
     <div class="playerbtns">
+      <button class="flowbtn" id="backBtn" type="button">Back</button>
       <button class="pausebtn" id="pauseBtn" type="button" aria-label="Pause">
         <svg id="pauseIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
         <svg id="playIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" hidden><path d="M7 4l13 8-13 8z"/></svg>
       </button>
+      <button class="flowbtn" id="skipBtn" type="button">Skip</button>
       <button class="bignext" id="nextBtn" type="button">Done — next</button>
     </div>
 
@@ -628,7 +745,7 @@
     {id:'cycle', name:'Cycling', durationScore:2.5, intensityScore:2, lowerBodyScore:2.5, upperBodyScore:1, coreAlignmentScore:1.5}
   ];
   const $ = id => document.getElementById(id);
-  const yt = q => 'https://www.youtube.com/results?search_query=' + q;
+  const yt = q => 'https://www.youtube.com/results?search_query=' + encodeURIComponent(String(q || ''));
 
   /* ---------- exercise library ----------
      Every exercise: name, cat, how (brief explainer), demo (YouTube search), cue (in-session) */
@@ -662,6 +779,28 @@
   };
   const SUBS = { carry:'bandhinge', pallof:'plank', sideplank:'plank', rope:'pogo', thrusters:'bandknees' };
   const ALL_CATS = ['Warm-up','Strength','Core','Burst'];
+  const EX_ENVIRONMENT = {
+    pallof:'outdoor', rope:'outdoor', carry:'outdoor',
+    lightgoblet:'indoor', bandpush:'indoor', goblet:'indoor', tempogoblet:'indoor', pausegoblet:'indoor',
+    hipthrust:'indoor', bandhinge:'indoor', bandrow:'indoor'
+  };
+  const EX_FAMILY = {
+    march:'warmup', walkout:'warmup', lightgoblet:'squat',
+    pushup:'push', bandpush:'push', inclinepush:'push', tempopush:'push',
+    goblet:'squat', tempogoblet:'squat', pausegoblet:'squat', bwsquat:'squat',
+    revlunge:'lunge', splitlunge:'lunge',
+    bridge:'hinge', hipthrust:'hinge', bandhinge:'hinge', carry:'carry',
+    bandrow:'pull', plank:'core', taps:'core', sideplank:'core', pallof:'core',
+    rope:'burst', bandknees:'burst', thrusters:'burst', pogo:'burst'
+  };
+  const EX_GOALS = {
+    push:['push','pull'], legs:['squat','lunge','hinge','carry'], core:['core'],
+    abs:['core','burst'], chain:['squat','lunge','hinge','pull'], upper:['push','pull','carry']
+  };
+  const USERNAME_PRESETS = ['QuietGrit','TinyRepTitan','LowAdminLegend','SoftStartStrong','DoneBeforeDinner','MomentumMoth','CalmlyCrushing','QuickWinQuokka','NoFussForce','BareMinimumBoss'];
+  const AVATAR_PRESETS = [
+    ['sunrise','#d76f45','#fff6de'], ['ocean','#16767c','#d8f1ed'], ['gumleaf','#557b45','#eef1dc'], ['night','#373658','#ece9ff']
+  ];
 
   /* ---------- state ---------- */
   function todayISO(d){ const x=d||new Date(); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0'); }
@@ -669,10 +808,17 @@
   function clampInputScore(value){ return Math.max(1, Math.min(3, Math.round((Number(value) || 1) * 2) / 2)); }
   function clampSessionScore(value){ return Math.max(1, Math.min(3, Math.round((Number(value) || 1) * 10) / 10)); }
   function defaultSettings(){
-    return {reminderEnabled:true, reminderTimeLocal:'19:00', trainingWindowStartLocal:'17:00', trainingWindowEndLocal:'21:30', bleedEnabled:true, momentumExplanations:true, sports:DEFAULT_SPORTS.map(s => Object.assign({}, s))};
+    return {reminderEnabled:true, reminderTimeLocal:'19:00', trainingWindowStartLocal:'17:00', trainingWindowEndLocal:'21:30', bleedEnabled:true, momentumExplanations:true, lastEnvironment:'indoor', sports:DEFAULT_SPORTS.map(s => Object.assign({}, s))};
   }
   function defaultState(){
-    return { startDate: todayISO(), goal:'abs', sessions: [], lifts: {push:{reps:8}, squat:{reps:12, kg:12.5}, lunge:{reps:8, kg:7.5}, plank:{sec:30}, bridge:{reps:12}}, lastHashes: [], streakFreezeCount:0, streakFreezeUses:[], bonusWorkoutCounter:0, dayRewardLedger:{}, freezeEarnedByDate:{}, lastDayEvaluatedLocal:todayISO(), momentumSystemVersion:MOMENTUM_SYSTEM_VERSION, settings:defaultSettings(), maxStreak:0, profile:{name:'', avatar:'', height:null, age:null, sex:'', weight:null, fitnessLevel:'', timezone:Intl.DateTimeFormat().resolvedOptions().timeZone || '', longitude:null} };
+    return {
+      startDate:todayISO(), progressionWeek:1, goal:'abs', sessions:[],
+      lifts:{push:{reps:8}, squat:{reps:12, kg:12.5}, lunge:{reps:8, kg:7.5}, plank:{sec:30}, bridge:{reps:12}},
+      lastHashes:[], exercisePreferences:{}, familyPreferences:{}, setPreferences:{}, exercisePB:{},
+      streakFreezeCount:2, signupFreezeGranted:true, streakFreezeUses:[], bonusWorkoutCounter:0, dayRewardLedger:{}, freezeEarnedByDate:{},
+      lastDayEvaluatedLocal:todayISO(), momentumSystemVersion:MOMENTUM_SYSTEM_VERSION, settings:defaultSettings(), maxStreak:0,
+      profile:{name:'', username:'', avatar:'preset:ocean', height:null, age:null, sex:'', weight:null, fitnessLevel:''}
+    };
   }
   function load(){
     try{
@@ -681,6 +827,10 @@
       const parsed = JSON.parse(raw);
       const merged = Object.assign(defaultState(), parsed);
       if (!Object.prototype.hasOwnProperty.call(parsed, 'momentumSystemVersion')) merged.momentumSystemVersion = 0;
+      if (!Object.prototype.hasOwnProperty.call(parsed, 'progressionWeek')){
+        const start = new Date(String(merged.startDate || todayISO()) + 'T00:00:00');
+        merged.progressionWeek = Math.min(8, Math.max(1, Math.floor((Date.now() - start.getTime()) / (7*24*3600*1000)) + 1));
+      }
       return merged;
     }catch(e){ return defaultState(); }
   }
@@ -699,6 +849,7 @@
       sourceType:source,
       isProvisional:source === 'sport_provisional' ? true : !!(entry && entry.isProvisional),
       sessionScore:clampSessionScore(entry && entry.sessionScore),
+      exercises:Array.isArray(entry && entry.exercises) ? entry.exercises.filter(exercise => exercise && exercise.exId && exercise.completed !== false) : [],
       completedAtLocal:String(entry && entry.completedAtLocal || String(entry && entry.date || todayISO()) + 'T12:00:00')
     });
   }
@@ -708,6 +859,18 @@
     const defaults = defaultSettings();
     state.settings = Object.assign(defaults, state.settings || {});
     state.settings.sports = Array.isArray(state.settings.sports) ? state.settings.sports.map(normaliseSport) : defaults.sports;
+    state.settings.lastEnvironment = ['indoor','outdoor','both'].includes(state.settings.lastEnvironment) ? state.settings.lastEnvironment : 'indoor';
+    state.profile = Object.assign(defaultState().profile, state.profile || {});
+    delete state.profile.timezone;
+    delete state.profile.longitude;
+    state.profile.username = String(state.profile.username || '');
+    state.profile.avatar = String(state.profile.avatar || 'preset:ocean');
+    state.progressionWeek = Math.max(1, Math.min(8, Math.floor(Number(state.progressionWeek) || weekFromStartDate())));
+    state.exercisePreferences = state.exercisePreferences && typeof state.exercisePreferences === 'object' ? state.exercisePreferences : {};
+    state.familyPreferences = state.familyPreferences && typeof state.familyPreferences === 'object' ? state.familyPreferences : {};
+    state.setPreferences = state.setPreferences && typeof state.setPreferences === 'object' ? state.setPreferences : {};
+    state.exercisePB = state.exercisePB && typeof state.exercisePB === 'object' ? state.exercisePB : {};
+    if (state.signupFreezeGranted !== true) state.signupFreezeGranted = true;
 
     if (state.momentumSystemVersion !== MOMENTUM_SYSTEM_VERSION){
       const counts = {};
@@ -747,10 +910,13 @@
   function signalsBad(){ const s = readSignals(); return !!(s && ((s.steps != null && s.steps < 4000) || (s.alcoholUnits != null && s.alcoholUnits > 0))); }
 
   /* ---------- program facts ---------- */
-  function weekNumber(){
+  function weekFromStartDate(){
     const start = new Date(state.startDate + 'T00:00:00');
     const wk = Math.floor((Date.now() - start.getTime()) / (7*24*3600*1000)) + 1;
     return Math.min(8, Math.max(1, wk));
+  }
+  function weekNumber(){
+    return Math.max(1, Math.min(8, Math.floor(Number(state.progressionWeek) || weekFromStartDate())));
   }
   const PHASES = [
     {wks:'Weeks 1–2', from:1, to:2, name:'Baseline and skill', desc:'Learn the patterns, find honest rep ranges. Comfortable load, middle-of-range volume.'},
@@ -922,16 +1088,137 @@
     return parts.join(' · ') + '.';
   }
 
+  function hashText(value){
+    let hash = 2166136261;
+    String(value || '').split('').forEach(char => { hash ^= char.charCodeAt(0); hash = Math.imul(hash, 16777619); });
+    return Math.abs(hash >>> 0);
+  }
+  function exerciseId(exercise){ return Object.keys(EX).find(key => EX[key] === exercise) || null; }
+  function exerciseEnvironment(exId){ return EX_ENVIRONMENT[exId] || 'flexible'; }
+  function environmentAllows(exId, environment){
+    const tagged = exerciseEnvironment(exId);
+    return environment === 'both' || tagged === 'flexible' || tagged === environment;
+  }
+  function preferenceScore(exId){
+    const family = EX_FAMILY[exId] || 'other';
+    return (Number(state.exercisePreferences[exId]) || 0) * 2 + (Number(state.familyPreferences[family]) || 0);
+  }
+  function chooseFromPool(pool, seed, environment){
+    const allowed = pool.filter(exercise => environmentAllows(exerciseId(exercise), environment));
+    const source = allowed.length ? allowed : pool;
+    return source.slice().sort((a, b) => {
+      const score = preferenceScore(exerciseId(b)) - preferenceScore(exerciseId(a));
+      return score || exerciseId(a).localeCompare(exerciseId(b));
+    })[Math.abs(seed) % source.length];
+  }
+  function estimateTargetSeconds(target){
+    const text = String(target || '').toLowerCase();
+    const values = (text.match(/\d+(?:\.\d+)?/g) || []).map(Number);
+    if (!values.length) return 30;
+    const rangeMatch = text.match(/(\d+(?:\.\d+)?)\s*[–-]\s*(\d+(?:\.\d+)?)/);
+    const rangeAverage = rangeMatch ? (Number(rangeMatch[1]) + Number(rangeMatch[2])) / 2 : values[0];
+    if (text.includes('minute')) return Math.max(20, Math.round(rangeAverage * 60));
+    if (text.includes('second')) return Math.max(10, Math.round(rangeAverage));
+    if (text.includes('per side') || text.includes('per leg')) return Math.max(20, Math.round(rangeAverage * 5));
+    if (text.includes('rep')) return Math.max(20, Math.round(values[0] * 4));
+    if (text.includes('×') && text.includes('m')) return Math.max(20, Math.round(values[0] * values[1] * 1.5));
+    return Math.max(20, Math.round(values[0] * 4));
+  }
+  function difficultyTarget(baseTarget, difficulty){
+    if (difficulty === 'easy') return baseTarget + ' · lighter or 20% shorter';
+    if (difficulty === 'hard') return baseTarget + ' · add 20% with clean form';
+    return baseTarget;
+  }
+  function applyDifficultyToStep(step, difficulty){
+    step.difficulty = ['easy','medium','hard'].includes(difficulty) ? difficulty : 'medium';
+    const multiplier = step.difficulty === 'easy' ? .8 : step.difficulty === 'hard' ? 1.2 : 1;
+    step.target = difficultyTarget(step.baseTarget, step.difficulty);
+    step.prescribedSec = Math.max(10, Math.round(step.basePrescribedSec * multiplier));
+  }
+  function makeStep(exercise, target, restSec, block){
+    const exId = exerciseId(exercise);
+    const basePrescribedSec = estimateTargetSeconds(target);
+    return {
+      stepId:newId('step'), exId, block:block || exercise.cat, name:exercise.name,
+      baseTarget:target, target, cue:exercise.cue, demo:exercise.demo || null, how:exercise.how || '',
+      rest:restSec || 0, environment:exerciseEnvironment(exId), family:EX_FAMILY[exId] || 'other',
+      difficulty:'medium', basePrescribedSec, prescribedSec:basePrescribedSec,
+      elapsedSec:0, status:'idle', setNumber:1, liked:false, disliked:false
+    };
+  }
+  function goalFit(exId, focus){
+    const family = EX_FAMILY[exId] || 'other';
+    const focusFamilies = EX_GOALS[focus] || EX_GOALS[state.goal] || [];
+    return focusFamilies.includes(family) ? 3 : ['warmup','burst'].includes(family) ? 0 : 1;
+  }
+  function plannedSecondsFor(steps){
+    return steps.reduce((total, step) => total + step.prescribedSec + step.rest + 20, 0);
+  }
+  function assignSetNumbers(steps){
+    const counts = {};
+    steps.forEach(step => {
+      counts[step.exId] = (counts[step.exId] || 0) + 1;
+      step.setNumber = counts[step.exId];
+    });
+  }
+  function fillSessionToBudget(steps, timeBudget, focus){
+    if (!timeBudget) { assignSetNumbers(steps); return steps; }
+    const targetSeconds = Math.round(timeBudget * 60 * .88);
+    const candidates = steps.filter(step => step.exId && !['warmup','burst'].includes(step.family))
+      .sort((a, b) => (goalFit(b.exId, focus) + preferenceScore(b.exId)) - (goalFit(a.exId, focus) + preferenceScore(a.exId)));
+    if (!candidates.length) { assignSetNumbers(steps); return steps; }
+    const repeats = [];
+    const exerciseCounts = {};
+    steps.forEach(step => { exerciseCounts[step.exId] = (exerciseCounts[step.exId] || 0) + 1; });
+    let cursor = 0;
+    while (plannedSecondsFor(steps.concat(repeats)) < targetSeconds && repeats.length < 14){
+      let candidate = candidates[cursor % candidates.length];
+      const previous = repeats[repeats.length - 1];
+      if (previous && previous.family === 'push'){
+        candidate = candidates.find(item => item.family === 'pull') || candidate;
+      } else if (previous && previous.family === 'pull'){
+        candidate = candidates.find(item => item.family === 'push') || candidate;
+      }
+      if (previous && previous.family === candidate.family && candidates.length > 1) candidate = candidates[(cursor + 1) % candidates.length];
+      const allowedExtraSets = Math.max(0, 2 + Math.floor(Number(state.setPreferences[candidate.family]) || 0));
+      const existingRepeats = repeats.filter(step => step.family === candidate.family).length;
+      cursor++;
+      if (existingRepeats >= allowedExtraSets) {
+        if (cursor > candidates.length * 5) break;
+        continue;
+      }
+      exerciseCounts[candidate.exId] = (exerciseCounts[candidate.exId] || 0) + 1;
+      repeats.push(Object.assign({}, candidate, {
+        stepId:newId('step'), elapsedSec:0, status:'idle', liked:false, disliked:false,
+        setNumber:exerciseCounts[candidate.exId], block:candidate.block + ' · repeat set'
+      }));
+    }
+    const burstIndex = steps.findIndex(step => step.family === 'burst');
+    const insertion = burstIndex >= 0 ? burstIndex : steps.length;
+    const filled = steps.slice(0, insertion).concat(repeats, steps.slice(insertion));
+    assignSetNumbers(filled);
+    return filled;
+  }
+  function orderForEnvironment(steps, environment){
+    const allowed = steps.filter(step => environmentAllows(step.exId, environment));
+    const outdoor = allowed.filter(step => step.environment === 'outdoor');
+    const other = allowed.filter(step => step.environment !== 'outdoor');
+    return other.concat(outdoor);
+  }
+
   function buildSession(mode, opts){
     opts = opts || {};
     const t = targets(), wk = weekNumber(), tod = timeOfDay();
-    const n = opts.seed != null ? opts.seed : state.sessions.length;
-    let timeBudget = opts.time || null;
+    const n = opts.seed != null ? opts.seed : hashText(todayISO() + '|' + state.goal + '|' + state.sessions.filter(entry => entry.date === todayISO()).length);
+    const timeBudget = Number(opts.time) || (mode === 'fallback' ? 10 : 20);
     const emphasis = opts.emphasis || 'goal';
     const focus = focusFrom(emphasis);
+    const environment = ['indoor','outdoor','both'].includes(opts.environment) ? opts.environment : state.settings.lastEnvironment;
     const hard = mode === 'harder';
     let steps = [];
-    const add = (ex, target, restSec, block) => steps.push({exId: Object.keys(EX).find(k=>EX[k]===ex) || null, block: block || ex.cat, name:ex.name, target, cue:ex.cue, demo:ex.demo||null, how:ex.how||'', rest:restSec||0});
+    const add = (exercise, target, restSec, block) => {
+      if (exercise && environmentAllows(exerciseId(exercise), environment)) steps.push(makeStep(exercise, target, restSec, block));
+    };
     let restBase = (hard ? 20 : 25) - t.restCut;
     // tune rests by available time: less time -> shorter rests
     if (timeBudget){
@@ -942,87 +1229,93 @@
     const morning = tod === 'am';
 
     const pushPool = [EX.pushup, EX.bandpush, EX.inclinepush].concat(hard ? [EX.tempopush] : []);
-    const squatPool = hard ? [EX.tempogoblet, EX.pausegoblet] : [EX.goblet];
+    const squatPool = hard ? [EX.tempogoblet, EX.pausegoblet, EX.goblet] : [EX.goblet, EX.bwsquat];
     const lungePool = [EX.revlunge, EX.splitlunge];
-    const hingePool = [EX.bridge, EX.hipthrust];
+    const hingePool = [EX.bridge, EX.hipthrust, EX.bandhinge];
     const corePool = [EX.taps, EX.sideplank, EX.pallof];
-    const burstPool = [EX.rope, EX.bandknees, EX.thrusters];
+    const burstPool = [EX.rope, EX.bandknees, EX.thrusters, EX.pogo];
+    const choose = (pool, offset) => chooseFromPool(pool, n + (offset || 0), environment);
 
     if (mode === 'travel'){
       add(EX.march, '2 minutes', 0, 'Warm-up');
       add(EX.walkout, '4–6 slow reps', 0, 'Warm-up');
-      add(pushPool[n % 2 ? 2 : 0], `${t.push} reps`, restBase, 'Strength');
+      add(choose([EX.pushup, EX.inclinepush], 1), `${t.push} reps`, restBase, 'Strength');
       add(EX.bwsquat, `${t.squatReps + 5} reps`, restBase, 'Strength');
       add(EX.revlunge, `${t.lungeReps} per leg, bodyweight`, restBase, 'Strength');
       add(EX.plank, `${t.plank} seconds`, restBase, 'Core');
       add(EX.sideplank, '20–30 seconds per side', restBase, 'Core');
-      add(EX.pogo, '20–30 seconds', 0, 'Burst');
+      add(choose([EX.pogo, EX.rope], 2), '20–30 seconds', 0, 'Burst');
     } else if (mode === 'fallback'){
       add(EX.march, '2 minutes — this is the whole ask', 0, 'Warm-up');
-      add(EX.goblet, `${t.squatReps} reps @ ${t.squatKg} kg`, 20, 'Mini-circuit');
-      add(n % 2 ? EX.pallof : EX.plank, n % 2 ? '8–10 per side, slow' : `${t.plank} seconds`, 0, 'Mini-circuit');
-      steps.push({block:'Done', name:'One round done? That counts.', target:'Repeat 1–2 more rounds only if you want to', cue:'The streak is already yours. Anything extra is a bonus.', how:'', demo:null, rest:0});
+      add(choose([EX.goblet, EX.bwsquat], 3), `${t.squatReps} reps @ ${t.squatKg} kg`, 20, 'Mini-circuit');
+      const quickCore = choose([EX.pallof, EX.plank], 4);
+      add(quickCore, quickCore === EX.pallof ? '8–10 per side, slow' : `${t.plank} seconds`, 0, 'Mini-circuit');
     } else {
       add(EX.march, morning ? '3 minutes, light' : '2 minutes', 0, 'Warm-up');
       if (!morning) add(EX.walkout, '4 slow reps + 4–6 band rows', 0, 'Warm-up');
       add(EX.lightgoblet, '2 easy minutes — quick win', 0, 'Opener');
 
-      const push = pushPool[n % pushPool.length];
-      const sq = squatPool[n % squatPool.length];
-      const lunge = lungePool[n % lungePool.length];
+      const push = choose(pushPool, 5);
+      const sq = choose(squatPool, 6);
+      const lunge = choose(lungePool, 7);
+      const squatTarget = sq === EX.bwsquat ? `${t.squatReps + 5} reps` : `${t.squatReps} reps @ ${t.squatKg} kg`;
+      const lungeTarget = environment === 'outdoor' ? `${t.lungeReps} per leg, bodyweight` : `${t.lungeReps} per leg @ ${t.lungeKg} kg`;
       if (focus === 'core'){
         add(EX.plank, `${t.plank} seconds`, restBase, 'Core focus');
         add(push, `${t.push} reps`, restBase, 'Strength');
-        add(sq, `${t.squatReps} reps @ ${t.squatKg} kg`, restBase, 'Strength');
-        add(lunge, `${t.lungeReps} per leg @ ${t.lungeKg} kg`, restBase, 'Strength');
+        add(sq, squatTarget, restBase, 'Strength');
+        add(lunge, lungeTarget, restBase, 'Strength');
       } else if (focus === 'legs'){
-        add(sq, `${t.squatReps} reps @ ${t.squatKg} kg`, restBase, 'Leg focus');
-        add(lunge, `${t.lungeReps} per leg @ ${t.lungeKg} kg`, restBase, 'Leg focus');
+        add(sq, squatTarget, restBase, 'Leg focus');
+        add(lunge, lungeTarget, restBase, 'Leg focus');
         add(EX.bandhinge, '12–15 reps', restBase, 'Leg focus');
         add(push, `${t.push} reps`, restBase, 'Strength');
       } else if (focus === 'push'){
         add(push, `${t.push} reps`, restBase, 'Push focus');
         add(EX.bandrow, '10–12 reps', restBase, 'Push focus');
-        add(pushPool[(n+1) % pushPool.length], `${Math.max(4, t.push - 2)} reps`, restBase, 'Push focus');
-        add(sq, `${t.squatReps} reps @ ${t.squatKg} kg`, restBase, 'Strength');
-        add(lunge, `${t.lungeReps} per leg @ ${t.lungeKg} kg`, restBase, 'Strength');
+        add(choose(pushPool.filter(exercise => exercise !== push), 8), `${Math.max(4, t.push - 2)} reps`, restBase, 'Push focus');
+        add(sq, squatTarget, restBase, 'Strength');
+        add(lunge, lungeTarget, restBase, 'Strength');
       } else {
         add(push, `${t.push} reps`, restBase, 'Strength');
-        add(sq, `${t.squatReps} reps @ ${t.squatKg} kg`, restBase, 'Strength');
-        add(lunge, `${t.lungeReps} per leg @ ${t.lungeKg} kg`, restBase, 'Strength');
+        add(sq, squatTarget, restBase, 'Strength');
+        add(lunge, lungeTarget, restBase, 'Strength');
       }
-      if (!morning) add(hingePool[n % hingePool.length], `${t.bridge} reps`, restBase, 'Strength');
+      if (!morning) add(choose(hingePool, 9), `${t.bridge} reps`, restBase, 'Strength');
       if (hard) add(EX.carry, '2 × 20 m, heavy-ish — optional', restBase, 'Strength');
 
       if (focus !== 'core') add(EX.plank, `${t.plank} seconds`, restBase, 'Core');
-      add(corePool[n % corePool.length], corePool[n % corePool.length] === EX.taps ? '10–16 per side' : (corePool[n % corePool.length] === EX.pallof ? '8–10 per side, slow' : '20–30 seconds per side'), restBase, 'Core');
+      const core = choose(corePool, 10);
+      add(core, core === EX.taps ? '10–16 per side' : (core === EX.pallof ? '8–10 per side, slow' : '20–30 seconds per side'), restBase, 'Core');
       if (focus === 'core' && !morning){
-        const extra = corePool[(n+1) % corePool.length];
+        const extra = choose(corePool.filter(exercise => exercise !== core), 11);
         add(extra, extra === EX.taps ? '10–16 per side' : (extra === EX.pallof ? '8–10 per side, slow' : '20–30 seconds per side'), restBase, 'Core');
       }
 
-      if (!morning || hard){ add(burstPool[n % burstPool.length], '20–30 seconds', 0, 'Burst'); }
+      if (!morning || hard){ add(choose(burstPool, 12), '20–30 seconds', 0, 'Burst'); }
     }
 
-    // shorten the plan if timeBudget is tight
-    if (timeBudget){
-      if (timeBudget <= 10) steps = steps.slice(0,3);
-      else if (timeBudget <= 20) steps = steps.slice(0,5);
-    }
+    if (timeBudget <= 10) steps = steps.slice(0, Math.min(4, steps.length));
+    if (mode === 'fallback') assignSetNumbers(steps);
+    else steps = fillSessionToBudget(steps, timeBudget, focus);
+    steps = orderForEnvironment(steps, environment);
 
-    const hash = steps.map(s=>s.name).join('|') + '|' + mode;
+    const hash = steps.map(step => step.exId + ':' + step.setNumber).join('|') + '|' + mode + '|' + environment;
     if (state.lastHashes.length >= 2 && state.lastHashes.slice(-2).every(h => h === hash) && mode !== 'fallback'){
       const i = steps.findIndex(s => s.block === 'Strength');
-      if (i >= 0){ const alt = pushPool[(n+1) % pushPool.length]; steps[i] = Object.assign({}, steps[i], {name:alt.name, cue:alt.cue, demo:alt.demo, how:alt.how}); }
+      if (i >= 0){
+        const alt = choose(pushPool.filter(exercise => exerciseId(exercise) !== steps[i].exId), 13);
+        if (alt) steps[i] = makeStep(alt, steps[i].baseTarget, steps[i].rest, steps[i].block);
+      }
     }
-    return {mode, steps, hash, week:wk};
+    return {mode, steps, hash, week:wk, timeBudget, environment, focus, plannedSeconds:plannedSecondsFor(steps)};
   }
 
   /* ---------- quiz + quick start ---------- */
   const MODE_LABEL = {standard:'Standard', fallback:'Momentum reset', travel:'Travel', harder:'Harder day'};
 
   // quiz state: 'state' sets both mood and energy (keeps the flow to 3 starter questions)
-  const quiz = {mood:null, energy:null, time:null, train:null};
+  const quiz = {mood:null, energy:null, time:null, train:null, environment:null};
   document.querySelectorAll('.qopts').forEach(group => {
     group.addEventListener('click', e => {
       const btn = e.target.closest('.qopt'); if (!btn) return;
@@ -1038,7 +1331,7 @@
         quiz[key] = btn.dataset.v;
       }
       // enable when all required fields are set (state -> mood+energy counts as one question)
-      $('quizGo').disabled = !(quiz.mood != null && quiz.energy != null && quiz.time != null && quiz.train != null);
+      $('quizGo').disabled = !(quiz.mood != null && quiz.energy != null && quiz.time != null && quiz.train != null && quiz.environment != null);
     });
   });
 
@@ -1057,7 +1350,7 @@
   let pending = null, pendingQuick = false;
 
   $('quizBtn').addEventListener('click', () => {
-    quiz.mood = quiz.energy = quiz.time = quiz.train = null;
+    quiz.mood = quiz.energy = quiz.time = quiz.train = quiz.environment = null;
     document.querySelectorAll('.qopt').forEach(b => b.setAttribute('aria-pressed','false'));
     $('quizGo').disabled = true;
     $('quizGoalChip').textContent = 'Goal: ' + GOALS[state.goal];
@@ -1068,7 +1361,9 @@
     const mode = modeFromQuiz();
     const emphasis = (quiz.train === 'travel' || quiz.train === 'goal') ? 'goal' : quiz.train;
     // pass time budget to the session builder so it can tune rests and length
-    pending = buildSession(mode, {emphasis, time: Number(quiz.time)});
+    state.settings.lastEnvironment = quiz.environment;
+    save();
+    pending = buildSession(mode, {emphasis, time:Number(quiz.time), environment:quiz.environment});
     pending.sourceType = mode === 'fallback' ? 'fallback' : mode === 'travel' ? 'travel' : 'guided';
     pending.reason = modeReason(mode, Number(quiz.time), emphasis, 'quiz');
     pendingQuick = false;
@@ -1083,7 +1378,7 @@
     const mode = pool[Math.floor(Math.random()*pool.length)];
     const emphs = state.goal === 'abs' ? ['goal','goal','core','legs','push'] : state.goal === 'chain' ? ['goal','goal','legs','core','push'] : ['goal','goal','push','core','legs'];
     const emphasis = emphs[Math.floor(Math.random()*emphs.length)];
-    pending = buildSession(mode, {emphasis, seed: Math.floor(Math.random()*97)});
+    pending = buildSession(mode, {emphasis, seed:Math.floor(Math.random()*997), environment:state.settings.lastEnvironment});
     pending.sourceType = 'quick_start';
     pending.reason = modeReason(mode, null, emphasis, 'quick');
     pendingQuick = true;
@@ -1091,7 +1386,7 @@
     show('preview');
   }
   function momentumQuickStart(){
-    pending = buildSession('fallback', {emphasis:'goal', time:10});
+    pending = buildSession('fallback', {emphasis:'goal', time:10, environment:state.settings.lastEnvironment});
     pending.sourceType = 'quick_start';
     pending.reason = 'The shortest viable reset. One completed round secures today.';
     pendingQuick = false;
@@ -1106,24 +1401,81 @@
     $('previewTitle').textContent = pending.mode === 'fallback' ? 'Your six minutes' : (timeOfDay() === 'am' ? 'Your circuit this morning' : 'Your circuit tonight');
     $('previewSay').textContent = sayText;
     $('previewReason').textContent = pending.reason || 'Built for your time, energy, and current goal.';
+    $('planSummary').innerHTML = `<span>${Math.max(1, Math.round(pending.plannedSeconds / 60))} min planned</span><span>${pending.steps.length} exercises</span><span>${pending.environment}</span>`;
     let html = '', lastBlock = null;
-    pending.steps.forEach(s => {
+    pending.steps.forEach((s, index) => {
       if (s.block !== lastBlock){ html += `<div class="cblock">${s.block}</div>`; lastBlock = s.block; }
-      html += `<div class="cx"><span class="nm">${s.name}</span><span class="tg">${s.target}</span></div>`;
+      html += `<div class="cx" data-preview-step="${index}">
+        <span class="nm">${escapeHTML(s.name)}${s.setNumber > 1 ? ` · set ${s.setNumber}` : ''}</span>
+        <span class="tg">${escapeHTML(s.target)}</span>
+        <span class="cxactions">
+          <button type="button" data-preview-swap="${index}">Swap</button>
+          <select data-preview-difficulty="${index}" aria-label="Difficulty for ${escapeHTML(s.name)}">
+            <option value="easy"${s.difficulty === 'easy' ? ' selected' : ''}>Easy</option>
+            <option value="medium"${s.difficulty === 'medium' ? ' selected' : ''}>Medium</option>
+            <option value="hard"${s.difficulty === 'hard' ? ' selected' : ''}>Hard</option>
+          </select>
+        </span>
+      </div>`;
     });
     $('circuitList').innerHTML = html;
     $('reshuffleBtn').hidden = !pendingQuick;
   }
+  function replacementForStep(built, index){
+    const current = built.steps[index];
+    if (!current || !current.exId) return null;
+    const used = new Set(built.steps.map(step => step.exId));
+    const findCandidates = allowUsed => Object.keys(EX).filter(exId => {
+      if (exId === current.exId || (!allowUsed && used.has(exId)) || !environmentAllows(exId, built.environment)) return false;
+      const sameFamily = EX_FAMILY[exId] === current.family;
+      const sameCategory = EX[exId].cat === EX[current.exId].cat;
+      return sameFamily || (sameCategory && goalFit(exId, built.focus) >= 1);
+    });
+    let candidates = findCandidates(false);
+    if (!candidates.length) candidates = findCandidates(true);
+    if (!candidates.length) return null;
+    candidates.sort((a, b) => (goalFit(b, built.focus) + preferenceScore(b)) - (goalFit(a, built.focus) + preferenceScore(a)) || a.localeCompare(b));
+    const nextId = candidates[hashText(todayISO() + current.stepId + index) % candidates.length];
+    const replacement = makeStep(EX[nextId], current.baseTarget, current.rest, current.block);
+    replacement.setNumber = current.setNumber;
+    applyDifficultyToStep(replacement, current.difficulty);
+    return replacement;
+  }
+  function swapBuiltStep(built, index){
+    const replacement = replacementForStep(built, index);
+    if (!replacement) { toast('No aligned alternative available.'); return false; }
+    built.steps[index] = replacement;
+    built.hash = built.steps.map(step => step.exId + ':' + step.setNumber).join('|') + '|' + built.mode + '|' + built.environment;
+    return true;
+  }
+  $('circuitList').addEventListener('click', event => {
+    const button = event.target.closest('[data-preview-swap]');
+    if (!button || !pending) return;
+    if (swapBuiltStep(pending, Number(button.dataset.previewSwap))) {
+      renderPreview('Plan updated. The replacement still serves your goal and environment.');
+      toast('Exercise swapped');
+    }
+  });
+  $('circuitList').addEventListener('change', event => {
+    const select = event.target.closest('[data-preview-difficulty]');
+    if (!select || !pending) return;
+    const step = pending.steps[Number(select.dataset.previewDifficulty)];
+    if (!step) return;
+    applyDifficultyToStep(step, select.value);
+    pending.plannedSeconds = plannedSecondsFor(pending.steps);
+    renderPreview('Difficulty updated without changing the training target.');
+  });
   $('previewBack').addEventListener('click', () => { pending = null; show('today'); });
   $('beginBtn').addEventListener('click', () => { if (pending) startSession(pending); });
-  $('beerStart').addEventListener('click', () => { const built = buildSession('fallback', {}); built.sourceType = 'fallback'; startSession(built); });
+  $('beerStart').addEventListener('click', () => { const built = buildSession('fallback', {environment:state.settings.lastEnvironment}); built.sourceType = 'fallback'; startSession(built); });
 
   /* ---------- views ---------- */
-  const views = ['today','quiz','preview','player','finish','plan','library','streak','profile'];
+  const views = ['today','quiz','preview','player','finish','plan','streak','settings'];
   function show(v){
     views.forEach(x => $('view-'+x).classList.toggle('hiddenview', x !== v));
     document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.view === v));
-    if (v === 'profile') renderProfile();
+    if (v === 'settings') renderSettings();
+    if (v === 'plan') renderPlan();
     window.scrollTo(0,0);
   }
   document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => { if (!session) show(b.dataset.view); }));
@@ -1153,7 +1505,7 @@
     toast('Activity logged. Streak extended.' + rewardMessage(result.reward));
   }
   function defaultWorkout(){
-    pending = buildSession('standard', {emphasis:'goal', time:20});
+    pending = buildSession('standard', {emphasis:'goal', time:20, environment:state.settings.lastEnvironment});
     pending.sourceType = 'guided';
     pending.reason = modeReason('standard', 20, 'goal', 'quiz');
     pendingQuick = false;
@@ -1215,7 +1567,7 @@
     const sports = state.settings.sports || [];
     $('sportChoices').innerHTML = sports.length
       ? sports.map(s => `<button class="sportchoice" type="button" data-sport-id="${escapeHTML(s.id)}">${escapeHTML(s.name)}</button>`).join('')
-      : '<p style="grid-column:1/-1;color:var(--color-text-muted);font-size:var(--text-sm)">Add a sport in Profile settings first.</p>';
+      : '<p style="grid-column:1/-1;color:var(--color-text-muted);font-size:var(--text-sm)">Add a sport in Settings first.</p>';
   }
   function openSportDialog(sessionId){
     const provisional = sessionId ? findSession(sessionId) : latestProvisionalSport();
@@ -1279,43 +1631,123 @@
 
   function renderPlan(){
     const wk = weekNumber();
-    $('goalSelect').value = state.goal;
+    $('progressionWeek').value = String(wk);
+    $('planEnvironment').value = state.settings.lastEnvironment;
     $('phaseList').innerHTML = PHASES.map(p => `
       <div class="phase ${wk >= p.from && wk <= p.to ? 'now' : ''}">
         <span class="wk">${p.wks}${wk >= p.from && wk <= p.to ? ' · you are here' : ''}</span>
         <h3>${p.name}</h3><p>${p.desc}</p>
       </div>`).join('');
-    const L = state.lifts, t = targets();
-    const rows = [
-      ['Push-up variant', `${L.push.reps} reps`, `next: ${t.push}`],
-      ['Goblet squat', `${L.squat.reps} × ${L.squat.kg} kg`, `next: ${t.squatReps} × ${t.squatKg} kg`],
-      ['Reverse lunge', `${L.lunge.reps}/leg × ${L.lunge.kg} kg`, `next: ${t.lungeReps}/leg × ${t.lungeKg} kg`],
-      ['Forearm plank', `${L.plank.sec} s`, `next: ${t.plank} s`],
-      ['Glute bridge / hip thrust', `${L.bridge.reps} reps`, `next: ${t.bridge}`]
-    ];
-    $('keyliftList').innerHTML = rows.map(r => `<div class="kl"><span>${r[0]}</span><span><span class="best">${r[1]}</span><span class="next">${r[2]}</span></span></div>`).join('');
   }
+  $('progressionWeek').addEventListener('change', event => {
+    state.progressionWeek = Math.max(1, Math.min(8, Number(event.target.value) || 1));
+    save(); renderPlan(); renderToday();
+    toast('Jumped to week ' + state.progressionWeek);
+  });
+  $('buildPlanSession').addEventListener('click', () => {
+    const environment = $('planEnvironment').value;
+    const time = Number($('planTime').value) || 20;
+    state.settings.lastEnvironment = environment;
+    save();
+    pending = buildSession('standard', {emphasis:'goal', time, environment});
+    pending.sourceType = 'guided';
+    pending.reason = modeReason('standard', time, 'goal', 'quiz') + ' ' + environment.charAt(0).toUpperCase() + environment.slice(1) + ' plan.';
+    pendingQuick = false;
+    renderPreview('Your plan is ready. Swap or scale any exercise before you begin.');
+    show('preview');
+  });
   $('goalSelect').addEventListener('change', e => { state.goal = e.target.value; save(); renderToday(); toast('Goal set: ' + GOALS[state.goal]); });
 
-  // Profile render/save
-  function renderProfile(){
+  function avatarPresetSource(id){
+    const preset = AVATAR_PRESETS.find(item => item[0] === id) || AVATAR_PRESETS[1];
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><rect width="96" height="96" rx="48" fill="${preset[1]}"/><circle cx="48" cy="36" r="17" fill="${preset[2]}"/><path d="M17 88c4-21 16-32 31-32s27 11 31 32" fill="${preset[2]}"/></svg>`;
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  }
+  function avatarSource(value){
+    if (String(value || '').startsWith('data:image/')) return value;
+    const id = String(value || 'preset:ocean').replace('preset:', '');
+    return avatarPresetSource(id);
+  }
+  let selectedAvatar = state.profile.avatar;
+  function renderAvatarPresets(){
+    $('avatarPresets').innerHTML = AVATAR_PRESETS.map(([id]) => `
+      <button class="avatarpreset" type="button" data-avatar-preset="${id}" aria-label="${id} avatar" aria-pressed="${selectedAvatar === 'preset:' + id}">
+        <img src="${avatarPresetSource(id)}" alt="">
+      </button>`).join('');
+  }
+  function renderKeyLiftSettings(){
+    const L = state.lifts;
+    const suggestions = keyLiftSuggestions();
+    const rows = [
+      ['Push-up reps','push-reps',L.push.reps,suggestions.pushReps,1],
+      ['Squat reps','squat-reps',L.squat.reps,suggestions.squatReps,1],
+      ['Squat load (kg)','squat-kg',L.squat.kg,suggestions.squatKg,2.5],
+      ['Lunge reps / leg','lunge-reps',L.lunge.reps,suggestions.lungeReps,1],
+      ['Lunge load / hand (kg)','lunge-kg',L.lunge.kg,suggestions.lungeKg,2.5],
+      ['Plank (seconds)','plank-sec',L.plank.sec,suggestions.plankSec,5],
+      ['Bridge reps','bridge-reps',L.bridge.reps,suggestions.bridgeReps,1]
+    ];
+    $('keyLiftEditor').innerHTML = rows.map(([label, id, value, suggested, step]) => `
+      <label>${label}<input data-lift-field="${id}" type="number" min="0" step="${step}" value="${value}"></label>
+      <span class="keysuggestion">${suggested > value ? `Suggested from recent logs: ${suggested}` : 'Keep building this baseline.'}</span>`).join('');
+  }
+  function loggedKeyCount(key){
+    return state.sessions.slice(-8).reduce((count, entry) => count + (entry.exercises || []).filter(exercise => exercise.key === key).length, 0);
+  }
+  function keyLiftSuggestions(){
+    const L = state.lifts;
+    const pushCount = loggedKeyCount('push'), squatCount = loggedKeyCount('squat'), lungeCount = loggedKeyCount('lunge'), plankCount = loggedKeyCount('plank'), bridgeCount = loggedKeyCount('bridge');
+    return {
+      pushReps:L.push.reps + (pushCount >= 2 ? 1 : 0),
+      squatReps:L.squat.reps + (squatCount >= 2 ? 1 : 0),
+      squatKg:L.squat.kg + (squatCount >= 3 ? 2.5 : 0),
+      lungeReps:L.lunge.reps + (lungeCount >= 2 ? 1 : 0),
+      lungeKg:L.lunge.kg + (lungeCount >= 3 ? 2.5 : 0),
+      plankSec:L.plank.sec + (plankCount >= 2 ? 5 : 0),
+      bridgeReps:L.bridge.reps + (bridgeCount >= 2 ? 1 : 0)
+    };
+  }
+  function writeLiftValues(values){
+    const L = state.lifts;
+    if (values['push-reps'] != null) L.push.reps = values['push-reps'];
+    if (values['squat-reps'] != null) L.squat.reps = values['squat-reps'];
+    if (values['squat-kg'] != null) L.squat.kg = values['squat-kg'];
+    if (values['lunge-reps'] != null) L.lunge.reps = values['lunge-reps'];
+    if (values['lunge-kg'] != null) L.lunge.kg = values['lunge-kg'];
+    if (values['plank-sec'] != null) L.plank.sec = values['plank-sec'];
+    if (values['bridge-reps'] != null) L.bridge.reps = values['bridge-reps'];
+  }
+  function renderSessionHistory(){
+    const logs = state.sessions.filter(entry => Array.isArray(entry.exercises) && entry.exercises.length).slice(-5).reverse();
+    $('sessionHistory').innerHTML = logs.length ? logs.map(entry => `
+      <div class="historyitem"><strong>${escapeHTML(entry.date)} · ${fmt(Number(entry.seconds) || 0)}</strong>
+        <span>${entry.exercises.map(exercise => escapeHTML(exercise.variantName || exercise.name)).join(' · ')}</span>
+      </div>`).join('') : '<p class="say">Completed exercises will appear here after your first session.</p>';
+  }
+  function renderSettings(){
     const p = state.profile || {};
+    $('goalSelect').value = state.goal;
+    $('themeSelect').value = localStorage.getItem('hwc_theme_pref') || 'auto';
+    $('profileUsername').value = p.username || '';
     $('profileName').value = p.name || '';
-    $('profileAvatar').value = p.avatar || '';
     $('profileHeight').value = p.height || '';
     $('profileAge').value = p.age || '';
     $('profileSex').value = p.sex || '';
     $('profileWeight').value = p.weight || '';
     $('profileLevel').value = p.fitnessLevel || '';
-    $('profileTZ').value = p.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-    $('profileLong').value = p.longitude || '';
+    selectedAvatar = p.avatar || 'preset:ocean';
+    $('avatarPreview').src = avatarSource(selectedAvatar);
+    renderAvatarPresets();
     $('reminderEnabled').checked = state.settings.reminderEnabled !== false;
     $('reminderTime').value = state.settings.reminderTimeLocal || '19:00';
     $('trainingWindowStart').value = state.settings.trainingWindowStartLocal || '17:00';
     $('trainingWindowEnd').value = state.settings.trainingWindowEndLocal || '21:30';
     $('bleedEnabled').checked = state.settings.bleedEnabled !== false;
     $('momentumExplanations').checked = state.settings.momentumExplanations !== false;
+    renderKeyLiftSettings();
     renderSportSettings();
+    renderLibrary();
+    renderSessionHistory();
   }
   function renderSportSettings(){
     $('sportSettings').innerHTML = (state.settings.sports || []).map(sport => `
@@ -1370,12 +1802,63 @@
     const items = $('sportSettings').querySelectorAll('details');
     if (items.length) items[items.length - 1].open = true;
   });
+  $('avatarPresets').addEventListener('click', event => {
+    const button = event.target.closest('[data-avatar-preset]');
+    if (!button) return;
+    selectedAvatar = 'preset:' + button.dataset.avatarPreset;
+    $('avatarPreview').src = avatarSource(selectedAvatar);
+    renderAvatarPresets();
+  });
+  $('avatarUpload').addEventListener('change', event => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    if (file.size > 900000){ toast('Choose an image under 900 KB.'); event.target.value = ''; return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      selectedAvatar = String(reader.result || '');
+      $('avatarPreview').src = selectedAvatar;
+      renderAvatarPresets();
+      toast('Picture ready. Save profile to keep it.');
+    };
+    reader.readAsDataURL(file);
+  });
+  $('generateUsername').addEventListener('click', () => {
+    const current = $('profileUsername').value;
+    const choices = USERNAME_PRESETS.filter(name => name !== current);
+    $('profileUsername').value = choices[Math.floor(Math.random() * choices.length)];
+  });
+  $('keyLiftEditor').addEventListener('change', () => {
+    const values = {};
+    $('keyLiftEditor').querySelectorAll('[data-lift-field]').forEach(input => { values[input.dataset.liftField] = Math.max(0, Number(input.value) || 0); });
+    writeLiftValues(values);
+    save(); renderKeyLiftSettings(); renderPlan(); renderToday();
+    toast('Key lifts updated');
+  });
+  $('applyLiftSuggestions').addEventListener('click', () => {
+    const suggestions = keyLiftSuggestions();
+    writeLiftValues({
+      'push-reps':suggestions.pushReps, 'squat-reps':suggestions.squatReps, 'squat-kg':suggestions.squatKg,
+      'lunge-reps':suggestions.lungeReps, 'lunge-kg':suggestions.lungeKg, 'plank-sec':suggestions.plankSec, 'bridge-reps':suggestions.bridgeReps
+    });
+    save(); renderKeyLiftSettings(); renderPlan(); renderToday();
+    toast('Log-based suggestions applied');
+  });
   document.addEventListener('click', e => {
     if (e.target && e.target.id === 'saveProfile'){
       const p = state.profile || {};
-      p.name = $('profileName').value||''; p.avatar = $('profileAvatar').value||''; p.height = $('profileHeight').value||null; p.age = $('profileAge').value||null; p.sex = $('profileSex').value||''; p.weight = $('profileWeight').value||null; p.fitnessLevel = $('profileLevel').value||''; p.timezone = $('profileTZ').value||''; p.longitude = $('profileLong').value||null; state.profile = p; save(); toast('Profile saved'); show('today');
+      p.username = $('profileUsername').value.trim();
+      p.name = $('profileName').value.trim();
+      p.avatar = selectedAvatar;
+      p.height = $('profileHeight').value || null;
+      p.age = $('profileAge').value || null;
+      p.sex = $('profileSex').value || '';
+      p.weight = $('profileWeight').value || null;
+      p.fitnessLevel = $('profileLevel').value || '';
+      delete p.timezone;
+      delete p.longitude;
+      state.profile = p;
+      save(); renderSettings(); toast('Profile saved');
     }
-    if (e.target && e.target.id === 'cancelProfile'){ show('today'); }
     if (e.target && e.target.id === 'exportData'){ exportCoachData(); }
     if (e.target && e.target.id === 'resetData'){ resetCoachData(); }
   });
@@ -1440,7 +1923,7 @@
       <details class="ex">
         <summary>${e.name}<span class="cat">${e.cat}</span></summary>
         <div class="body">${e.how}
-          ${e.demo ? `<br><a href="${yt(e.demo)}" target="_blank" rel="noopener noreferrer">Watch technique video</a>` : ''}
+          ${e.demo ? `<br><a href="${yt(e.name + ' technique')}" target="_blank" rel="noopener noreferrer">Watch technique video</a>` : ''}
         </div>
       </details>`).join('');
   }
@@ -1530,21 +2013,61 @@
 
   /* ---------- player ---------- */
   let session = null, stepIdx = 0, elapsed = 0, ticker = null, paused = false, resting = false, restLeft = 0;
+  let pendingCompletedSessionId = null;
 
-  function fmt(s){ return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
+  function fmt(s){ const safe = Math.max(0, Math.floor(Number(s) || 0)); return Math.floor(safe/60) + ':' + String(safe%60).padStart(2,'0'); }
+  function sessionOvertimeSeconds(built){
+    return (built && built.steps || []).reduce((total, step) => total + Math.max(0, (Number(step.elapsedSec) || 0) - (Number(step.prescribedSec) || 0)), 0);
+  }
+  function renderExerciseTimer(){
+    if (!session || resting) return;
+    const step = session.steps[stepIdx];
+    const overtime = Math.max(0, step.elapsedSec - step.prescribedSec);
+    const remaining = Math.max(0, step.prescribedSec - step.elapsedSec);
+    $('exerciseTimer').textContent = overtime > 0 ? '+' + fmt(overtime) : fmt(remaining);
+    $('exerciseClockStatus').textContent = step.status === 'idle' ? 'Ready'
+      : step.status === 'completed' ? 'Completed · ' + fmt(step.elapsedSec)
+      : step.status === 'skipped' ? 'Skipped'
+      : paused ? 'Paused'
+      : overtime > 0 ? 'Overtime · keep your form'
+      : 'Work time remaining';
+    $('exerciseClock').classList.toggle('overtime', overtime > 0);
+    $('exerciseClock').classList.toggle('paused', paused);
+    $('exerciseStart').hidden = step.status === 'running';
+    $('exerciseStart').textContent = step.status === 'completed' ? 'Continue this exercise' : step.status === 'skipped' ? 'Do it after all' : 'Start exercise';
+    $('nextBtn').textContent = stepIdx === session.steps.length - 1 ? 'Finish session' : 'Done — next';
+    $('sessionOvertime').textContent = 'OT ' + fmt(sessionOvertimeSeconds(session));
+  }
 
   function startSession(built){
     session = built;
     stepIdx = 0; elapsed = 0; paused = false; resting = false;
+    session.steps.forEach(step => {
+      step.elapsedSec = Number(step.elapsedSec) || 0;
+      step.status = step.status === 'completed' ? 'completed' : 'idle';
+      step.liked = false; step.disliked = false;
+    });
     document.body.classList.add('in-session');
     $('phaseTxt').textContent = MODE_LABEL[session.mode];
+    $('elapsedTxt').textContent = '0:00';
+    $('sessionOvertime').textContent = 'OT 0:00';
+    $('pauseIcon').hidden = false; $('playIcon').hidden = true;
     show('player');
     renderStep();
     clearInterval(ticker);
     ticker = setInterval(() => {
       if (paused) return;
       elapsed++; $('elapsedTxt').textContent = fmt(elapsed);
-      if (resting && --restLeft <= 0){ endRest(); } else if (resting){ $('restTimer').textContent = fmt(restLeft); }
+      if (resting){
+        if (--restLeft <= 0) endRest();
+        else $('restTimer').textContent = fmt(restLeft);
+        return;
+      }
+      const step = session && session.steps[stepIdx];
+      if (step && step.status === 'running'){
+        step.elapsedSec++;
+        renderExerciseTimer();
+      }
     }, 1000);
   }
 
@@ -1557,21 +2080,30 @@
     const st = session.steps[stepIdx];
     $('stepCard').classList.remove('resting');
     resting = false;
+    $('exerciseClock').hidden = false;
+    $('sessionTools').hidden = false;
     $('stepBlock').textContent = st.block + ' · step ' + (stepIdx+1) + ' of ' + session.steps.length;
     $('stepName').textContent = st.name;
     $('stepTarget').textContent = st.target;
     $('stepCue').textContent = st.cue || '';
-    if (st.demo){ $('stepDemo').href = yt(st.demo); $('stepDemo').hidden = false; } else $('stepDemo').hidden = true;
-    const subId = st.exId && SUBS[st.exId];
-    $('stepSwap').hidden = !subId;
-    $('stepSwap').textContent = subId ? 'Swap: ' + EX[subId].name : '';
-    $('nextBtn').textContent = stepIdx === session.steps.length - 1 ? 'Finish session' : 'Done — next';
+    if (st.exId){ $('stepDemo').href = yt(st.name + ' ' + st.difficulty + ' technique'); $('stepDemo').hidden = false; } else $('stepDemo').hidden = true;
+    $('stepSwap').hidden = !replacementForStep(session, stepIdx);
+    $('stepSwap').textContent = 'Swap exercise';
+    $('stepDifficulty').value = st.difficulty;
+    $('stepLike').setAttribute('aria-pressed', String(!!st.liked));
+    $('stepDislike').setAttribute('aria-pressed', String(!!st.disliked));
+    $('stepPBNote').hidden = !st.pbUpdated;
+    $('stepPBNote').textContent = st.pbUpdated ? 'New duration PB: ' + fmt(st.elapsedSec) : '';
+    renderExerciseTimer();
     drawDots();
   }
 
   function startRest(sec){
     resting = true; restLeft = sec;
     $('stepCard').classList.add('resting');
+    $('exerciseClock').hidden = true;
+    $('sessionTools').hidden = true;
+    $('stepPBNote').hidden = true;
     $('restTimer').textContent = fmt(restLeft);
     $('stepName').textContent = 'Rest';
     $('stepTarget').textContent = 'Next: ' + session.steps[stepIdx].name;
@@ -1581,106 +2113,212 @@
   }
   function endRest(){ $('stepCard').classList.remove('resting'); resting = false; renderStep(); }
 
+  function completeActiveStep(){
+    const step = session.steps[stepIdx];
+    if (step.status === 'idle'){ toast('Start the exercise, or skip it.'); return false; }
+    if (step.status === 'skipped') return false;
+    step.status = 'completed';
+    const pbKey = step.exId + ':' + step.difficulty;
+    const currentPB = state.exercisePB[pbKey] || {};
+    if (step.elapsedSec > (Number(currentPB.durationSec) || 0)){
+      state.exercisePB[pbKey] = Object.assign({}, currentPB, {durationSec:step.elapsedSec, updatedAt:todayISO()});
+      step.pbUpdated = true;
+    }
+    save();
+    return true;
+  }
+  function advanceAfterStep(step){
+    if (stepIdx >= session.steps.length - 1){ completeSession(); return; }
+    stepIdx++;
+    if (step && step.rest > 0) startRest(step.rest);
+    else renderStep();
+  }
   $('nextBtn').addEventListener('click', () => {
     if (!session) return;
     if (resting){ endRest(); return; }
-    const prev = session.steps[stepIdx];
-    if (stepIdx >= session.steps.length - 1){ completeSession(); return; }
-    stepIdx++;
-    if (prev && prev.rest > 0){ startRest(prev.rest); } else { renderStep(); }
+    const current = session.steps[stepIdx];
+    if (current.status !== 'completed' && !completeActiveStep()) return;
+    advanceAfterStep(current);
+  });
+  $('exerciseStart').addEventListener('click', () => {
+    const step = session && session.steps[stepIdx];
+    if (!step) return;
+    step.status = 'running';
+    paused = false;
+    $('pauseIcon').hidden = false; $('playIcon').hidden = true;
+    renderExerciseTimer();
   });
   $('pauseBtn').addEventListener('click', () => {
     paused = !paused;
     $('pauseIcon').hidden = paused; $('playIcon').hidden = !paused;
     $('pauseBtn').setAttribute('aria-label', paused ? 'Resume' : 'Pause');
+    renderExerciseTimer();
     toast(paused ? 'Paused' : 'Running');
   });
+  $('backBtn').addEventListener('click', () => {
+    if (!session) return;
+    if (resting){
+      resting = false;
+      stepIdx = Math.max(0, stepIdx - 1);
+      renderStep();
+      return;
+    }
+    if (stepIdx === 0){ toast('You are at the first exercise.'); return; }
+    stepIdx--;
+    renderStep();
+  });
+  $('skipBtn').addEventListener('click', () => {
+    if (!session) return;
+    if (resting){ endRest(); return; }
+    const current = session.steps[stepIdx];
+    current.status = 'skipped';
+    current.elapsedSec = 0;
+    if (stepIdx >= session.steps.length - 1){ completeSession(); return; }
+    stepIdx++;
+    renderStep();
+    toast('Skipped. It will stay out of the log.');
+  });
   $('quitBtn').addEventListener('click', () => {
-    if (stepIdx >= 2 && session.mode === 'fallback'){ completeSession(); return; }
+    if (session.steps.some(step => step.status === 'completed')){ completeSession(); return; }
     teardownSession(); show('today'); renderToday(); toast('Session ended — no judgement.');
   });
   $('stepSwap').addEventListener('click', () => {
-    const st = session.steps[stepIdx], subId = st.exId && SUBS[st.exId];
-    if (!subId) return;
-    const sub = EX[subId];
-    st.name = sub.name; st.cue = sub.cue; st.demo = sub.demo; st.exId = subId; st.how = sub.how;
-    renderStep(); toast('Swapped');
+    if (swapBuiltStep(session, stepIdx)){ renderStep(); toast('Swapped for an aligned alternative.'); }
+  });
+  $('stepDifficulty').addEventListener('change', event => {
+    const step = session && session.steps[stepIdx];
+    if (!step) return;
+    applyDifficultyToStep(step, event.target.value);
+    renderStep();
+    toast('Difficulty set to ' + step.difficulty);
+  });
+  $('stepLike').addEventListener('click', () => {
+    const step = session && session.steps[stepIdx];
+    if (!step) return;
+    step.liked = true; step.disliked = false;
+    state.exercisePreferences[step.exId] = Math.min(5, (Number(state.exercisePreferences[step.exId]) || 0) + 1);
+    state.familyPreferences[step.family] = Math.min(3, (Number(state.familyPreferences[step.family]) || 0) + .5);
+    save(); renderStep(); toast('More like this next time.');
+  });
+  $('stepDislike').addEventListener('click', () => {
+    const step = session && session.steps[stepIdx];
+    if (!step) return;
+    step.disliked = true; step.liked = false;
+    const completedExerciseSets = session.steps.filter(item => item.exId === step.exId && item.status === 'completed').length;
+    if (completedExerciseSets >= 2 || step.setNumber >= 2){
+      state.setPreferences[step.family] = Math.max(-2, (Number(state.setPreferences[step.family]) || 0) - 1);
+      const futureRepeat = session.steps.findIndex((item, index) => index > stepIdx && item.exId === step.exId && item.setNumber > 1);
+      if (futureRepeat >= 0) session.steps.splice(futureRepeat, 1);
+      toast('Future repeat sets reduced.');
+    } else {
+      state.exercisePreferences[step.exId] = Math.max(-5, (Number(state.exercisePreferences[step.exId]) || 0) - 2);
+      state.familyPreferences[step.family] = Math.max(-3, (Number(state.familyPreferences[step.family]) || 0) - .5);
+      toast('This exercise will appear less often.');
+    }
+    save();
+    swapBuiltStep(session, stepIdx);
+    renderStep();
   });
 
   function teardownSession(){ clearInterval(ticker); session = null; pending = null; document.body.classList.remove('in-session'); }
 
   function completeSession(){
-    const rec = {sessionId:newId('session'), date:todayISO(), mode:session.mode, sourceType:session.sourceType || (session.mode === 'fallback' ? 'fallback' : session.mode === 'travel' ? 'travel' : 'guided'), isProvisional:false, sessionScore:1, seconds:elapsed, week:session.week, completedAtLocal:localDateTimeString()};
+    const completed = session.steps.filter(step => step.status === 'completed' && step.exId);
+    if (!completed.length){
+      teardownSession(); show('today'); renderToday(); toast('Nothing logged—start again whenever you are ready.');
+      return;
+    }
+    const overtimeSeconds = sessionOvertimeSeconds(session);
+    const exercises = completed.map(step => ({
+      stepId:step.stepId, exId:step.exId, key:EX[step.exId] && EX[step.exId].key || null,
+      name:step.name, variantName:step.name + ' · ' + step.difficulty, difficulty:step.difficulty,
+      target:step.target, elapsedSec:step.elapsedSec, prescribedSec:step.prescribedSec,
+      overtimeSec:Math.max(0, step.elapsedSec - step.prescribedSec), setNumber:step.setNumber,
+      completed:true, pbUpdated:!!step.pbUpdated
+    }));
+    const rec = {
+      sessionId:newId('session'), date:todayISO(), mode:session.mode,
+      sourceType:session.sourceType || (session.mode === 'fallback' ? 'fallback' : session.mode === 'travel' ? 'travel' : 'guided'),
+      isProvisional:false, sessionScore:1, seconds:elapsed, overtimeSeconds, week:session.week,
+      environment:session.environment, exercises, completedAtLocal:localDateTimeString()
+    };
     const result = registerSession(rec);
     state.lastHashes.push(session.hash); state.lastHashes = state.lastHashes.slice(-4);
     save();
     const mode = session.mode;
-    // Capture the built session so we can use it to pre-populate finish inputs if needed
-    const finished = session;
+    pendingCompletedSessionId = rec.sessionId;
     teardownSession();
     $('finishChip').textContent = MODE_LABEL[mode] + ' complete · ' + fmt(rec.seconds);
     const sc = streakCount();
     $('streakAward').textContent = 'Streak: ' + sc + (sc === 1 ? ' day' : ' days') + ' · ' + result.reward.level + rewardMessage(result.reward) + ' ✓';
-    renderLiftLog(finished);
+    renderSessionRecap(rec);
     show('finish');
   }
 
-  function renderLiftLog(expectedSession){
-    const L = state.lifts;
-    const t = targets();
-    // Pre-populate with expected targets for this week/session; user may delete or overwrite
-    const rows = [
-      {id:'push', label:'Push-up variant', hint:'expected reps', val:t.push},
-      {id:'squatReps', label:'Goblet squat', hint:'expected reps', val:t.squatReps},
-      {id:'squatKg', label:'Goblet squat load', hint:'kg expected', val:t.squatKg, step:2.5},
-      {id:'lungeReps', label:'Reverse lunge', hint:'expected reps / leg', val:t.lungeReps},
-      {id:'lungeKg', label:'Lunge load', hint:'kg per hand expected', val:t.lungeKg, step:2.5},
-      {id:'plank', label:'Longest plank / hold', hint:'seconds expected', val:t.plank},
-      {id:'bridge', label:'Glute bridge / hip thrust', hint:'expected reps', val:t.bridge}
-    ];
-    $('liftLog').innerHTML = rows.map(r => `
-      <div class="liftrow">
-        <label for="lift-${r.id}">${r.label}<span class="hint">${r.hint}</span></label>
-        <input id="lift-${r.id}" value="${r.val}" type="number" inputmode="decimal" min="0" step="${r.step||1}">
-      </div>`).join('');
+  function renderSessionRecap(rec){
+    const pbCount = rec.exercises.filter(exercise => exercise.pbUpdated).length;
+    $('finishTiming').textContent = 'Overtime ' + fmt(rec.overtimeSeconds) + ' · ' + rec.exercises.length + ' completed exercise' + (rec.exercises.length === 1 ? '' : 's') + (pbCount ? ' · ' + pbCount + ' new PB' + (pbCount === 1 ? '' : 's') : '');
+    $('sessionRecap').innerHTML = rec.exercises.map((exercise, index) => {
+      const keyInputs = exercise.key ? `<div class="recapinputs">
+        ${exercise.key === 'plank'
+          ? `<label>Actual seconds<input data-log-seconds="${index}" type="number" min="0" inputmode="numeric" placeholder="Optional"></label>`
+          : `<label>Actual reps<input data-log-reps="${index}" type="number" min="0" inputmode="numeric" placeholder="Optional"></label>`}
+        ${['squat','lunge'].includes(exercise.key) ? `<label>Load (kg)<input data-log-kg="${index}" type="number" min="0" step="2.5" inputmode="decimal" placeholder="Optional"></label>` : ''}
+      </div>` : '';
+      return `<div class="recaprow"><strong>${escapeHTML(exercise.variantName)}${exercise.setNumber > 1 ? ` · set ${exercise.setNumber}` : ''}</strong>
+        <span class="recapmeta">${fmt(exercise.elapsedSec)} work · ${exercise.overtimeSec ? '+' + fmt(exercise.overtimeSec) + ' overtime' : 'within target'}${exercise.pbUpdated ? ' · new duration PB' : ''}</span>
+        ${keyInputs}</div>`;
+    }).join('');
   }
 
   $('saveLifts').addEventListener('click', () => {
-    const g = id => { const v = $('lift-'+id).value; return v === '' ? null : Number(v); };
-    const L = state.lifts;
-    const push=g('push'), sqR=g('squatReps'), sqK=g('squatKg'), lgR=g('lungeReps'), lgK=g('lungeKg'), pl=g('plank'), br=g('bridge');
-    if (push != null) L.push.reps = push;
-    if (sqR != null) L.squat.reps = sqR;
-    if (sqK != null) L.squat.kg = sqK;
-    if (lgR != null) L.lunge.reps = lgR;
-    if (lgK != null) L.lunge.kg = lgK;
-    if (pl != null) L.plank.sec = pl;
-    if (br != null) L.bridge.reps = br;
+    const rec = findSession(pendingCompletedSessionId);
+    if (rec){
+      $('sessionRecap').querySelectorAll('[data-log-reps]').forEach(input => {
+        const exercise = rec.exercises[Number(input.dataset.logReps)];
+        if (!exercise || input.value === '') return;
+        exercise.reps = Math.max(0, Number(input.value) || 0);
+        const pbKey = exercise.exId + ':' + exercise.difficulty;
+        const pb = state.exercisePB[pbKey] || {};
+        if (exercise.reps > (Number(pb.reps) || 0)) state.exercisePB[pbKey] = Object.assign({}, pb, {reps:exercise.reps, updatedAt:todayISO()});
+      });
+      $('sessionRecap').querySelectorAll('[data-log-kg]').forEach(input => {
+        const exercise = rec.exercises[Number(input.dataset.logKg)];
+        if (!exercise || input.value === '') return;
+        exercise.kg = Math.max(0, Number(input.value) || 0);
+        const pbKey = exercise.exId + ':' + exercise.difficulty;
+        const pb = state.exercisePB[pbKey] || {};
+        if (exercise.kg > (Number(pb.kg) || 0)) state.exercisePB[pbKey] = Object.assign({}, pb, {kg:exercise.kg, updatedAt:todayISO()});
+      });
+      $('sessionRecap').querySelectorAll('[data-log-seconds]').forEach(input => {
+        const exercise = rec.exercises[Number(input.dataset.logSeconds)];
+        if (!exercise || input.value === '') return;
+        exercise.loggedSeconds = Math.max(0, Number(input.value) || 0);
+        const pbKey = exercise.exId + ':' + exercise.difficulty;
+        const pb = state.exercisePB[pbKey] || {};
+        if (exercise.loggedSeconds > (Number(pb.durationSec) || 0)) state.exercisePB[pbKey] = Object.assign({}, pb, {durationSec:exercise.loggedSeconds, updatedAt:todayISO()});
+      });
+    }
     save();
     show('streak'); renderStreak(); renderToday(); renderPlan();
     toast('Logged. See you tomorrow.');
   });
 
-  /* ---------- theme: time-of-day with manual toggle ---------- */
+  /* ---------- theme: time-of-day with Settings control ---------- */
   (function(){
     const prefKey = 'hwc_theme_pref';
-    const btn = $('themeToggle');
     const apply = (mode) => {
       if (mode === 'auto'){
         const h = hourNow();
         document.documentElement.setAttribute('data-theme', (h >= 17 || h < 6) ? 'dark' : 'light');
-        btn.textContent = '⚙';
-        btn.setAttribute('aria-label','Theme: Auto');
       } else {
         document.documentElement.setAttribute('data-theme', mode);
-        if (mode === 'dark') { btn.textContent = '🌙'; btn.setAttribute('aria-label','Theme: Night'); }
-        else { btn.textContent = '☀'; btn.setAttribute('aria-label','Theme: Day'); }
       }
     };
     let pref = localStorage.getItem(prefKey) || 'auto';
     apply(pref);
-    btn.addEventListener('click', () => {
-      pref = pref === 'auto' ? 'light' : pref === 'light' ? 'dark' : 'auto';
+    $('themeSelect').addEventListener('change', event => {
+      pref = event.target.value;
       localStorage.setItem(prefKey, pref);
       apply(pref);
       toast(pref === 'auto' ? 'Theme: Auto' : (pref === 'dark' ? 'Theme: Night' : 'Theme: Day'));
@@ -1786,6 +2424,12 @@
   }
   window.setInterval(refreshForLocalDayChange, 60000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshForLocalDayChange(); });
+  $('aboutToggle').addEventListener('click', () => {
+    const panel = $('aboutPanel');
+    const open = panel.hidden;
+    panel.hidden = !open;
+    $('aboutToggle').setAttribute('aria-expanded', String(open));
+  });
   // Day label help toggle (AM / PM / Full explanation)
   (function(){
     const dl = $('dayLabel');
@@ -1803,7 +2447,7 @@
   })();
   checkVersion();
 
-  renderToday(); renderPlan(); renderLibrary(); renderStreak(); renderProfile(); show('today');
+  renderToday(); renderPlan(); renderLibrary(); renderStreak(); renderSettings(); show('today');
   handleLaunchAction();
   scheduleDailyReminder();
   })();

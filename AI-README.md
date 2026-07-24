@@ -22,7 +22,7 @@ Jack's low-admin movement PWA. Keep it simple: plain `coach.html`, static assets
 - Do not add auth, remote persistence, package-manager tooling, or a build step
   unless explicitly requested.
 - Keep app data local to the browser. Backup/restore should use JSON export and
-  import from the Profile tab.
+  import from Settings.
 - Verify mobile layout around 390px width for user-facing changes.
 - Verify service-worker precache paths exist before shipping.
 - Report outcomes in plain language.
