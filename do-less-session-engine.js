@@ -11,6 +11,22 @@
     return !!value && typeof value === 'object' && !Array.isArray(value);
   }
 
+  function blocksFromSteps(steps){
+    const blocks = [];
+    const byName = new Map();
+    (Array.isArray(steps) ? steps : []).forEach(step => {
+      const name = String(step && step.block || 'Session');
+      let block = byName.get(name);
+      if (!block) {
+        block = {name, steps:[]};
+        byName.set(name, block);
+        blocks.push(block);
+      }
+      block.steps.push(step);
+    });
+    return blocks;
+  }
+
   function create(options){
     const config = isObject(options) ? options : {};
     const resolveArchetype = config.resolveArchetype;
@@ -49,7 +65,20 @@
       });
       if (!isObject(plan)) throw new TypeError('Session planner must return a plan object');
 
+      const recommendedSessionType = String(
+        plan.recommendedSessionType || plan.mode || (Array.isArray(archetype.sessionTypes) && archetype.sessionTypes[0]) || 'recommended'
+      );
+      if (Array.isArray(archetype.sessionTypes) && archetype.sessionTypes.length && !archetype.sessionTypes.includes(recommendedSessionType)) {
+        throw new RangeError('Session type is not declared by archetype: ' + recommendedSessionType);
+      }
+      const cautionLevel = ['green', 'yellow', 'red'].includes(plan.cautionLevel) ? plan.cautionLevel : 'green';
       return Object.assign({}, plan, {
+        recommendedSessionType,
+        rationale:Array.isArray(plan.rationale) ? plan.rationale : [],
+        blocks:Array.isArray(plan.blocks) ? plan.blocks : blocksFromSteps(plan.steps),
+        substitutions:Array.isArray(plan.substitutions) ? plan.substitutions : [],
+        completionRule:plan.completionRule || 'Complete any planned movement to count the session.',
+        cautionLevel,
         profileInstanceId,
         archetypeId:archetype.archetypeId,
         archetypeVersion:archetype.version,

@@ -21,6 +21,8 @@ access mandatory for local use.
 - Browser-safe Supabase config function: `api/supabase-config.js`.
 - Database migration: `supabase/migrations/`.
 - Shared session-generation seam: `do-less-session-engine.js`.
+- Shared tagged movement inventory and safety filters: `do-less-exercise-catalog.js`.
+- Complete/partial/skipped/aborted outcome classifier: `do-less-session-outcome-core.js`.
 - Local profile-instance and namespaced-storage seam: `do-less-profile-store.js`.
 - Adaptation policy seam: `do-less-adaptation-core.js`.
 - Offline queue and reconciliation seam: `do-less-sync-core.js`.
@@ -67,6 +69,10 @@ access mandatory for local use.
   stable ID and timestamp, and never merge generated plans across devices.
 - Adaptation must be deterministic, produce inspectable rationale/events, update
   only the assigned profile instance, and never mutate archetype definitions.
+- Skipped and aborted plans remain durable history. Safe substitutions and
+  lightweight exercise preferences must stay profile-scoped and syncable.
+- Difficulty choices must respect the assigned archetype and caution level;
+  red symptom-gated plans are Easy-only and cannot be swapped.
 - Adaptation history from before the current assignment epoch must not progress
   a newly corrected plan.
 - Admin review is exact-email and read-only by default. A correction must use the

@@ -23,6 +23,10 @@
     checkInSchema:Object.freeze({
       fields:Object.freeze(['state', 'time', 'trainingIntent', 'environment'])
     }),
+    exerciseFilters:Object.freeze({
+      requireAnyGoalTags:Object.freeze([]),
+      excludeContraTags:Object.freeze([])
+    }),
     progressionPolicy:'coach_key_lift_v1',
     safetyPolicy:'coach_signals_v1',
     copyPolicy:'do_less_current_v1',
@@ -103,12 +107,14 @@
     sessionTypes:Object.freeze([
       'mobility_and_balance_8',
       'strength_function_a_12',
+      'strength_function_b_12',
       'walk_plus_strength_15',
       'confidence_full_body_20'
     ]),
     defaultTimeBudgets:Object.freeze({
       mobility_and_balance_8:8,
       strength_function_a_12:12,
+      strength_function_b_12:12,
       walk_plus_strength_15:15,
       confidence_full_body_20:20
     }),

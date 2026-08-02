@@ -1,4 +1,4 @@
-const CACHE_NAME = 'do-less-cache-20260802T151042Z';
+const CACHE_NAME = 'do-less-cache-20260802T155226Z';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
@@ -8,7 +8,9 @@ const PRECACHE_URLS = [
   '/coach-state-core.js',
   '/coach-prescription-core.js',
   '/do-less-archetype-core.js',
+  '/do-less-exercise-catalog.js',
   '/do-less-session-engine.js',
+  '/do-less-session-outcome-core.js',
   '/do-less-profile-store.js',
   '/do-less-checkin-core.js',
   '/do-less-adaptation-core.js',

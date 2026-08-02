@@ -15,6 +15,20 @@ test('fit30something resolves as the current Coach baseline without exposing a u
   assert.equal(Archetypes.resolveArchetype('not_real'), null);
 });
 
+test('every approved archetype exposes the complete reusable definition contract', () => {
+  const requiredFields = [
+    'archetypeId', 'version', 'labelInternal', 'sessionTypes', 'defaultTimeBudgets',
+    'checkInSchema', 'exerciseFilters', 'progressionPolicy', 'safetyPolicy',
+    'copyPolicy', 'adaptationPolicy', 'featureFlags'
+  ];
+
+  for (const archetypeId of Archetypes.APPROVED_ARCHETYPE_IDS) {
+    const archetype = Archetypes.resolveArchetype(archetypeId);
+    requiredFields.forEach(field => assert.equal(Object.prototype.hasOwnProperty.call(archetype, field), true, archetypeId + ' missing ' + field));
+    assert.equal(archetype.sessionTypes.every(type => Number(archetype.defaultTimeBudgets[type]) > 0), true);
+  }
+});
+
 test('Phase 2 archetype packages expose distinct safe starting policies', () => {
   const postpartum = Archetypes.resolveArchetype('postpartum');
   const activeAgingFemale = Archetypes.resolveArchetype('active_aging_female_60plus');
@@ -31,6 +45,8 @@ test('Phase 2 archetype packages expose distinct safe starting policies', () => 
   assert.equal(postpartum.safetyPolicy, 'postpartum_symptom_gate_v1');
   assert.equal(activeAgingFemale.progressionPolicy, 'active_aging_slow_progression_v1');
   assert.equal(activeAgingMale.featureFlags.placeholder, true);
+  assert.equal(activeAgingMale.sessionTypes.includes('strength_function_b_12'), true);
+  assert.equal(activeAgingMale.defaultTimeBudgets.strength_function_b_12, 12);
   [postpartum, activeAgingFemale, activeAgingMale].forEach(archetype => {
     assert.equal(archetype.featureFlags.harderDay, false);
     assert.equal(archetype.featureFlags.visibleAbsPriority, false);
@@ -62,7 +78,10 @@ test('session engine resolves fit30something and preserves its baseline planner 
       fit30something:({archetype, profileInstance:activeProfile, request}) => ({
         mode:request.mode,
         profileInstanceId:activeProfile.profileInstanceId,
-        steps:[{name:'March in place'}],
+        steps:[
+          {name:'March in place', block:'Warm-up'},
+          {name:'Supported squat', block:'Strength'}
+        ],
         timeBudget:archetype.defaultTimeBudgets[request.mode]
       })
     }
@@ -81,8 +100,20 @@ test('session engine resolves fit30something and preserves its baseline planner 
   assert.deepEqual(plan, {
     mode:'fallback',
     profileInstanceId:'local-primary',
-    steps:[{name:'March in place'}],
+    steps:[
+      {name:'March in place', block:'Warm-up'},
+      {name:'Supported squat', block:'Strength'}
+    ],
     timeBudget:10,
+    recommendedSessionType:'fallback',
+    rationale:[],
+    blocks:[
+      {name:'Warm-up', steps:[{name:'March in place', block:'Warm-up'}]},
+      {name:'Strength', steps:[{name:'Supported squat', block:'Strength'}]}
+    ],
+    substitutions:[],
+    completionRule:'Complete any planned movement to count the session.',
+    cautionLevel:'green',
     archetypeId:'fit30something',
     archetypeVersion:1,
     engineVersion:'2'
@@ -103,4 +134,16 @@ test('session engine rejects a profile instance assigned to a different archetyp
       archetypeVersion:1
     }
   }), /does not match/);
+});
+
+test('session engine rejects a planner output not declared by its archetype', () => {
+  const engine = SessionEngine.create({
+    resolveArchetype:Archetypes.resolveArchetype,
+    planners:{fit30something:() => ({mode:'strength_function_a_12', steps:[]})}
+  });
+
+  assert.throws(() => engine.generate({
+    archetypeId:'fit30something',
+    profileInstance:{profileInstanceId:'local-primary', archetypeId:'fit30something'}
+  }), /not declared by archetype/);
 });

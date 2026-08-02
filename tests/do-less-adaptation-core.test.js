@@ -46,6 +46,24 @@ test('repeated short completions create an explainable profile-scoped preference
   assert.equal(result.generatedEvents[0].policyName, 'short_wins_v1');
 });
 
+test('repeated skipped long plans bias the same profile toward a shorter next win', () => {
+  const recentCompletions = [1, 2].map(index => ({
+    id:'skipped-' + index,
+    profileInstanceId:PROFILE_ID,
+    completionStatus:'skipped',
+    plannedDurationMin:20,
+    actualDurationMin:0,
+    completedAt:'2026-08-0' + index + 'T10:00:00.000Z'
+  }));
+
+  const result = createEngine().evaluate(baseInput({recentCompletions}));
+
+  assert.equal(result.statePatch.preferredSessionLength, 10);
+  assert.equal(result.recommendationBias.favourShorterSessions, true);
+  assert.match(result.rationale.join(' '), /skipped|shorter/i);
+  assert.equal(result.generatedEvents.some(event => event.policyName === 'missed_long_plans_v1'), true);
+});
+
 test('symptom flags reduce complexity only for the assigned profile instance', () => {
   const result = createEngine().evaluate(baseInput({
     recentReadiness:[{

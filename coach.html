@@ -786,7 +786,9 @@
   <script src="./coach-state-core.js"></script>
   <script src="./coach-prescription-core.js"></script>
   <script src="./do-less-archetype-core.js"></script>
+  <script src="./do-less-exercise-catalog.js"></script>
   <script src="./do-less-session-engine.js"></script>
+  <script src="./do-less-session-outcome-core.js"></script>
   <script src="./do-less-profile-store.js"></script>
   <script src="./do-less-checkin-core.js"></script>
   <script src="./do-less-adaptation-core.js"></script>
@@ -800,7 +802,9 @@
   const StateCore = window.CoachStateCore;
   const Prescription = window.CoachPrescriptionCore;
   const Archetypes = window.DoLessArchetypes;
+  const ExerciseCatalog = window.DoLessExerciseCatalog;
   const SessionEngineCore = window.DoLessSessionEngine;
+  const SessionOutcome = window.DoLessSessionOutcome;
   const ProfileStoreCore = window.DoLessProfileStore;
   const CheckInCore = window.DoLessCheckIn;
   const AdaptationCore = window.DoLessAdaptation;
@@ -826,6 +830,7 @@
     });
   if (!cloudProfileHint) localProfileStore.migrateLegacyProfile({profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId});
   const ACTIVE_ARCHETYPE_ID = ACTIVE_PROFILE_INSTANCE.archetypeId;
+  const ACTIVE_ARCHETYPE = Archetypes.resolveArchetype(ACTIVE_ARCHETYPE_ID);
   const KEY = localProfileStore.profileKey(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'state');
   const SIGNALS_KEY = localProfileStore.profileKey(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'signals'); // optional: {dateISO, steps, alcoholUnits} fed by phone automation; never entered manually in-app
   const UI_PREFS_KEY = localProfileStore.profileKey(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'ui-prefs');
@@ -907,13 +912,15 @@
     heel_raise: {name:'Supported heel raises', cat:'Strength', demo:'standing+heel+raise+with+chair', cue:'Keep one or both hands supported and rise slowly.', how:'Hold a chair or wall, rise onto the balls of the feet, pause, then lower with control.', stable:true},
     supported_balance:{name:'Supported single-leg balance', cat:'Core', demo:'supported+single+leg+balance+exercise', cue:'Keep fingertips on the support. Confidence matters more than letting go.', how:'Stand beside a chair or wall and lighten one foot while keeping support within reach. Swap sides before fatigue changes your posture.', stable:true}
   };
+  Object.keys(EX).forEach(exId => {
+    if (!ExerciseCatalog.EXERCISES[exId]) throw new Error('Missing shared exercise metadata: ' + exId);
+    Object.assign(EX[exId], ExerciseCatalog.EXERCISES[exId]);
+  });
   const SUBS = { carry:'bandhinge', pallof:'plank', sideplank:'plank', rope:'pogo', thrusters:'bandknees' };
   const ALL_CATS = ['Warm-up','Strength','Core','Burst'];
-  const EX_ENVIRONMENT = {
-    pallof:'outdoor', rope:'outdoor', carry:'outdoor',
-    lightgoblet:'indoor', bandpush:'indoor', goblet:'indoor', tempogoblet:'indoor', pausegoblet:'indoor',
-    hipthrust:'indoor', bandhinge:'indoor', bandrow:'indoor'
-  };
+  const EX_ENVIRONMENT = Object.fromEntries(Object.entries(ExerciseCatalog.EXERCISES)
+    .filter(([, exercise]) => exercise.preferredEnvironment !== 'both')
+    .map(([exId, exercise]) => [exId, exercise.preferredEnvironment]));
   const EX_FAMILY = {
     march:'warmup', walkout:'warmup', lightgoblet:'squat',
     pushup:'push', bandpush:'push', inclinepush:'push', tempopush:'push',
@@ -924,11 +931,7 @@
     rope:'burst', bandknees:'burst', thrusters:'burst', pogo:'burst',
     breath_brace:'core', chair_squat:'squat', wall_push:'push', seated_march:'warmup', heel_raise:'balance', supported_balance:'balance'
   };
-  const PROFILE_SAFE_EXERCISES = Object.freeze({
-    postpartum:new Set(['breath_brace','bridge','bandrow','chair_squat','wall_push','seated_march']),
-    active_aging_female_60plus:new Set(['seated_march','chair_squat','wall_push','heel_raise','supported_balance','bandrow']),
-    active_aging_male_50plus:new Set(['seated_march','chair_squat','wall_push','heel_raise','supported_balance','bandrow'])
-  });
+  const PROFILE_SAFE_EXERCISE_IDS = new Set(ExerciseCatalog.allowedExerciseIds(ACTIVE_ARCHETYPE));
   const EX_GOALS = {
     push:['push','pull'], legs:['squat','lunge','hinge','carry'], core:['core'],
     abs:['core','burst'], chain:['squat','lunge','hinge','pull'], upper:['push','pull','carry']
@@ -1008,6 +1011,11 @@
     return Object.assign({}, state.adaptiveState, {
       profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId,
       currentStreak:streakSnapshot ? streakSnapshot().count : Number(state.adaptiveState.currentStreak) || 0,
+      preferenceState:{
+        exercisePreferences:Object.assign({}, state.exercisePreferences),
+        familyPreferences:Object.assign({}, state.familyPreferences),
+        setPreferences:Object.assign({}, state.setPreferences)
+      },
       updatedAt:state.adaptiveState.updatedAt || new Date().toISOString()
     });
   }
@@ -1030,6 +1038,7 @@
   }
   function normaliseSession(entry, index){
     const source = entry && entry.sourceType || (entry && entry.mode === 'fallback' ? 'fallback' : entry && entry.mode === 'travel' ? 'travel' : 'guided');
+    const completionStatus = String(entry && entry.completionStatus || (entry && entry.isProvisional ? 'partial' : 'complete'));
     return Object.assign({}, entry, {
       sessionId:String(entry && entry.sessionId || 'legacy-' + String(entry && entry.date || todayISO()) + '-' + index),
       date:String(entry && entry.date || todayISO()),
@@ -1037,6 +1046,7 @@
       profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId,
       sessionPlanId:entry && (entry.sessionPlanId || entry.session_plan_id) || null,
       startedAt:entry && (entry.startedAt || entry.started_at) || null,
+      completionStatus:['complete', 'partial', 'aborted', 'skipped'].includes(completionStatus) ? completionStatus : 'complete',
       isProvisional:source === 'sport_provisional' ? true : !!(entry && entry.isProvisional),
       sessionScore:clampSessionScore(entry && entry.sessionScore),
       exercises:Array.isArray(entry && entry.exercises)
@@ -1140,7 +1150,10 @@
   function calendarDayNumber(d){ return Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000; }
   function daysBetween(a, b){ return calendarDayNumber(b) - calendarDayNumber(a); }
   function addDays(d, amount){ const next = new Date(d); next.setDate(next.getDate() + amount); return next; }
-  function isQualifyingSession(s){ return !!(s && parseISODate(s.date) && clampSessionScore(s.sessionScore) >= 1); }
+  function isQualifyingSession(s){
+    const completionStatus = String(s && s.completionStatus || (s && s.isProvisional ? 'partial' : 'complete'));
+    return !!(s && parseISODate(s.date) && ['complete', 'partial'].includes(completionStatus) && clampSessionScore(s.sessionScore) >= 1);
+  }
   function sessionsForDate(iso){ return state.sessions.filter(s => s.date === iso && isQualifyingSession(s)); }
   function levelForCount(count){ return count >= 3 ? 'L3' : count === 2 ? 'L2' : count === 1 ? 'L1' : 'L0'; }
   function levelCredits(level){ return level === 'L3' ? 2 : level === 'L2' ? 1 : 0; }
@@ -1194,12 +1207,12 @@
       sessionPlanId:rec.sessionPlanId || null,
       startedAt:rec.startedAt || null,
       completedAt,
-      completionStatus:rec.isProvisional ? 'partial' : 'complete',
+      completionStatus:String(rec.completionStatus || (rec.isProvisional ? 'partial' : 'complete')),
       actualDurationMin:Math.max(0, Math.round((Number(rec.seconds) || 0) / 6) / 10),
       rpeSimple:exercises.length && exercises.every(exercise => exercise.difficulty === 'easy') ? 'easy' : exercises.length ? 'medium' : null,
       symptomFlags:Array.isArray(rec.symptomFlags) ? rec.symptomFlags : [],
       userFeedback:String(rec.userFeedback || ''),
-      streakAwarded:!rec.isProvisional,
+      streakAwarded:!rec.isProvisional && isQualifyingSession(rec),
       completionPayload:rec,
       updatedAt:String(rec.updatedAt || new Date().toISOString())
     });
@@ -1416,8 +1429,10 @@
     if (difficulty === 'hard') return baseTarget + ' · add 20% with clean form';
     return baseTarget;
   }
-  function applyDifficultyToStep(step, difficulty){
-    step.difficulty = ['easy','medium','hard'].includes(difficulty) ? difficulty : 'medium';
+  function applyDifficultyToStep(step, difficulty, cautionLevel){
+    const allowed = ExerciseCatalog.allowedDifficultyLevels(ACTIVE_ARCHETYPE, cautionLevel);
+    const fallback = allowed.includes('medium') ? 'medium' : 'easy';
+    step.difficulty = allowed.includes(difficulty) ? difficulty : fallback;
     const multiplier = step.difficulty === 'easy' ? .8 : step.difficulty === 'hard' ? 1.2 : 1;
     step.target = difficultyTarget(step.baseTarget, step.difficulty);
     step.prescribedSec = Math.max(10, Math.round(step.basePrescribedSec * multiplier));
@@ -1617,6 +1632,7 @@
     });
     const environment = request.options && ['indoor','outdoor','both'].includes(request.options.environment) ? request.options.environment : 'indoor';
     const steps = plan.stepSpecs.map(spec => makeStep(EX[spec.exId], spec.target, spec.restSec, spec.block));
+    if (plan.cautionLevel === 'red') steps.forEach(step => applyDifficultyToStep(step, 'easy', plan.cautionLevel));
     assignSetNumbers(steps);
     return {
       mode:plan.mode,
@@ -1700,19 +1716,20 @@
   function attachPlanSync(plan, reason){
     if (!plan.planId) plan.planId = newId('plan');
     if (!plan.generatedAt) plan.generatedAt = new Date().toISOString();
+    plan.updatedAt = new Date().toISOString();
     const rationale = Array.isArray(plan.rationale) && plan.rationale.length ? plan.rationale : [reason].filter(Boolean);
     enqueueSync('session_plan', {
       id:plan.planId,
       profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId,
       generatedAt:plan.generatedAt,
-      updatedAt:plan.generatedAt,
+      updatedAt:plan.updatedAt,
       sessionType:plan.mode,
       timeBudgetMin:Number(plan.timeBudget) || Math.max(1, Math.round(Number(plan.plannedSeconds) / 60) || 1),
       planPayload:plan,
       generationReason:rationale,
       engineVersion:plan.engineVersion,
       archetypeVersion:plan.archetypeVersion
-    }, {id:'queue-' + plan.planId, updatedAt:plan.generatedAt});
+    }, {id:'queue-' + plan.planId, updatedAt:plan.updatedAt});
     localProfileStore.writeProfileValue(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'last-plan', plan);
     return plan;
   }
@@ -1850,23 +1867,25 @@
   $('reshuffleBtn').addEventListener('click', quickStart);
 
   function renderPreview(sayText){
+    const redCaution = pending.cautionLevel === 'red';
     $('previewChip').textContent = (MODE_LABEL[pending.mode] || 'Today’s plan') + ' · ' + (isFitBaseline() ? 'week ' : 'step ') + pending.week + ' · ' + activeFocusLabel();
-    $('previewTitle').textContent = pending.mode === 'fallback' ? 'Your six minutes' : (timeOfDay() === 'am' ? 'Your circuit this morning' : 'Your circuit tonight');
-    $('previewSay').textContent = sayText;
+    $('previewTitle').textContent = redCaution ? 'Pause and reset' : pending.mode === 'fallback' ? 'Your six minutes' : (timeOfDay() === 'am' ? 'Your circuit this morning' : 'Your circuit tonight');
+    $('previewSay').textContent = redCaution ? 'Today is a stop-and-check-in day. Rest is a valid choice.' : sayText;
     $('previewReason').textContent = pending.reason || 'Built for your time, energy, and current goal.';
-    $('planSummary').innerHTML = `<span>${Math.max(1, Math.round(pending.plannedSeconds / 60))} min planned</span><span>${pending.steps.length} exercises</span><span>${pending.environment}</span>`;
+    const exerciseCountLabel = pending.steps.length + ' exercise' + (pending.steps.length === 1 ? '' : 's');
+    $('planSummary').innerHTML = `<span>${Math.max(1, Math.round(pending.plannedSeconds / 60))} min planned</span><span>${exerciseCountLabel}</span><span>${pending.environment}</span>`;
+    const difficultyOptions = ExerciseCatalog.allowedDifficultyLevels(ACTIVE_ARCHETYPE, pending.cautionLevel);
     let html = '', lastBlock = null;
     pending.steps.forEach((s, index) => {
       if (s.block !== lastBlock){ html += `<div class="cblock">${s.block}</div>`; lastBlock = s.block; }
+      const canSwap = pending.cautionLevel !== 'red' && !!replacementForStep(pending, index);
       html += `<div class="cx" data-preview-step="${index}">
         <span class="nm">${escapeHTML(s.name)}${s.setNumber > 1 ? ` · set ${s.setNumber}` : ''}</span>
         <span class="tg">${escapeHTML(s.target)}</span>
         <span class="cxactions">
-          <button type="button" data-preview-swap="${index}">Swap</button>
+          ${canSwap ? `<button type="button" data-preview-swap="${index}">Swap</button>` : ''}
           <select data-preview-difficulty="${index}" aria-label="Difficulty for ${escapeHTML(s.name)}">
-            <option value="easy"${s.difficulty === 'easy' ? ' selected' : ''}>Easy</option>
-            <option value="medium"${s.difficulty === 'medium' ? ' selected' : ''}>Medium</option>
-            <option value="hard"${s.difficulty === 'hard' ? ' selected' : ''}>Hard</option>
+            ${difficultyOptions.map(difficulty => `<option value="${difficulty}"${s.difficulty === difficulty ? ' selected' : ''}>${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</option>`).join('')}
           </select>
         </span>
       </div>`;
@@ -1876,12 +1895,15 @@
   }
   function replacementForStep(built, index){
     const current = built.steps[index];
-    if (!current || !current.exId) return null;
+    if (!current || !current.exId || built.cautionLevel === 'red') return null;
     const used = new Set(built.steps.map(step => step.exId));
-    const safePool = PROFILE_SAFE_EXERCISES[ACTIVE_ARCHETYPE_ID];
+    const safeAlternatives = isFitBaseline()
+      ? null
+      : new Set(ExerciseCatalog.safeAlternatives(current.exId, ACTIVE_ARCHETYPE));
     const findCandidates = allowUsed => Object.keys(EX).filter(exId => {
-      if (safePool && !safePool.has(exId)) return false;
+      if (!PROFILE_SAFE_EXERCISE_IDS.has(exId)) return false;
       if (exId === current.exId || (!allowUsed && used.has(exId)) || !environmentAllows(exId, built.environment)) return false;
+      if (safeAlternatives) return safeAlternatives.has(exId);
       const sameFamily = EX_FAMILY[exId] === current.family;
       const sameCategory = EX[exId].cat === EX[current.exId].cat;
       return sameFamily || (sameCategory && goalFit(exId, built.focus) >= 1);
@@ -1893,14 +1915,22 @@
     const nextId = candidates[hashText(todayISO() + current.stepId + index) % candidates.length];
     const replacement = makeStep(EX[nextId], current.baseTarget, current.rest, current.block);
     replacement.setNumber = current.setNumber;
-    applyDifficultyToStep(replacement, current.difficulty);
+    applyDifficultyToStep(replacement, current.difficulty, built.cautionLevel);
     return replacement;
   }
   function swapBuiltStep(built, index){
     const replacement = replacementForStep(built, index);
     if (!replacement) { toast('No aligned alternative available.'); return false; }
+    const original = built.steps[index];
     built.steps[index] = replacement;
+    built.substitutions = (Array.isArray(built.substitutions) ? built.substitutions.slice() : []).concat({
+      stepId:String(original.stepId || ''),
+      fromExerciseId:String(original.exId || ''),
+      toExerciseId:String(replacement.exId || ''),
+      substitutedAt:new Date().toISOString()
+    });
     built.hash = built.steps.map(step => step.exId + ':' + step.setNumber).join('|') + '|' + built.mode + '|' + built.environment;
+    attachPlanSync(built, built.reason || recommendationReason(built, 'Plan updated with a safe alternative.'));
     return true;
   }
   $('circuitList').addEventListener('click', event => {
@@ -1916,7 +1946,7 @@
     if (!select || !pending) return;
     const step = pending.steps[Number(select.dataset.previewDifficulty)];
     if (!step) return;
-    applyDifficultyToStep(step, select.value);
+    applyDifficultyToStep(step, select.value, pending.cautionLevel);
     pending.plannedSeconds = plannedSecondsFor(pending.steps);
     renderPreview('Difficulty updated without changing the training target.');
   });
@@ -2071,6 +2101,7 @@
     if (!sport || !entry) return;
     entry.sourceType = 'sport_resolved';
     entry.isProvisional = false;
+    entry.completionStatus = 'complete';
     entry.sportId = sport.id;
     entry.sportName = sport.name;
     SPORT_SCORE_FIELDS.forEach(([key]) => { entry[key] = clampInputScore(sport[key]); });
@@ -2227,7 +2258,8 @@
       sessionPlanId:row && row.session_plan_id || payload.sessionPlanId || null,
       startedAt:row && row.started_at || payload.startedAt || null,
       completedAtLocal:String(payload.completedAtLocal || row && row.completed_at || ''),
-      isProvisional:String(row && row.completion_status || '') === 'partial',
+      completionStatus:String(row && row.completion_status || payload.completionStatus || 'complete'),
+      isProvisional:payload.sourceType === 'sport_provisional',
       updatedAt:String(row && row.updated_at || payload.updatedAt || '')
     }), index);
   }
@@ -2298,7 +2330,15 @@
         adaptationEvents:(remote.adaptationEvents || []).map(remoteAdaptationToLocal)
       }
     });
-    state.adaptiveState = reconciled.userState || state.adaptiveState;
+    const nextAdaptiveState = reconciled.userState || state.adaptiveState;
+    const preferenceState = nextAdaptiveState && nextAdaptiveState.preferenceState;
+    if (preferenceState && typeof preferenceState === 'object') {
+      if (preferenceState.exercisePreferences && typeof preferenceState.exercisePreferences === 'object') state.exercisePreferences = Object.assign({}, preferenceState.exercisePreferences);
+      if (preferenceState.familyPreferences && typeof preferenceState.familyPreferences === 'object') state.familyPreferences = Object.assign({}, preferenceState.familyPreferences);
+      if (preferenceState.setPreferences && typeof preferenceState.setPreferences === 'object') state.setPreferences = Object.assign({}, preferenceState.setPreferences);
+    }
+    state.adaptiveState = Object.assign({}, nextAdaptiveState);
+    delete state.adaptiveState.preferenceState;
     state.sessions = reconciled.sessionCompletions.map(normaliseSession);
     state.readinessHistory = reconciled.readinessLogs.slice(-40);
     state.liftSnapshots = reconciled.liftSnapshots.slice(-80);
@@ -2522,8 +2562,7 @@
   /* ---------- library ---------- */
   let libFilter = 'all';
   function renderLibrary(){
-    const safePool = PROFILE_SAFE_EXERCISES[ACTIVE_ARCHETYPE_ID];
-    const items = Object.keys(EX).filter(id => !safePool || safePool.has(id)).map(id => EX[id]).filter(e => libFilter === 'all' || e.cat === libFilter);
+    const items = Object.keys(EX).filter(id => PROFILE_SAFE_EXERCISE_IDS.has(id)).map(id => EX[id]).filter(e => libFilter === 'all' || e.cat === libFilter);
     $('exList').innerHTML = items.map(e => `
       <details class="ex">
         <summary>${e.name}<span class="cat">${e.cat}</span></summary>
@@ -2726,8 +2765,13 @@
     renderPrescriptionAdjuster(st);
     $('stepCue').textContent = st.cue || '';
     if (st.exId){ $('stepDemo').href = yt(st.name + ' ' + st.difficulty + ' technique'); $('stepDemo').hidden = false; } else $('stepDemo').hidden = true;
-    $('stepSwap').hidden = !replacementForStep(session, stepIdx);
+    $('stepSwap').hidden = session.cautionLevel === 'red' || !replacementForStep(session, stepIdx);
     $('stepSwap').textContent = 'Swap exercise';
+    const allowedDifficulties = ExerciseCatalog.allowedDifficultyLevels(ACTIVE_ARCHETYPE, session.cautionLevel);
+    Array.from($('stepDifficulty').options).forEach(option => {
+      option.hidden = !allowedDifficulties.includes(option.value);
+      option.disabled = !allowedDifficulties.includes(option.value);
+    });
     $('stepDifficulty').value = st.difficulty;
     $('stepLike').setAttribute('aria-pressed', String(!!st.liked));
     $('stepDislike').setAttribute('aria-pressed', String(!!st.disliked));
@@ -2819,8 +2863,7 @@
     toast('Skipped. It will stay out of the log.');
   });
   $('quitBtn').addEventListener('click', () => {
-    if (session.steps.some(step => step.status === 'completed')){ completeSession(); return; }
-    teardownSession(); show('today'); renderToday(); toast('Session ended — no judgement.');
+    completeSession();
   });
   $('stepSwap').addEventListener('click', () => {
     if (swapBuiltStep(session, stepIdx)){ renderStep(); toast('Swapped for an aligned alternative.'); }
@@ -2828,7 +2871,7 @@
   $('stepDifficulty').addEventListener('change', event => {
     const step = session && session.steps[stepIdx];
     if (!step) return;
-    applyDifficultyToStep(step, event.target.value);
+    applyDifficultyToStep(step, event.target.value, session.cautionLevel);
     renderStep();
     toast('Difficulty set to ' + step.difficulty);
   });
@@ -2868,11 +2911,8 @@
   function teardownSession(){ clearInterval(ticker); session = null; pending = null; document.body.classList.remove('in-session'); }
 
   function completeSession(){
+    const outcome = SessionOutcome.summarise(session.steps);
     const completed = session.steps.filter(step => step.status === 'completed' && step.exId);
-    if (!completed.length){
-      teardownSession(); show('today'); renderToday(); toast('Nothing logged—start again whenever you are ready.');
-      return;
-    }
     const overtimeSeconds = sessionOvertimeSeconds(session);
     const exercises = completed.map(step => {
       const prescription = Prescription.toLog(step.prescription || Prescription.create(step.target, step.prescribedSec));
@@ -2883,6 +2923,7 @@
         reps:prescription.completedReps, kg:prescription.completedLoadKg, loggedSeconds:prescription.completedSeconds,
         elapsedSec:step.elapsedSec, prescribedSec:step.prescribedSec,
         overtimeSec:Math.max(0, step.elapsedSec - step.prescribedSec), setNumber:step.setNumber,
+        liked:!!step.liked, disliked:!!step.disliked,
         completed:true, pbUpdated:!!step.pbUpdated
       };
     });
@@ -2890,7 +2931,15 @@
       sessionId:newId('session'), date:todayISO(), mode:session.mode,
       sessionPlanId:session.planId || null, startedAt:session.startedAt || null,
       sourceType:session.sourceType || (session.mode === 'fallback' ? 'fallback' : session.mode === 'travel' ? 'travel' : 'guided'),
-      isProvisional:false, sessionScore:1, seconds:elapsed, overtimeSeconds, week:session.week,
+      completionStatus:outcome.completionStatus,
+      plannedStepCount:outcome.plannedStepCount,
+      completedStepCount:outcome.completedStepCount,
+      skippedStepCount:outcome.skippedStepCount,
+      skippedExerciseIds:outcome.skippedExerciseIds,
+      unfinishedExerciseIds:outcome.unfinishedExerciseIds,
+      substitutions:Array.isArray(session.substitutions) ? session.substitutions.slice() : [],
+      plannedDurationMin:Math.max(1, Number(session.timeBudget) || Math.round((Number(session.plannedSeconds) || 60) / 60)),
+      isProvisional:false, sessionScore:completed.length ? 1 : 0, seconds:elapsed, overtimeSeconds, week:session.week,
       environment:session.environment, exercises, completedAtLocal:localDateTimeString()
     };
     const result = registerSession(rec);
@@ -2899,7 +2948,12 @@
     const mode = session.mode;
     pendingCompletedSessionId = rec.sessionId;
     teardownSession();
-    $('finishChip').textContent = MODE_LABEL[mode] + ' complete · ' + fmt(rec.seconds);
+    if (!completed.length){
+      show('today'); renderToday(); renderStreak();
+      toast(outcome.completionStatus === 'skipped' ? 'Plan skipped. Your next recommendation will take that into account.' : 'Session ended — no judgement.');
+      return;
+    }
+    $('finishChip').textContent = MODE_LABEL[mode] + (outcome.completionStatus === 'partial' ? ' partially complete · ' : ' complete · ') + fmt(rec.seconds);
     const sc = streakCount();
     $('streakAward').textContent = 'Streak: ' + sc + (sc === 1 ? ' day' : ' days') + ' · ' + result.reward.level + rewardMessage(result.reward) + ' ✓';
     renderSessionRecap(rec);

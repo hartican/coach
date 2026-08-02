@@ -67,6 +67,17 @@
     return Number.isFinite(minutes) && minutes >= 0 ? minutes : null;
   }
 
+  function plannedDurationOf(value){
+    const source = isObject(value) ? value : {};
+    const payload = isObject(source.completion_payload) ? source.completion_payload : {};
+    const minutes = Number(
+      source.plannedDurationMin != null ? source.plannedDurationMin
+        : source.planned_duration_min != null ? source.planned_duration_min
+          : payload.plannedDurationMin
+    );
+    return Number.isFinite(minutes) && minutes >= 0 ? minutes : null;
+  }
+
   function isEasyCompletion(value){
     const source = isObject(value) ? value : {};
     const rating = source.rpeSimple != null ? source.rpeSimple : source.rpe_simple;
@@ -137,6 +148,26 @@
             Number(userState.preferredSessionLength) || null,
             10,
             'Three recent completed sessions were ten minutes or shorter.'
+          );
+        }
+      }
+
+      const skippedLongPlans = recentCompletions.filter(item => {
+        const status = completionStatusOf(item);
+        const plannedMinutes = plannedDurationOf(item);
+        return ['skipped', 'aborted'].includes(status) && plannedMinutes != null && plannedMinutes >= 15;
+      });
+      if (skippedLongPlans.length >= 2) {
+        recommendationBias.favourShorterSessions = true;
+        rationale.push('Longer plans have been skipped lately, so the next recommendation aims for a shorter win.');
+        if (Number(userState.preferredSessionLength) !== 10) {
+          statePatch.preferredSessionLength = 10;
+          addEvent(
+            'completion_pattern',
+            'missed_long_plans_v1',
+            Number(userState.preferredSessionLength) || null,
+            10,
+            'Two recent plans of fifteen minutes or longer were skipped or ended before any movement was completed.'
           );
         }
       }

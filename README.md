@@ -20,6 +20,8 @@ The main app remains plain HTML/CSS/JS with no client build step.
 - `api/supabase-config.js` - no-store browser configuration endpoint that exposes only the public Supabase URL and publishable key.
 - `supabase/migrations/` - database schema, indexes, grants, and owner-only row-level security policies.
 - `do-less-session-engine.js` - profile-instance-aware session-engine boundary used by the live app.
+- `do-less-exercise-catalog.js` - shared tagged movement inventory, archetype filters, substitutions, and intensity caps.
+- `do-less-session-outcome-core.js` - deterministic complete, partial, skipped, and aborted outcome classification.
 - `do-less-profile-store.js` - local profile-instance model, isolated storage namespaces, assignment simulation, and legacy-data migration.
 - `do-less-adaptation-core.js` - deterministic, profile-scoped adaptation rules and inspectable events.
 - `do-less-sync-core.js` - offline event queue plus timestamp-and-ID reconciliation rules.
@@ -57,6 +59,7 @@ The main app remains plain HTML/CSS/JS with no client build step.
 - A separate family-profile setup flow that assigns a starting plan, stores its rationale, creates the profile, and only then requests the sign-in email.
 - Authenticated profile activation with restrained account/sync status, offline queuing, automatic reconnect, and manual sync/sign-out controls.
 - One-sentence recommendation rationale plus deterministic adaptations based on recent completions and feedback.
+- Durable skipped/partial outcomes, safe substitution history, and profile-scoped exercise preferences that inform later recommendations.
 - A private admin review at `/admin` showing matcher outcome, rationale, intake, recommendation, and adaptation history, with explicit confirmation and an audit reason required before any assignment correction.
 
 ## Local Data
