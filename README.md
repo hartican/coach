@@ -1,16 +1,20 @@
 # Do Less
 
-Mobile-first, low-admin movement app built from `Planning/coach-app-spec.md`.
-It is a standalone browser app: plain HTML/CSS/JS, no build step, no auth,
-no backend, and local browser persistence only.
+Mobile-first, low-admin movement app evolving under the canonical archetype and
+multi-profile specifications in `planning-coach/`. The current Phase 1 build is
+still a standalone browser app: plain HTML/CSS/JS, no build step, no auth, no
+backend, and local browser persistence only.
 
 ## Files
 
 - `coach.html` - the Do Less app, served at the site root.
 - `coach-state-core.js` - versioned local-state and profile migration rules.
 - `coach-prescription-core.js` - upwards-only prescription and completed-load rules.
-- `tests/` - dependency-free Node regression tests for persistence and prescriptions.
-- `Planning/coach-app-spec.md` - canonical product spec.
+- `do-less-archetype-core.js` - approved internal archetype IDs, the `fit30something` baseline, resolver, and placeholder matcher interface.
+- `do-less-session-engine.js` - shared session-engine boundary used by the live app.
+- `tests/` - dependency-free Node regression tests for persistence, prescriptions, archetypes, and engine delegation.
+- `planning-coach/PIPELINE-do-less-archetype-assignment-spec.md` - overriding archetype assignment and phased-delivery contract.
+- `planning-coach/PIPELINE-do-less-multi-profile-architecture.md` - detailed canonical multi-profile architecture.
 - `context/marketing-site-hero-copy.md` - single source of truth for all Do Less marketing copy.
 - `assets/` - strong-arm app icons for the browser manifest and iOS home screen.
 - `manifest.json` - home-screen/PWA metadata.
@@ -24,7 +28,7 @@ no backend, and local browser persistence only.
 - Per-exercise countdowns, overtime and PB feedback, plus pause, back, skip, swap, difficulty, and like/dislike controls.
 - Upwards-only in-session rep, hold-time, and load controls with the generated target enforced as the minimum.
 - Global goal, Profile, Key lifts, Appearance, sport configuration, and the Technique library under Settings.
-- Session generator with standard, momentum-reset, travel, and harder-day modes.
+- Session generator with standard, momentum-reset, travel, and harder-day modes, resolved through the internal `fit30something` baseline.
 - Duration-aware repeat sets, daily variation, environment-aware ordering, and an 8-week progression jump control.
 - Completed-only session logs with exact variants, generated and completed prescriptions, load history, and specific technique-video searches.
 - Daily streak tracking where any completed session counts, including fallback sessions, with three banked cheat-day freezes that refill one at a time every 30 days (maximum bank: three).

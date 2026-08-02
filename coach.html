@@ -741,11 +741,16 @@
 
   <script src="./coach-state-core.js"></script>
   <script src="./coach-prescription-core.js"></script>
+  <script src="./do-less-archetype-core.js"></script>
+  <script src="./do-less-session-engine.js"></script>
   <script>
   (function(){
   'use strict';
   const StateCore = window.CoachStateCore;
   const Prescription = window.CoachPrescriptionCore;
+  const Archetypes = window.DoLessArchetypes;
+  const SessionEngineCore = window.DoLessSessionEngine;
+  const ACTIVE_ARCHETYPE_ID = Archetypes.DEFAULT_ARCHETYPE_ID;
   const KEY = 'hwc_state_v1';
   const SIGNALS_KEY = 'hwc_signals'; // optional: {dateISO, steps, alcoholUnits} fed by phone automation; never entered manually in-app
   const MOMENTUM_SYSTEM_VERSION = 1;
@@ -1250,11 +1255,11 @@
     return other.concat(outdoor);
   }
 
-  function buildSession(mode, opts){
+  function buildFit30somethingSession(mode, opts, archetype){
     opts = opts || {};
     const t = targets(), wk = weekNumber(), tod = timeOfDay();
     const n = opts.seed != null ? opts.seed : hashText(todayISO() + '|' + state.goal + '|' + state.sessions.filter(entry => entry.date === todayISO()).length);
-    const timeBudget = Number(opts.time) || (mode === 'fallback' ? 10 : 20);
+    const timeBudget = Number(opts.time) || Number(archetype.defaultTimeBudgets[mode]) || 20;
     const emphasis = opts.emphasis || 'goal';
     const focus = focusFrom(emphasis);
     const environment = ['indoor','outdoor','both'].includes(opts.environment) ? opts.environment : state.settings.lastEnvironment;
@@ -1353,6 +1358,29 @@
       }
     }
     return {mode, steps, hash, week:wk, timeBudget, environment, focus, plannedSeconds:plannedSecondsFor(steps)};
+  }
+
+  const sessionEngine = SessionEngineCore.create({
+    resolveArchetype:Archetypes.resolveArchetype,
+    planners:{
+      fit30something:({archetype, request}) => buildFit30somethingSession(request.mode, request.options, archetype)
+    }
+  });
+
+  function buildSession(mode, opts){
+    const options = opts || {};
+    return sessionEngine.generate({
+      archetypeId:ACTIVE_ARCHETYPE_ID,
+      request:{mode, options},
+      userState:state,
+      readiness:{
+        timeBudget:Number(options.time) || null,
+        emphasis:options.emphasis || 'goal',
+        lowerEnergy:signalsBad()
+      },
+      recentCompletions:state.sessions.slice(-8),
+      now:new Date().toISOString()
+    });
   }
 
   /* ---------- quiz + quick start ---------- */
