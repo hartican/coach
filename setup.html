@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#01696f">
+  <title>Set up a profile — Do Less</title>
+  <meta name="description" content="Create a Do Less profile and receive a secure sign-in link.">
+  <link rel="icon" href="./assets/icon-180.png" type="image/png">
+  <link rel="apple-touch-icon" href="./assets/icon-180.png">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#f7f6f2; --surface:#fdfcfa; --surface-2:#f1efe9; --text:#28251d;
+      --muted:#66645f; --faint:#8e8b84; --primary:#01696f; --primary-hover:#0c4e54;
+      --primary-soft:#d8e4e1; --amber:#96500f; --amber-soft:#f0e2cd;
+      --line:rgba(40,37,29,.14); --good:#437a22;
+      --display:'Instrument Serif',Georgia,serif; --body:'Inter',system-ui,sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    [hidden]{display:none!important}
+    html{background:var(--bg)}
+    body{margin:0;color:var(--text);background:var(--bg);font-family:var(--body);font-size:1rem;line-height:1.55;-webkit-font-smoothing:antialiased}
+    a{color:inherit}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    .shell{width:min(100%,620px);min-height:100dvh;margin:0 auto;padding:calc(1rem + env(safe-area-inset-top)) 1.15rem calc(3rem + env(safe-area-inset-bottom))}
+    .topline{display:flex;align-items:center;justify-content:space-between;padding-bottom:1rem;border-bottom:1px solid var(--line)}
+    .wordmark{font-family:var(--display);font-size:1.35rem;text-decoration:none}
+    .back{font-size:.78rem;font-weight:750;color:var(--muted);text-decoration:none}
+    .intro{padding:2.2rem 0 1.4rem}
+    .eyebrow{margin:0;color:var(--primary);font-size:.73rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+    h1{max-width:12ch;margin:.35rem 0 .7rem;font-family:var(--display);font-weight:400;font-size:clamp(2.7rem,12vw,4.6rem);line-height:.92;letter-spacing:-.02em}
+    .introcopy{max-width:36rem;margin:0;color:var(--muted);font-size:.95rem}
+    .sequence{display:flex;gap:.55rem;align-items:center;margin-top:1.1rem;color:var(--faint);font-size:.73rem;font-weight:700}
+    .sequence span{display:inline-grid;place-items:center;width:1.45rem;height:1.45rem;border:1px solid var(--line);border-radius:50%;color:var(--primary)}
+    form{border-top:1px solid var(--line)}
+    fieldset{margin:0;padding:1.45rem 0;border:0;border-bottom:1px solid var(--line)}
+    legend{float:left;width:100%;padding:0;margin:0 0 1.05rem;font-family:var(--display);font-size:1.7rem;line-height:1}
+    legend+*{clear:both}
+    .fieldgrid{display:grid;grid-template-columns:1fr 1fr;gap:1rem .8rem}
+    .field{display:grid;gap:.35rem;align-content:start}
+    .field.full{grid-column:1/-1}
+    .label{font-size:.78rem;font-weight:750;color:var(--muted)}
+    .hint{margin:0;color:var(--faint);font-size:.73rem;line-height:1.4}
+    input:not([type=checkbox]),select,textarea{width:100%;min-height:48px;border:1px solid var(--line);border-radius:.7rem;background:var(--surface);color:var(--text);padding:.72rem .8rem;outline:none}
+    textarea{min-height:88px;resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 13%,transparent)}
+    .checks{display:grid;gap:.6rem}
+    .check{display:grid;grid-template-columns:1.25rem 1fr;gap:.65rem;align-items:start;font-size:.88rem}
+    .check input{width:1.15rem;height:1.15rem;margin:.12rem 0 0;accent-color:var(--primary)}
+    .check small{display:block;color:var(--faint);font-size:.72rem}
+    .postpartum-note{margin:.75rem 0 0;padding:.75rem .85rem;border-left:3px solid var(--primary);background:var(--primary-soft);font-size:.78rem}
+    details{margin-top:1rem;border-top:1px dashed var(--line);padding-top:1rem}
+    summary{cursor:pointer;color:var(--muted);font-size:.8rem;font-weight:750}
+    details .field{margin-top:.8rem}
+    .consent{padding:1.25rem 0 0}
+    .submitrow{padding:1.35rem 0}
+    .primary{width:100%;min-height:58px;border:0;border-radius:999px;background:var(--primary);color:#f9f8f4;font-weight:800}
+    .primary:hover{background:var(--primary-hover)}
+    .primary:disabled{cursor:wait;opacity:.65}
+    .formstatus{min-height:1.5rem;margin:.7rem 0 0;color:var(--amber);font-size:.8rem;font-weight:650}
+    .privacy{margin:0;color:var(--faint);font-size:.72rem}
+    .success{padding:3rem 0;border-bottom:1px solid var(--line)}
+    .successmark{display:grid;place-items:center;width:2.6rem;height:2.6rem;border-radius:50%;background:var(--primary-soft);color:var(--primary);font-weight:900}
+    .success h2{margin:1.2rem 0 .5rem;font-family:var(--display);font-weight:400;font-size:clamp(2.3rem,10vw,3.8rem);line-height:.95}
+    .success p{color:var(--muted)}
+    .success strong{color:var(--text)}
+    .secondary{display:inline-flex;align-items:center;justify-content:center;min-height:46px;margin-top:1rem;padding:.55rem 1rem;border:1px solid var(--line);border-radius:999px;text-decoration:none;font-size:.84rem;font-weight:750}
+    .offline{margin:0 0 1rem;padding:.7rem .85rem;background:var(--amber-soft);color:var(--amber);font-size:.78rem;font-weight:650}
+    @media (max-width:480px){.fieldgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.intro{padding-top:1.7rem}}
+    @media (prefers-reduced-motion:no-preference){.intro,form,.success{animation:enter .38s ease both}.success{animation-delay:.04s}@keyframes enter{from{opacity:0;transform:translateY(7px)}}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topline">
+      <a class="wordmark" href="/coach.html">Do Less</a>
+      <a class="back" href="/coach.html">Back to the app</a>
+    </header>
+
+    <section id="setupFlow">
+      <div class="intro">
+        <p class="eyebrow">Family profile setup</p>
+        <h1>Start with the right plan.</h1>
+        <p class="introcopy">Tell us the useful bits. We’ll assign a starting plan, create the profile, then send the secure sign-in link.</p>
+        <div class="sequence" aria-label="Setup sequence"><span>1</span> Details <span>2</span> Plan <span>3</span> Email link</div>
+      </div>
+
+      <p class="offline" id="offlineNote" hidden>You’ll need an internet connection to create this profile.</p>
+
+      <form id="setupForm" novalidate>
+        <fieldset>
+          <legend>Who is this for?</legend>
+          <div class="fieldgrid">
+            <label class="field full"><span class="label">Setup access code</span><input name="setupCode" type="password" autocomplete="one-time-code" required maxlength="120"><span class="hint">Use the private code supplied by the family account admin.</span></label>
+            <label class="field"><span class="label">Name</span><input name="displayName" type="text" autocomplete="name" required maxlength="80"></label>
+            <label class="field"><span class="label">Email</span><input name="email" type="email" inputmode="email" autocomplete="email" required maxlength="254"></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Starting point</legend>
+          <div class="fieldgrid">
+            <label class="field"><span class="label">Age range</span><select name="ageBand" required><option value="">Choose one</option><option value="under_50">Under 50</option><option value="50_59">50–59</option><option value="60_plus">60+</option></select></label>
+            <label class="field"><span class="label">Sex or gender</span><select name="sexOrGender" required><option value="prefer_not_to_say">Prefer not to say</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option></select></label>
+            <label class="field"><span class="label">Training experience</span><select name="trainingExperience" required><option value="new">Brand new</option><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="experienced">Experienced</option></select></label>
+            <label class="check field"><input id="postpartumStatus" name="postpartumStatus" type="checkbox"><span>Postpartum now <small>This changes the starting plan before anything else.</small></span></label>
+            <p class="postpartum-note field full" id="postpartumNote" hidden>We’ll prioritise a recovery-first starting plan. Add any symptoms or movement concerns below.</p>
+            <label class="field full"><span class="label">Main goal</span><textarea name="goalSummary" maxlength="500" placeholder="For example: feel stronger, move more consistently, or return to training"></textarea></label>
+            <label class="field full"><span class="label">Equipment available</span><textarea name="equipmentSummary" maxlength="500" placeholder="For example: mat, resistance bands, two dumbbells"></textarea></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Anything to work around?</legend>
+          <div class="checks">
+            <label class="check"><input name="constraintFlags" value="fatigue_sensitive" type="checkbox"><span>Energy or fatigue varies significantly</span></label>
+            <label class="check"><input name="constraintFlags" value="balance_concern" type="checkbox"><span>Balance needs extra care</span></label>
+            <label class="check"><input name="constraintFlags" value="mobility_limitation" type="checkbox"><span>Some movements or positions are limited</span></label>
+            <label class="check"><input name="constraintFlags" value="pain_or_injury" type="checkbox"><span>Current pain or injury</span></label>
+            <label class="check"><input name="constraintFlags" value="postpartum_symptoms" type="checkbox"><span>Postpartum symptoms affect movement</span></label>
+          </div>
+          <label class="field" style="margin-top:1rem"><span class="label">Notes for setup</span><textarea name="notes" maxlength="1000" placeholder="Keep this practical. Do not include anything you do not want stored with the account."></textarea></label>
+          <details>
+            <summary>Assignment override (admin only)</summary>
+            <label class="field"><span class="label">Starting-plan override</span><select name="manualOverrideArchetypeId"><option value="">Use the automatic match</option><option value="fit30something">Efficient strength baseline</option><option value="postpartum">Recovery-first foundation</option><option value="active_aging_female_60plus">Strength, mobility and balance</option><option value="active_aging_male_50plus">Healthy-ageing foundation</option></select><span class="hint">Leave this on automatic unless a qualified admin has chosen a specific starting plan.</span></label>
+          </details>
+        </fieldset>
+
+        <label class="check consent"><input name="consent" type="checkbox" required><span>I agree to store these details to create this Do Less account and assigned profile.</span></label>
+        <div class="submitrow">
+          <button class="primary" id="submitSetup" type="submit">Create profile and send link</button>
+          <p class="formstatus" id="formStatus" role="alert" aria-live="polite"></p>
+          <p class="privacy">The sign-in email is only requested after the profile has been created successfully.</p>
+        </div>
+      </form>
+    </section>
+
+    <section class="success" id="setupSuccess" tabindex="-1" hidden>
+      <span class="successmark" aria-hidden="true">✓</span>
+      <p class="eyebrow">Profile ready</p>
+      <h2>Check your email.</h2>
+      <p>The assigned profile was created before we sent the link to <strong id="successEmail"></strong>.</p>
+      <p>Open that secure link to continue to Do Less.</p>
+      <a class="secondary" href="/coach.html">Return to the app</a>
+    </section>
+  </main>
+  <script src="./do-less-setup.js"></script>
+</body>
+</html>

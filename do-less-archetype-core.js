@@ -6,6 +6,7 @@
   'use strict';
 
   const DEFAULT_ARCHETYPE_ID = 'fit30something';
+  const MATCHER_VERSION = '1';
   const APPROVED_ARCHETYPE_IDS = Object.freeze([
     DEFAULT_ARCHETYPE_ID,
     'postpartum',
@@ -137,23 +138,73 @@
     return definitions[id] || null;
   }
 
+  function normaliseMatcherIntake(value){
+    const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+    const rawAge = source.age == null || source.age === '' ? null : Number(source.age);
+    if (rawAge != null && (!Number.isFinite(rawAge) || rawAge < 13 || rawAge > 120)) {
+      throw new RangeError('Age must be between 13 and 120');
+    }
+    const ageBand = String(source.ageBand || 'unspecified').trim().toLowerCase();
+    if (!['unspecified', 'under_50', '50_59', '60_plus'].includes(ageBand)) {
+      throw new RangeError('Unknown age band: ' + ageBand);
+    }
+    const sexOrGender = String(source.sexOrGender || 'prefer_not_to_say').trim().toLowerCase();
+    const postpartumValue = String(source.postpartumStatus == null ? '' : source.postpartumStatus).trim().toLowerCase();
+    return {
+      age:rawAge,
+      ageBand,
+      sexOrGender,
+      postpartumStatus:source.postpartumStatus === true || postpartumValue === 'true' || postpartumValue === 'yes' || postpartumValue === '1',
+      manualOverrideArchetypeId:String(source.manualOverrideArchetypeId || '').trim()
+    };
+  }
+
+  function ageAtLeast(intake, minimum){
+    if (intake.age != null) return intake.age >= minimum;
+    if (minimum >= 60) return intake.ageBand === '60_plus';
+    return intake.ageBand === '50_59' || intake.ageBand === '60_plus';
+  }
+
   function createArchetypeMatcher(){
-    return Object.freeze({
-      matcherVersion:'interface_v1',
-      match:function(){
-        return {
-          status:'deferred',
-          matchedArchetypeId:null,
-          matcherVersion:'interface_v1',
-          assignmentMethod:'matcher',
-          rationale:['Deterministic archetype assignment is deferred to Phase 3.']
-        };
+    function match(value){
+      const intake = normaliseMatcherIntake(value);
+      let matchedArchetypeId = DEFAULT_ARCHETYPE_ID;
+      let assignmentMethod = 'matcher';
+      let rationale = ['Default adult-strength rule applied because no higher-priority rule matched.'];
+
+      if (intake.manualOverrideArchetypeId) {
+        if (!resolveArchetype(intake.manualOverrideArchetypeId)) {
+          throw new RangeError('Unknown Do Less archetype: ' + intake.manualOverrideArchetypeId);
+        }
+        matchedArchetypeId = intake.manualOverrideArchetypeId;
+        assignmentMethod = 'manual_override';
+        rationale = ['Manual override selected during account provisioning.'];
+      } else if (intake.postpartumStatus) {
+        matchedArchetypeId = 'postpartum';
+        rationale = ['Postpartum status takes priority in matcher v1.'];
+      } else if (intake.sexOrGender === 'female' && ageAtLeast(intake, 60)) {
+        matchedArchetypeId = 'active_aging_female_60plus';
+        rationale = ['Female age band starts at 60 in matcher v1.'];
+      } else if (intake.sexOrGender === 'male' && ageAtLeast(intake, 50)) {
+        matchedArchetypeId = 'active_aging_male_50plus';
+        rationale = ['Male age band starts at 50 in matcher v1.'];
       }
-    });
+
+      return Object.freeze({
+        status:'matched',
+        matchedArchetypeId,
+        matcherVersion:MATCHER_VERSION,
+        assignmentMethod,
+        rationale:Object.freeze(rationale)
+      });
+    }
+
+    return Object.freeze({matcherVersion:MATCHER_VERSION, match});
   }
 
   return {
     DEFAULT_ARCHETYPE_ID,
+    MATCHER_VERSION,
     APPROVED_ARCHETYPE_IDS,
     resolveArchetype,
     createArchetypeMatcher

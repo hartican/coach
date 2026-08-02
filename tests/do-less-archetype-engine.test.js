@@ -38,15 +38,15 @@ test('Phase 2 archetype packages expose distinct safe starting policies', () => 
   assert.equal(Object.prototype.hasOwnProperty.call(postpartum, 'label'), false);
 });
 
-test('placeholder archetype matcher makes its deferred status explicit and inspectable', () => {
+test('archetype matcher is deterministic and returns inspectable rationale', () => {
   const matcher = Archetypes.createArchetypeMatcher();
 
-  assert.deepEqual(matcher.match({ageBand:'30-39'}), {
-    status:'deferred',
-    matchedArchetypeId:null,
-    matcherVersion:'interface_v1',
+  assert.deepEqual(matcher.match({ageBand:'under_50'}), {
+    status:'matched',
+    matchedArchetypeId:'fit30something',
+    matcherVersion:'1',
     assignmentMethod:'matcher',
-    rationale:['Deterministic archetype assignment is deferred to Phase 3.']
+    rationale:['Default adult-strength rule applied because no higher-priority rule matched.']
   });
 });
 
