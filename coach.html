@@ -743,6 +743,7 @@
   <script src="./coach-prescription-core.js"></script>
   <script src="./do-less-archetype-core.js"></script>
   <script src="./do-less-session-engine.js"></script>
+  <script src="./do-less-profile-store.js"></script>
   <script>
   (function(){
   'use strict';
@@ -750,9 +751,42 @@
   const Prescription = window.CoachPrescriptionCore;
   const Archetypes = window.DoLessArchetypes;
   const SessionEngineCore = window.DoLessSessionEngine;
-  const ACTIVE_ARCHETYPE_ID = Archetypes.DEFAULT_ARCHETYPE_ID;
-  const KEY = 'hwc_state_v1';
-  const SIGNALS_KEY = 'hwc_signals'; // optional: {dateISO, steps, alcoholUnits} fed by phone automation; never entered manually in-app
+  const ProfileStoreCore = window.DoLessProfileStore;
+  const DEFAULT_PROFILE_INSTANCE_ID = 'local-primary';
+  const localProfileStore = ProfileStoreCore.createLocalProfileStore({
+    storage:localStorage,
+    resolveArchetype:Archetypes.resolveArchetype
+  });
+  const ACTIVE_PROFILE_INSTANCE = localProfileStore.ensureProfileInstance({
+    profileInstanceId:DEFAULT_PROFILE_INSTANCE_ID,
+    userId:'local-user',
+    archetypeId:Archetypes.DEFAULT_ARCHETYPE_ID,
+    assignmentMethod:'manual_override',
+    assignmentReason:'Migrated current local Do Less baseline',
+    isActive:true
+  });
+  localProfileStore.migrateLegacyProfile({profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId});
+  const ACTIVE_ARCHETYPE_ID = ACTIVE_PROFILE_INSTANCE.archetypeId;
+  const KEY = localProfileStore.profileKey(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'state');
+  const SIGNALS_KEY = localProfileStore.profileKey(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'signals'); // optional: {dateISO, steps, alcoholUnits} fed by phone automation; never entered manually in-app
+  const UI_PREFS_KEY = localProfileStore.profileKey(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'ui-prefs');
+  function readUiPreferences(){
+    const preferences = localProfileStore.readProfileValue(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'ui-prefs');
+    return preferences && typeof preferences === 'object' && !Array.isArray(preferences) ? preferences : {};
+  }
+  function writeUiPreferences(patch){
+    localProfileStore.writeProfileValue(
+      ACTIVE_PROFILE_INSTANCE.profileInstanceId,
+      'ui-prefs',
+      Object.assign({}, readUiPreferences(), patch || {})
+    );
+  }
+  window.DoLessLocalProfiles = Object.freeze({
+    activeProfileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId,
+    profileKeys:Object.freeze({state:KEY, signals:SIGNALS_KEY, uiPreferences:UI_PREFS_KEY}),
+    list:function(){ return localProfileStore.listProfileInstances(); },
+    simulateAssignment:function(input){ return localProfileStore.simulateAssignment(input); }
+  });
   const MOMENTUM_SYSTEM_VERSION = 1;
   const SPORT_SCORE_FIELDS = [
     ['durationScore','Duration'],
@@ -1371,6 +1405,7 @@
     const options = opts || {};
     return sessionEngine.generate({
       archetypeId:ACTIVE_ARCHETYPE_ID,
+      profileInstance:ACTIVE_PROFILE_INSTANCE,
       request:{mode, options},
       userState:state,
       readiness:{
@@ -1816,7 +1851,7 @@
   function renderSettings(){
     const p = state.profile || {};
     $('goalSelect').value = state.goal;
-    $('themeSelect').value = localStorage.getItem('hwc_theme_pref') || 'auto';
+    $('themeSelect').value = readUiPreferences().theme || 'auto';
     $('profileUsername').value = p.username || '';
     $('profileName').value = p.name || '';
     $('profileHeight').value = p.height || '';
@@ -1985,11 +2020,12 @@
   }
   function resetCoachData(){
     if (!window.confirm('Reset all Do Less data in this browser? This clears sessions, lifts, profile, signals, and preferences.')) return;
-    localStorage.removeItem(KEY);
-    localStorage.removeItem(SIGNALS_KEY);
+    localProfileStore.clearAllProfileData();
+    localStorage.removeItem('hwc_state_v1');
+    localStorage.removeItem('hwc_signals');
     localStorage.removeItem('hwc_theme_pref');
     localStorage.removeItem('hwc_reminder_enabled');
-    localStorage.removeItem('hwc_deployed_version');
+    localProfileStore.ensureProfileInstance(ACTIVE_PROFILE_INSTANCE);
     state = StateCore.resetSnapshot(defaultState());
     save();
     window.location.reload();
@@ -2453,7 +2489,6 @@
 
   /* ---------- theme: time-of-day with Settings control ---------- */
   (function(){
-    const prefKey = 'hwc_theme_pref';
     const apply = (mode) => {
       if (mode === 'auto'){
         const h = hourNow();
@@ -2462,11 +2497,11 @@
         document.documentElement.setAttribute('data-theme', mode);
       }
     };
-    let pref = localStorage.getItem(prefKey) || 'auto';
+    let pref = readUiPreferences().theme || 'auto';
     apply(pref);
     $('themeSelect').addEventListener('change', event => {
       pref = event.target.value;
-      localStorage.setItem(prefKey, pref);
+      writeUiPreferences({theme:pref});
       apply(pref);
       toast(pref === 'auto' ? 'Theme: Auto' : (pref === 'dark' ? 'Theme: Night' : 'Theme: Day'));
     });

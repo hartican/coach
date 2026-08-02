@@ -5,7 +5,7 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function(){
   'use strict';
 
-  const ENGINE_VERSION = '1';
+  const ENGINE_VERSION = '2';
 
   function isObject(value){
     return !!value && typeof value === 'object' && !Array.isArray(value);
@@ -26,6 +26,12 @@
       const archetypeId = String(source.archetypeId || '').trim();
       const archetype = resolveArchetype(archetypeId);
       if (!archetype) throw new RangeError('Unknown Do Less archetype: ' + archetypeId);
+      const profileInstance = isObject(source.profileInstance) ? source.profileInstance : null;
+      const profileInstanceId = String(profileInstance && profileInstance.profileInstanceId || '').trim();
+      if (!profileInstanceId) throw new TypeError('Session engine requires a profile instance');
+      if (String(profileInstance.archetypeId || '').trim() !== archetype.archetypeId) {
+        throw new RangeError('Profile instance archetype does not match requested archetype');
+      }
 
       const planner = planners[archetype.archetypeId];
       if (typeof planner !== 'function') {
@@ -34,6 +40,7 @@
 
       const plan = planner({
         archetype,
+        profileInstance,
         request:isObject(source.request) ? source.request : {},
         userState:isObject(source.userState) ? source.userState : {},
         readiness:isObject(source.readiness) ? source.readiness : {},
@@ -43,6 +50,7 @@
       if (!isObject(plan)) throw new TypeError('Session planner must return a plan object');
 
       return Object.assign({}, plan, {
+        profileInstanceId,
         archetypeId:archetype.archetypeId,
         archetypeVersion:archetype.version,
         engineVersion

@@ -1,7 +1,7 @@
 # Do Less
 
 Mobile-first, low-admin movement app evolving under the canonical archetype and
-multi-profile specifications in `planning-coach/`. The current Phase 1 build is
+multi-profile specifications in `planning-coach/`. The current Phase 2 build is
 still a standalone browser app: plain HTML/CSS/JS, no build step, no auth, no
 backend, and local browser persistence only.
 
@@ -10,8 +10,9 @@ backend, and local browser persistence only.
 - `coach.html` - the Do Less app, served at the site root.
 - `coach-state-core.js` - versioned local-state and profile migration rules.
 - `coach-prescription-core.js` - upwards-only prescription and completed-load rules.
-- `do-less-archetype-core.js` - approved internal archetype IDs, the `fit30something` baseline, resolver, and placeholder matcher interface.
-- `do-less-session-engine.js` - shared session-engine boundary used by the live app.
+- `do-less-archetype-core.js` - approved internal archetype definitions, resolver, and deferred matcher interface.
+- `do-less-session-engine.js` - profile-instance-aware session-engine boundary used by the live app.
+- `do-less-profile-store.js` - local profile-instance model, isolated storage namespaces, assignment simulation, and legacy-data migration.
 - `tests/` - dependency-free Node regression tests for persistence, prescriptions, archetypes, and engine delegation.
 - `planning-coach/PIPELINE-do-less-archetype-assignment-spec.md` - overriding archetype assignment and phased-delivery contract.
 - `planning-coach/PIPELINE-do-less-multi-profile-architecture.md` - detailed canonical multi-profile architecture.
@@ -28,7 +29,7 @@ backend, and local browser persistence only.
 - Per-exercise countdowns, overtime and PB feedback, plus pause, back, skip, swap, difficulty, and like/dislike controls.
 - Upwards-only in-session rep, hold-time, and load controls with the generated target enforced as the minimum.
 - Global goal, Profile, Key lifts, Appearance, sport configuration, and the Technique library under Settings.
-- Session generator with standard, momentum-reset, travel, and harder-day modes, resolved through the internal `fit30something` baseline.
+- Session generator with standard, momentum-reset, travel, and harder-day modes, resolved through the current internal baseline and active local profile instance.
 - Duration-aware repeat sets, daily variation, environment-aware ordering, and an 8-week progression jump control.
 - Completed-only session logs with exact variants, generated and completed prescriptions, load history, and specific technique-video searches.
 - Daily streak tracking where any completed session counts, including fallback sessions, with three banked cheat-day freezes that refill one at a time every 30 days (maximum bank: three).
@@ -37,16 +38,25 @@ backend, and local browser persistence only.
 
 ## Local Data
 
-Do Less stores data only in this browser using `localStorage`. Nothing is sent to
-a cloud database, no login is required, and data does not sync across devices.
+Do Less stores data only in this browser using profile-instance namespaces in
+`localStorage`. Nothing is sent to a cloud database, no login is required, and
+data does not sync across devices.
 
 The app stores session history, key lifts, profile fields, theme preference,
 optional background signals, and deployed-version state. Browser storage can be
 cleared by the user, browser privacy settings, or device cleanup tools.
 
-Profile reload, import, and reset all use the same versioned migration path.
+The live app uses `local-primary` as its current local profile instance. Existing
+single-user state, signals, and theme data migrate once into that namespace; the
+legacy values remain untouched for recovery. Profile reload, import, and reset
+all use the same versioned migration path.
 Completed exercise logs store generated and completed reps, seconds, and load;
 Key-lift suggestions use those completed values.
+
+Phase 2 also exposes `window.DoLessLocalProfiles` for local development. Its
+`simulateAssignment(...)` method creates additional profile instances without a
+visible account switcher. Intake matching, authentication, and cloud sync remain
+deferred to later phases.
 
 Run the local regression suite with:
 
@@ -59,7 +69,7 @@ Settings -> Import backup to restore that JSON file in another browser. Use
 Settings -> Reset Do Less data to clear local Do Less data in the current browser.
 
 Optional background signals can be written by phone automation to
-`localStorage["hwc_signals"]` in this shape:
+`localStorage["dl:profile:local-primary:signals"]` in this shape:
 
 ```json
 {"dateISO":"YYYY-MM-DD","steps":1234,"alcoholUnits":0}

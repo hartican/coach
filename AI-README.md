@@ -12,6 +12,7 @@ until the relevant later phase is active.
 - Exercise prescription/logging seam: `coach-prescription-core.js`.
 - Archetype definition/resolver seam: `do-less-archetype-core.js`.
 - Shared session-generation seam: `do-less-session-engine.js`.
+- Local profile-instance and namespaced-storage seam: `do-less-profile-store.js`.
 - Regression tests: `tests/*.test.js` using Node's built-in test runner.
 - Overriding canonical spec: `planning-coach/PIPELINE-do-less-archetype-assignment-spec.md`.
 - Detailed canonical architecture: `planning-coach/PIPELINE-do-less-multi-profile-architecture.md`.
@@ -29,8 +30,12 @@ until the relevant later phase is active.
   keep app copy aligned without replacing clear operational labels.
 - Do not add auth or remote persistence before the canonical phase that calls
   for it. Do not add package-manager tooling or a build step unless required.
-- Phase 1 keeps app data local to the browser. Backup/restore uses JSON export
-  and import from Settings; namespaced profile-instance storage begins in Phase 2.
+- Phase 2 keeps app data local to the browser. The live app uses the
+  `local-primary` profile instance and `dl:profile:{profileInstanceId}:*` storage
+  namespaces. Legacy single-user data migrates idempotently and remains available
+  for recovery. Backup/restore still uses JSON export and import from Settings.
+- `window.DoLessLocalProfiles.simulateAssignment(...)` is the local-only Phase 2
+  assignment seam. Deterministic intake matching, auth, and cloud sync are deferred.
 - Internal archetype IDs must never appear in normal user-facing copy.
 - Keep generated prescription values as hard minimums. User-entered rep, time,
   and load adjustments may only increase them, and completed logs must retain
