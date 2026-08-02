@@ -1,0 +1,32 @@
+'use strict';
+
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const root = path.resolve(__dirname, '..');
+const read = file => fs.readFileSync(path.join(root, file), 'utf8');
+
+test('live coach check-in loads the profile-aware boundary and has progressive-disclosure hooks', () => {
+  const html = read('coach.html');
+  assert.match(html, /<script src="\.\/do-less-checkin-core\.js"><\/script>/);
+  for (const id of ['trainingIntentQuestion', 'trainingIntentTitle', 'trainingIntentOptions', 'profileSignalQuestion', 'profileSignalTitle', 'profileSignalOptions', 'environmentQuestion']) {
+    assert.match(html, new RegExp('id="' + id + '"'));
+  }
+  assert.match(read('sw.js'), /'\/do-less-checkin-core\.js'/);
+});
+
+test('dedicated admin route exposes guarded review and override controls outside the normal app', () => {
+  const html = read('admin.html');
+  const vercel = JSON.parse(read('vercel.json'));
+  assert.deepEqual(vercel.rewrites.find(rule => rule.source === '/admin'), {source:'/admin', destination:'/admin.html'});
+  for (const id of ['adminLookupForm', 'adminCode', 'accountEmail', 'reviewPanel', 'internalArchetypeId', 'assignmentRationale', 'latestRationale', 'adaptationHistory', 'overrideForm', 'overridePlan', 'overrideReason', 'overrideConfirmed']) {
+    assert.match(html, new RegExp('id="' + id + '"'));
+  }
+  assert.match(html, /<script src="\.\/do-less-admin\.js"><\/script>/);
+  assert.match(html, /Administrative view/i);
+  assert.match(read('sw.js'), /'\/admin\.html'/);
+  assert.match(read('sw.js'), /'\/do-less-admin\.js'/);
+  assert.doesNotMatch(read('setup.html'), /href="\/admin"/i);
+});

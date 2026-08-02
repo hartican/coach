@@ -1,15 +1,23 @@
-const CACHE_NAME = 'do-less-cache-20260802T095649Z';
+const CACHE_NAME = 'do-less-cache-20260802T151042Z';
 const PRECACHE_URLS = [
   '/',
   '/index.html',
   '/coach.html',
   '/setup.html',
+  '/admin.html',
   '/coach-state-core.js',
   '/coach-prescription-core.js',
   '/do-less-archetype-core.js',
   '/do-less-session-engine.js',
   '/do-less-profile-store.js',
+  '/do-less-checkin-core.js',
+  '/do-less-adaptation-core.js',
+  '/do-less-sync-core.js',
+  '/do-less-profile-planners.js',
+  '/do-less-supabase-sync.js',
+  '/do-less-cloud.js',
   '/do-less-setup.js',
+  '/do-less-admin.js',
   '/manifest.json',
   '/version.json',
   '/assets/icon-180.png',
@@ -55,6 +63,7 @@ self.addEventListener('notificationclick', event => {
 
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
+  if (url.origin === self.location.origin && url.pathname.startsWith('/api/')) return;
   const isHTML = event.request.mode === 'navigate' ||
     (event.request.headers.get('accept') || '').includes('text/html') ||
     url.pathname === '/version.json';

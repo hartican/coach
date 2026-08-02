@@ -11,6 +11,9 @@
   <link rel="icon" href="./assets/icon-180.png" type="image/png">
   <link rel="apple-touch-icon" href="./assets/icon-180.png">
   <link rel="manifest" href="./manifest.json">
+  <script>
+    document.documentElement.setAttribute('data-cloud-auth-pending', 'true');
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -44,6 +47,8 @@
     [hidden]{display:none !important}
     .visually-hidden{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     html,body{height:100%}
+    html[data-cloud-auth-pending="true"] .app{visibility:hidden}
+    html[data-cloud-auth-pending="true"] body::before{content:'Opening your plan…';position:fixed;inset:0;display:grid;place-items:center;background:var(--color-bg);color:var(--color-primary);font-family:var(--font-body);font-size:var(--text-sm);font-weight:750;letter-spacing:.02em;z-index:9999}
     body{margin:0;font-family:var(--font-body);font-size:var(--text-base);line-height:1.55;background:var(--color-bg);color:var(--color-text);-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
     button{font:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer}
     input,select{font:inherit}
@@ -59,6 +64,12 @@
     .daylabel{font-size:var(--text-xs);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-faint)}
     .topactions{display:flex;align-items:center;gap:.45rem}
     .topaction{border:0;background:transparent;color:var(--color-text-muted);padding:.4rem .2rem;font-size:var(--text-xs);font-weight:750}
+    .syncpill{display:inline-flex;align-items:center;gap:.35rem;border:0;background:transparent;color:var(--color-text-muted);padding:.4rem .2rem;font-size:var(--text-xs);font-weight:750;max-width:8.5rem}
+    .syncpill::before{content:'';width:.48rem;height:.48rem;border-radius:50%;background:var(--color-text-faint);flex:none;transition:background .2s ease,transform .2s ease}
+    .syncpill[data-mode="synced"]::before{background:var(--color-good)}
+    .syncpill[data-mode="syncing"]::before,.syncpill[data-mode="loading"]::before{background:var(--color-primary);transform:scale(1.25)}
+    .syncpill[data-mode="pending"]::before,.syncpill[data-mode="error"]::before{background:var(--color-amber)}
+    .syncpill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     .aboutpanel{margin:.55rem 0 .2rem;padding:.9rem 0;border-top:1px solid var(--color-line);border-bottom:1px solid var(--color-line);font-size:var(--text-sm);color:var(--color-text-muted)}
     .aboutpanel strong{display:block;color:var(--color-text);font-family:var(--font-display);font-size:var(--text-lg);font-weight:400}
     .aboutpanel p{margin:.25rem 0}
@@ -290,6 +301,11 @@
     .settingsblock{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--color-line)}
     .settingsblock h3{font-family:var(--font-display);font-size:var(--text-lg);font-weight:400;margin:0 0 .25rem}
     .settingsblock > p{font-size:var(--text-sm);color:var(--color-text-muted);margin:.1rem 0 .8rem}
+    .accountline{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;padding:.55rem 0}
+    .accountline strong{display:block;font-size:var(--text-sm)}
+    .accountline span{display:block;color:var(--color-text-muted);font-size:var(--text-xs);overflow-wrap:anywhere}
+    .accountactions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.55rem}
+    .accountactions .smallaction{min-height:42px}
     .settingrow{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.65rem 0;border-bottom:1px solid var(--color-line);font-size:var(--text-sm)}
     .settingrow input[type="time"]{border:1px solid var(--color-line);border-radius:.6rem;background:var(--color-surface-2);color:var(--color-text);padding:.45rem}
     .settingrow input[type="checkbox"]{width:20px;height:20px;accent-color:var(--color-primary)}
@@ -368,6 +384,7 @@
       <div class="topstrip">
         <span class="wordmark">Do Less</span>
         <div class="topactions">
+          <button id="cloudStatusButton" class="syncpill" type="button" data-mode="local" aria-label="Account and sync status"><span id="cloudStatusShort">Local</span></button>
           <button id="aboutToggle" class="topaction" type="button" aria-expanded="false" aria-controls="aboutPanel">About</button>
           <button id="dayLabel" class="daylabel" aria-expanded="false" aria-controls="dayHelp">PM full</button>
         </div>
@@ -451,9 +468,9 @@
           </div>
         </div>
 
-        <div class="qblock">
-          <h2>What do you feel like training?</h2>
-          <div class="qopts" data-q="train">
+        <div class="qblock" id="trainingIntentQuestion">
+          <h2 id="trainingIntentTitle">What do you feel like training?</h2>
+          <div class="qopts" id="trainingIntentOptions" data-q="train">
             <button class="qopt" data-v="goal" type="button" aria-pressed="false">Whatever serves the goal</button>
             <button class="qopt" data-v="legs" type="button" aria-pressed="false">Legs &amp; glutes</button>
             <button class="qopt" data-v="push" type="button" aria-pressed="false">Push &amp; upper</button>
@@ -462,7 +479,12 @@
           </div>
         </div>
 
-        <div class="qblock">
+        <div class="qblock" id="profileSignalQuestion" hidden>
+          <h2 id="profileSignalTitle">How does movement feel today?</h2>
+          <div class="qopts" id="profileSignalOptions" data-q="profileSignal"></div>
+        </div>
+
+        <div class="qblock" id="environmentQuestion">
           <h2>Where are you training?</h2>
           <div class="qopts" data-q="environment">
             <button class="qopt" data-v="indoor" type="button" aria-pressed="false">Indoor</button>
@@ -598,9 +620,23 @@
     <section class="view hiddenview" id="view-settings">
       <div class="plan-head"><h2 class="display">Settings</h2></div>
       <div class="settingsform">
+        <section class="settingsblock" aria-labelledby="accountSettingsTitle" id="accountSettings">
+          <h3 id="accountSettingsTitle">Account &amp; sync</h3>
+          <p id="accountStatusCopy">Your sessions are saved on this device.</p>
+          <div class="accountline">
+            <div><strong id="accountStatusTitle">Local only</strong><span id="accountEmail">No account connected</span></div>
+            <span id="accountPending">0 waiting</span>
+          </div>
+          <div class="accountactions">
+            <button class="smallaction" id="syncNow" type="button" hidden>Sync now</button>
+            <button class="smallaction" id="signOut" type="button" hidden>Sign out</button>
+            <a class="smallaction" id="accountSetupLink" href="/setup">Set up an account</a>
+          </div>
+        </section>
+
         <section class="settingsblock" aria-labelledby="appSettingsTitle">
           <h3 id="appSettingsTitle">App</h3>
-          <label>Goal
+          <label id="goalSetting">Goal
             <select id="goalSelect">
               <option value="abs">Visible abs</option>
               <option value="chain">Anterior &amp; posterior chain</option>
@@ -635,7 +671,7 @@
           <button class="startsecondary" id="saveProfile" type="button">Save profile</button>
         </section>
 
-        <section class="settingsblock" aria-labelledby="keyLiftSettingsTitle">
+        <section class="settingsblock" aria-labelledby="keyLiftSettingsTitle" id="keyLiftSettings">
           <h3 id="keyLiftSettingsTitle">Key lifts</h3>
           <p>Edit your baseline. Suggestions use only exercises you actually logged.</p>
           <div class="keyliftedit" id="keyLiftEditor"></div>
@@ -688,7 +724,7 @@
 
         <div class="localdata">
           <h3>Local data</h3>
-          <p>Do Less data lives only in this browser. Export a backup before clearing site data or moving phones.</p>
+          <p>This browser keeps an offline copy. If no account is connected, export a backup before clearing site data or moving phones.</p>
           <div class="databtns">
             <button class="databtn" id="exportData" type="button">Export backup</button>
             <label class="databtn" for="importData">Import backup</label>
@@ -752,6 +788,12 @@
   <script src="./do-less-archetype-core.js"></script>
   <script src="./do-less-session-engine.js"></script>
   <script src="./do-less-profile-store.js"></script>
+  <script src="./do-less-checkin-core.js"></script>
+  <script src="./do-less-adaptation-core.js"></script>
+  <script src="./do-less-sync-core.js"></script>
+  <script src="./do-less-profile-planners.js"></script>
+  <script src="./do-less-supabase-sync.js"></script>
+  <script src="./do-less-cloud.js"></script>
   <script>
   (function(){
   'use strict';
@@ -760,20 +802,29 @@
   const Archetypes = window.DoLessArchetypes;
   const SessionEngineCore = window.DoLessSessionEngine;
   const ProfileStoreCore = window.DoLessProfileStore;
+  const CheckInCore = window.DoLessCheckIn;
+  const AdaptationCore = window.DoLessAdaptation;
+  const SyncCore = window.DoLessSync;
+  const ProfilePlanners = window.DoLessProfilePlanners;
+  const SupabaseSync = window.DoLessSupabaseSync;
+  const CloudCore = window.DoLessCloud;
   const DEFAULT_PROFILE_INSTANCE_ID = 'local-primary';
   const localProfileStore = ProfileStoreCore.createLocalProfileStore({
     storage:localStorage,
     resolveArchetype:Archetypes.resolveArchetype
   });
-  const ACTIVE_PROFILE_INSTANCE = localProfileStore.ensureProfileInstance({
-    profileInstanceId:DEFAULT_PROFILE_INSTANCE_ID,
-    userId:'local-user',
-    archetypeId:Archetypes.DEFAULT_ARCHETYPE_ID,
-    assignmentMethod:'manual_override',
-    assignmentReason:'Migrated current local Do Less baseline',
-    isActive:true
-  });
-  localProfileStore.migrateLegacyProfile({profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId});
+  const cloudProfileHint = CloudCore.readProfileHint(localStorage, Archetypes.resolveArchetype);
+  const ACTIVE_PROFILE_INSTANCE = cloudProfileHint
+    ? localProfileStore.upsertProfileInstance(cloudProfileHint)
+    : localProfileStore.ensureProfileInstance({
+      profileInstanceId:DEFAULT_PROFILE_INSTANCE_ID,
+      userId:'local-user',
+      archetypeId:Archetypes.DEFAULT_ARCHETYPE_ID,
+      assignmentMethod:'manual_override',
+      assignmentReason:'Migrated current local Do Less baseline',
+      isActive:true
+    });
+  if (!cloudProfileHint) localProfileStore.migrateLegacyProfile({profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId});
   const ACTIVE_ARCHETYPE_ID = ACTIVE_PROFILE_INSTANCE.archetypeId;
   const KEY = localProfileStore.profileKey(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'state');
   const SIGNALS_KEY = localProfileStore.profileKey(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'signals'); // optional: {dateISO, steps, alcoholUnits} fed by phone automation; never entered manually in-app
@@ -795,6 +846,14 @@
     list:function(){ return localProfileStore.listProfileInstances(); },
     simulateAssignment:function(input){ return localProfileStore.simulateAssignment(input); }
   });
+  const syncQueue = SyncCore.createPendingEventQueue({
+    profileStore:localProfileStore,
+    profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId
+  });
+  const adaptationEngine = AdaptationCore.create();
+  let cloudRuntime = null;
+  let cloudUiState = {mode:'local', message:'Saved on this device', pending:0, email:''};
+  function notifyCloudPending(){ if (cloudRuntime) cloudRuntime.notifyPending(); }
   const MOMENTUM_SYSTEM_VERSION = 1;
   const SPORT_SCORE_FIELDS = [
     ['durationScore','Duration'],
@@ -840,7 +899,13 @@
     rope:       {name:'Rope sprint', cat:'Burst', demo:'jump+rope+basics', cue:'Crisp and powerful. Stop before technique breaks.', how:'20–30 seconds of fast skipping. Soft knees, small bounces, wrists doing the spinning. Stop before the form frays.'},
     bandknees:  {name:'Band high knees', cat:'Burst', demo:'high+knees+exercise+form', cue:'Fast, punchy knees.', how:'Band around the thighs or feet, run on the spot with fast, punchy knees. Short, sharp, done.'},
     thrusters:  {name:'DB thrusters', cat:'Burst', demo:'dumbbell+thruster+form', cue:'Smooth rhythm, full lockout overhead.', how:'Light dumbbells at the shoulders. Squat, then drive them overhead in one motion as you stand. Smooth rhythm beats frantic speed.'},
-    pogo:       {name:'Fast march / low pogo hops', cat:'Burst', demo:'pogo+hops+exercise', cue:'Quiet and springy, twenty seconds.', how:'Quiet, springy little hops on the spot — or a hard, fast march if hopping isn’t friendly today. Low impact, high heart rate.'}
+    pogo:       {name:'Fast march / low pogo hops', cat:'Burst', demo:'pogo+hops+exercise', cue:'Quiet and springy, twenty seconds.', how:'Quiet, springy little hops on the spot — or a hard, fast march if hopping isn’t friendly today. Low impact, high heart rate.'},
+    breath_brace:{name:'Breath + gentle brace', cat:'Core', demo:'diaphragmatic+breathing+gentle+core+brace', cue:'Slow breath out, then a light brace. Nothing forced.', how:'Lie or sit comfortably. Breathe out slowly, then add a gentle low-level brace without holding your breath.'},
+    chair_squat:{name:'Supported sit-to-stand', cat:'Strength', key:'squat', demo:'chair+sit+to+stand+exercise', cue:'Use the chair and hands as much as helps you move confidently.', how:'Stand from a firm chair with feet planted, then sit back down under control. Use hand support whenever it improves comfort or confidence.', stable:true},
+    wall_push:  {name:'Wall push', cat:'Strength', key:'push', demo:'wall+push+up+form', cue:'Keep the body long and move only through a comfortable range.', how:'Hands on a wall around chest height. Bend the elbows to bring the body toward the wall, then press away smoothly.', stable:true},
+    seated_march:{name:'Seated march', cat:'Warm-up', demo:'seated+march+exercise', cue:'Sit tall and lift one foot at a time without rushing.', how:'Sit toward the front of a stable chair and alternate lifting each foot. Keep the movement smooth and comfortable.', stable:true},
+    heel_raise: {name:'Supported heel raises', cat:'Strength', demo:'standing+heel+raise+with+chair', cue:'Keep one or both hands supported and rise slowly.', how:'Hold a chair or wall, rise onto the balls of the feet, pause, then lower with control.', stable:true},
+    supported_balance:{name:'Supported single-leg balance', cat:'Core', demo:'supported+single+leg+balance+exercise', cue:'Keep fingertips on the support. Confidence matters more than letting go.', how:'Stand beside a chair or wall and lighten one foot while keeping support within reach. Swap sides before fatigue changes your posture.', stable:true}
   };
   const SUBS = { carry:'bandhinge', pallof:'plank', sideplank:'plank', rope:'pogo', thrusters:'bandknees' };
   const ALL_CATS = ['Warm-up','Strength','Core','Burst'];
@@ -856,8 +921,14 @@
     revlunge:'lunge', splitlunge:'lunge',
     bridge:'hinge', hipthrust:'hinge', bandhinge:'hinge', carry:'carry',
     bandrow:'pull', plank:'core', taps:'core', sideplank:'core', pallof:'core',
-    rope:'burst', bandknees:'burst', thrusters:'burst', pogo:'burst'
+    rope:'burst', bandknees:'burst', thrusters:'burst', pogo:'burst',
+    breath_brace:'core', chair_squat:'squat', wall_push:'push', seated_march:'warmup', heel_raise:'balance', supported_balance:'balance'
   };
+  const PROFILE_SAFE_EXERCISES = Object.freeze({
+    postpartum:new Set(['breath_brace','bridge','bandrow','chair_squat','wall_push','seated_march']),
+    active_aging_female_60plus:new Set(['seated_march','chair_squat','wall_push','heel_raise','supported_balance','bandrow']),
+    active_aging_male_50plus:new Set(['seated_march','chair_squat','wall_push','heel_raise','supported_balance','bandrow'])
+  });
   const EX_GOALS = {
     push:['push','pull'], legs:['squat','lunge','hinge','carry'], core:['core'],
     abs:['core','burst'], chain:['squat','lunge','hinge','pull'], upper:['push','pull','carry']
@@ -875,6 +946,21 @@
   function defaultSettings(){
     return {reminderEnabled:true, reminderTimeLocal:'19:00', trainingWindowStartLocal:'17:00', trainingWindowEndLocal:'21:30', bleedEnabled:true, momentumExplanations:true, lastEnvironment:'indoor', sports:DEFAULT_SPORTS.map(s => Object.assign({}, s))};
   }
+  function defaultAdaptiveState(){
+    return {
+      currentPhase:1,
+      currentStreak:0,
+      lastCompletedAt:null,
+      lastProgressionAt:null,
+      readinessBaseline:{},
+      complianceScore:null,
+      preferredSessionLength:null,
+      activeConstraints:[],
+      lastRecommendationType:'steady',
+      stateVersion:1,
+      updatedAt:null
+    };
+  }
   function defaultState(){
     return {
       profileSchemaVersion:StateCore.PROFILE_SCHEMA_VERSION,
@@ -883,7 +969,7 @@
       lastHashes:[], exercisePreferences:{}, familyPreferences:{}, setPreferences:{}, exercisePB:{},
       streakFreezeCount:2, signupFreezeGranted:true, streakFreezeUses:[], bonusWorkoutCounter:0, dayRewardLedger:{}, freezeEarnedByDate:{},
       lastDayEvaluatedLocal:todayISO(), momentumSystemVersion:MOMENTUM_SYSTEM_VERSION, settings:defaultSettings(), maxStreak:0,
-      profile:StateCore.defaultProfile()
+      profile:StateCore.defaultProfile(), adaptiveState:defaultAdaptiveState(), readinessHistory:[], liftSnapshots:[], adaptationEvents:[]
     };
   }
   let profileRewriteNeeded = false;
@@ -910,6 +996,21 @@
     }catch(e){}
   }
   let state = load();
+  function enqueueSync(type, payload, options){
+    if (!cloudProfileHint) return null;
+    const event = syncQueue.enqueue(type, Object.assign({}, payload || {}, {
+      profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId
+    }), options || {});
+    notifyCloudPending();
+    return event;
+  }
+  function adaptiveStatePayload(){
+    return Object.assign({}, state.adaptiveState, {
+      profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId,
+      currentStreak:streakSnapshot ? streakSnapshot().count : Number(state.adaptiveState.currentStreak) || 0,
+      updatedAt:state.adaptiveState.updatedAt || new Date().toISOString()
+    });
+  }
   function normaliseSport(sport, index){
     const safe = {id:String(sport && sport.id || 'sport-' + index), name:String(sport && sport.name || 'Sport ' + (index + 1))};
     SPORT_SCORE_FIELDS.forEach(([key]) => { safe[key] = clampInputScore(sport && sport[key]); });
@@ -933,12 +1034,16 @@
       sessionId:String(entry && entry.sessionId || 'legacy-' + String(entry && entry.date || todayISO()) + '-' + index),
       date:String(entry && entry.date || todayISO()),
       sourceType:source,
+      profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId,
+      sessionPlanId:entry && (entry.sessionPlanId || entry.session_plan_id) || null,
+      startedAt:entry && (entry.startedAt || entry.started_at) || null,
       isProvisional:source === 'sport_provisional' ? true : !!(entry && entry.isProvisional),
       sessionScore:clampSessionScore(entry && entry.sessionScore),
       exercises:Array.isArray(entry && entry.exercises)
         ? entry.exercises.filter(exercise => exercise && exercise.exId && exercise.completed !== false).map(normaliseLoggedExercise)
         : [],
-      completedAtLocal:String(entry && entry.completedAtLocal || String(entry && entry.date || todayISO()) + 'T12:00:00')
+      completedAtLocal:String(entry && entry.completedAtLocal || String(entry && entry.date || todayISO()) + 'T12:00:00'),
+      updatedAt:String(entry && (entry.updatedAt || entry.updated_at) || entry && entry.completedAtLocal || new Date().toISOString())
     });
   }
   function ensureMomentumState(){
@@ -955,6 +1060,12 @@
     state.familyPreferences = state.familyPreferences && typeof state.familyPreferences === 'object' ? state.familyPreferences : {};
     state.setPreferences = state.setPreferences && typeof state.setPreferences === 'object' ? state.setPreferences : {};
     state.exercisePB = state.exercisePB && typeof state.exercisePB === 'object' ? state.exercisePB : {};
+    state.adaptiveState = Object.assign(defaultAdaptiveState(), state.adaptiveState && typeof state.adaptiveState === 'object' ? state.adaptiveState : {});
+    state.adaptiveState.activeConstraints = Array.isArray(state.adaptiveState.activeConstraints) ? state.adaptiveState.activeConstraints.map(String) : [];
+    state.adaptiveState.readinessBaseline = state.adaptiveState.readinessBaseline && typeof state.adaptiveState.readinessBaseline === 'object' ? state.adaptiveState.readinessBaseline : {};
+    state.readinessHistory = Array.isArray(state.readinessHistory) ? state.readinessHistory : [];
+    state.liftSnapshots = Array.isArray(state.liftSnapshots) ? state.liftSnapshots : [];
+    state.adaptationEvents = Array.isArray(state.adaptationEvents) ? state.adaptationEvents : [];
     if (state.signupFreezeGranted !== true) state.signupFreezeGranted = true;
 
     if (state.momentumSystemVersion !== MOMENTUM_SYSTEM_VERSION){
@@ -987,6 +1098,12 @@
   ensureMomentumState();
 
   const GOALS = {abs:'Visible abs', chain:'Anterior & posterior chain', upper:'Upper body'};
+  function isFitBaseline(){ return ACTIVE_ARCHETYPE_ID === Archetypes.DEFAULT_ARCHETYPE_ID; }
+  function activeFocusLabel(){
+    if (ACTIVE_ARCHETYPE_ID === 'postpartum') return 'Gentle strength';
+    if (ACTIVE_ARCHETYPE_ID === 'active_aging_female_60plus' || ACTIVE_ARCHETYPE_ID === 'active_aging_male_50plus') return 'Strength & balance';
+    return GOALS[state.goal] || GOALS.abs;
+  }
 
   function readSignals(){
     try{
@@ -1064,11 +1181,85 @@
     save();
     return {level:summary.level, bonusAdded:added, freezesEarned};
   }
+  function isoFromLocal(value){
+    const date = new Date(String(value || ''));
+    return Number.isFinite(date.getTime()) ? date.toISOString() : new Date().toISOString();
+  }
+  function completionForSync(rec){
+    const exercises = Array.isArray(rec.exercises) ? rec.exercises : [];
+    const completedAt = rec.completedAt || isoFromLocal(rec.completedAtLocal);
+    return Object.assign({}, rec, {
+      id:rec.sessionId,
+      profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId,
+      sessionPlanId:rec.sessionPlanId || null,
+      startedAt:rec.startedAt || null,
+      completedAt,
+      completionStatus:rec.isProvisional ? 'partial' : 'complete',
+      actualDurationMin:Math.max(0, Math.round((Number(rec.seconds) || 0) / 6) / 10),
+      rpeSimple:exercises.length && exercises.every(exercise => exercise.difficulty === 'easy') ? 'easy' : exercises.length ? 'medium' : null,
+      symptomFlags:Array.isArray(rec.symptomFlags) ? rec.symptomFlags : [],
+      userFeedback:String(rec.userFeedback || ''),
+      streakAwarded:!rec.isProvisional,
+      completionPayload:rec,
+      updatedAt:String(rec.updatedAt || new Date().toISOString())
+    });
+  }
+  function queueSessionCompletion(rec){
+    const payload = completionForSync(rec);
+    enqueueSync('session_completion', payload, {id:'queue-completion-' + rec.sessionId, updatedAt:payload.updatedAt});
+  }
+  function runProfileAdaptation(rec){
+    const timestamp = new Date().toISOString();
+    const result = adaptationEngine.evaluate({
+      archetype:Archetypes.resolveArchetype(ACTIVE_ARCHETYPE_ID),
+      profileInstance:ACTIVE_PROFILE_INSTANCE,
+      userState:state.adaptiveState,
+      recentCompletions:state.sessions.slice(-8).map(completionForSync),
+      recentReadiness:state.readinessHistory.slice(-8),
+      recentLiftSnapshots:state.liftSnapshots.slice(-8)
+    });
+    state.adaptiveState = Object.assign({}, state.adaptiveState, result.statePatch, {
+      currentStreak:streakSnapshot().count,
+      lastCompletedAt:rec && isoFromLocal(rec.completedAtLocal),
+      updatedAt:timestamp
+    });
+    result.generatedEvents.forEach(event => {
+      state.adaptationEvents.push(event);
+      enqueueSync('adaptation_event', event, {id:'queue-' + event.id, updatedAt:event.updatedAt});
+    });
+    state.adaptationEvents = state.adaptationEvents.slice(-80);
+    save();
+    enqueueSync('user_state', adaptiveStatePayload(), {id:'queue-user-state', updatedAt:timestamp});
+    return result;
+  }
+  function queueLiftSnapshots(rec){
+    const timestamp = new Date().toISOString();
+    (rec && Array.isArray(rec.exercises) ? rec.exercises : []).forEach((exercise, index) => {
+      const prescription = Prescription.normaliseLog(exercise);
+      if (prescription.completedReps == null && prescription.completedLoadKg == null && prescription.completedSeconds == null) return;
+      const snapshot = {
+        id:rec.sessionId + '-' + exercise.exId + '-' + String(exercise.setNumber || index + 1),
+        profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId,
+        exerciseFamily:EX_FAMILY[exercise.exId] || 'other',
+        exerciseId:exercise.exId,
+        bestReps:prescription.completedReps,
+        bestLoad:prescription.completedLoadKg,
+        bestHoldSeconds:prescription.completedSeconds,
+        snapshotDate:rec.date,
+        createdAt:timestamp,
+        updatedAt:timestamp
+      };
+      state.liftSnapshots = SyncCore.reconcileRecords(state.liftSnapshots, [snapshot]).slice(-80);
+      enqueueSync('lift_snapshot', snapshot, {id:'queue-lift-' + snapshot.id, updatedAt:timestamp});
+    });
+  }
   function registerSession(entry){
     const rec = normaliseSession(entry, state.sessions.length);
     state.sessions.push(rec);
     const reward = applyDayRewards(rec.date);
     save();
+    queueSessionCompletion(rec);
+    if (!rec.isProvisional) runProfileAdaptation(rec);
     return {session:rec, reward};
   }
   function sessionDates(referenceDate){
@@ -1167,6 +1358,14 @@
     return labels[emphasis] || labels[focusFrom(emphasis)] || 'the goal';
   }
   function modeReason(mode, time, emphasis, source){
+    if (ACTIVE_ARCHETYPE_ID !== Archetypes.DEFAULT_ARCHETYPE_ID) {
+      const parts = [];
+      if (time) parts.push(time + ' minutes available');
+      if (state.adaptiveState.activeConstraints.length) parts.push('kept gentle from recent feedback');
+      else if (Number(state.adaptiveState.preferredSessionLength) <= 10) parts.push('short wins have been working');
+      else parts.push('steady work matched to today');
+      return parts.join(' · ') + '.';
+    }
     const parts = [];
     if (source === 'quick') parts.push('Quick start rolled this inside your limits');
     else parts.push((time || 20) + ' minutes available');
@@ -1402,35 +1601,154 @@
     return {mode, steps, hash, week:wk, timeBudget, environment, focus, plannedSeconds:plannedSecondsFor(steps)};
   }
 
+  function currentRecommendationBias(){
+    return {
+      favourShorterSessions:Number(state.adaptiveState.preferredSessionLength) > 0 && Number(state.adaptiveState.preferredSessionLength) <= 10,
+      reduceComplexity:Array.isArray(state.adaptiveState.activeConstraints) && state.adaptiveState.activeConstraints.length > 0,
+      unlockNextProgression:state.adaptiveState.lastRecommendationType === 'small_progression'
+    };
+  }
+
+  function buildProfileStarterSession(archetype, request){
+    const plan = ProfilePlanners.build({
+      archetypeId:archetype.archetypeId,
+      request,
+      recommendationBias:currentRecommendationBias()
+    });
+    const environment = request.options && ['indoor','outdoor','both'].includes(request.options.environment) ? request.options.environment : 'indoor';
+    const steps = plan.stepSpecs.map(spec => makeStep(EX[spec.exId], spec.target, spec.restSec, spec.block));
+    assignSetNumbers(steps);
+    return {
+      mode:plan.mode,
+      steps,
+      hash:steps.map(step => step.exId + ':' + step.setNumber).join('|') + '|' + plan.mode,
+      week:Math.max(1, Number(state.adaptiveState.currentPhase) || 1),
+      timeBudget:plan.timeBudget,
+      environment,
+      focus:'steady',
+      plannedSeconds:plannedSecondsFor(steps),
+      rationale:plan.rationale,
+      cautionLevel:plan.cautionLevel,
+      substitutions:plan.substitutions,
+      completionRule:plan.completionRule,
+      nextBestFallback:plan.nextBestFallback
+    };
+  }
+
   const sessionEngine = SessionEngineCore.create({
     resolveArchetype:Archetypes.resolveArchetype,
     planners:{
-      fit30something:({archetype, request}) => buildFit30somethingSession(request.mode, request.options, archetype)
+      fit30something:({archetype, request}) => buildFit30somethingSession(request.mode, request.options, archetype),
+      postpartum:({archetype, request}) => buildProfileStarterSession(archetype, request),
+      active_aging_female_60plus:({archetype, request}) => buildProfileStarterSession(archetype, request),
+      active_aging_male_50plus:({archetype, request}) => buildProfileStarterSession(archetype, request)
     }
   });
 
   function buildSession(mode, opts){
-    const options = opts || {};
+    const options = Object.assign({}, opts || {});
+    if (options.variationSeed == null) options.variationSeed = state.sessions.length;
     return sessionEngine.generate({
       archetypeId:ACTIVE_ARCHETYPE_ID,
       profileInstance:ACTIVE_PROFILE_INSTANCE,
       request:{mode, options},
-      userState:state,
+      userState:state.adaptiveState,
       readiness:{
         timeBudget:Number(options.time) || null,
         emphasis:options.emphasis || 'goal',
+        confidence:options.confidence || null,
+        symptomGate:options.symptomGate || null,
         lowerEnergy:signalsBad()
       },
-      recentCompletions:state.sessions.slice(-8),
+      recentCompletions:state.sessions.slice(-8).map(entry => Object.assign({profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId}, entry)),
       now:new Date().toISOString()
     });
   }
 
-  /* ---------- quiz + quick start ---------- */
-  const MODE_LABEL = {standard:'Standard', fallback:'Momentum reset', travel:'Travel', harder:'Harder day'};
+  function recordReadiness(input){
+    const source = input || {};
+    const timestamp = new Date().toISOString();
+    const readiness = {
+      id:newId('readiness'),
+      profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId,
+      loggedAt:timestamp,
+      updatedAt:timestamp,
+      energyLevel:source.energyLevel == null ? null : Number(source.energyLevel),
+      timeBudgetChoice:source.timeBudgetChoice == null ? null : Number(source.timeBudgetChoice),
+      trainingIntent:String(source.trainingIntent || ''),
+      symptomFlags:Array.isArray(source.symptomFlags) ? source.symptomFlags : [],
+      confidenceLevel:String(source.confidenceLevel || ''),
+      notes:String(source.notes || '')
+    };
+    state.readinessHistory.push(readiness);
+    state.readinessHistory = state.readinessHistory.slice(-40);
+    save();
+    enqueueSync('readiness_log', readiness, {id:'queue-' + readiness.id, updatedAt:timestamp});
+    return readiness;
+  }
 
-  // quiz state: 'state' sets both mood and energy (keeps the flow to 3 starter questions)
-  const quiz = {mood:null, energy:null, time:null, train:null, environment:null};
+  function recommendationReason(plan, fallback){
+    const reasons = Array.isArray(plan && plan.rationale) ? plan.rationale.filter(Boolean) : [];
+    if (reasons.length) return reasons[0];
+    if (state.adaptiveState.activeConstraints.length) return 'Recent feedback keeps today gentler and simpler.';
+    if (Number(state.adaptiveState.preferredSessionLength) > 0 && Number(state.adaptiveState.preferredSessionLength) <= 10) {
+      return 'Short sessions have been the most consistent lately, so today stays compact.';
+    }
+    return fallback || 'Built for your time, energy, and current goal.';
+  }
+
+  function attachPlanSync(plan, reason){
+    if (!plan.planId) plan.planId = newId('plan');
+    if (!plan.generatedAt) plan.generatedAt = new Date().toISOString();
+    const rationale = Array.isArray(plan.rationale) && plan.rationale.length ? plan.rationale : [reason].filter(Boolean);
+    enqueueSync('session_plan', {
+      id:plan.planId,
+      profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId,
+      generatedAt:plan.generatedAt,
+      updatedAt:plan.generatedAt,
+      sessionType:plan.mode,
+      timeBudgetMin:Number(plan.timeBudget) || Math.max(1, Math.round(Number(plan.plannedSeconds) / 60) || 1),
+      planPayload:plan,
+      generationReason:rationale,
+      engineVersion:plan.engineVersion,
+      archetypeVersion:plan.archetypeVersion
+    }, {id:'queue-' + plan.planId, updatedAt:plan.generatedAt});
+    localProfileStore.writeProfileValue(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'last-plan', plan);
+    return plan;
+  }
+
+  /* ---------- quiz + quick start ---------- */
+  const MODE_LABEL = {
+    standard:'Standard', fallback:'Momentum reset', travel:'Travel', harder:'Harder day',
+    recovery_reset_6:'Recovery reset', core_restore_10:'Core restore', strength_basics_a_12:'Strength basics', strength_basics_b_12:'Strength basics',
+    good_day_full_body_20:'Steady full body', mobility_downshift_8:'Mobility reset', mobility_and_balance_8:'Mobility & balance',
+    strength_function_a_12:'Strength for function', strength_function_b_12:'Strength for function', walk_plus_strength_15:'Walk + strength', confidence_full_body_20:'Confident full body'
+  };
+
+  const quiz = {mood:null, energy:null, time:null, train:null, environment:null, profileSignal:null};
+  function preparedCheckIn(){
+    return CheckInCore.prepare(ACTIVE_ARCHETYPE_ID, quiz, state.sessions.length);
+  }
+  function updateQuizReady(){
+    $('quizGo').disabled = !preparedCheckIn().complete;
+  }
+  function configureCheckIn(){
+    const config = CheckInCore.resolve(ACTIVE_ARCHETYPE_ID);
+    $('trainingIntentQuestion').hidden = !config.showTrainingIntent;
+    $('trainingIntentTitle').textContent = config.trainingQuestion || '';
+    $('trainingIntentOptions').innerHTML = config.trainingOptions.map(option =>
+      `<button class="qopt" data-v="${escapeHTML(option.value)}" type="button" aria-pressed="false">${escapeHTML(option.label)}</button>`
+    ).join('');
+    $('profileSignalQuestion').hidden = !config.profileSignalOptions.length;
+    $('profileSignalTitle').textContent = config.profileSignalQuestion || '';
+    $('profileSignalOptions').innerHTML = config.profileSignalOptions.map(option =>
+      `<button class="qopt" data-v="${escapeHTML(option.value)}" type="button" aria-pressed="false">${escapeHTML(option.label)}</button>`
+    ).join('');
+    $('environmentQuestion').hidden = !config.showEnvironment;
+    if (!config.showTrainingIntent) quiz.train = 'goal';
+    if (!config.showEnvironment) quiz.environment = 'indoor';
+    updateQuizReady();
+  }
   document.querySelectorAll('.qopts').forEach(group => {
     group.addEventListener('click', e => {
       const btn = e.target.closest('.qopt'); if (!btn) return;
@@ -1445,8 +1763,7 @@
       } else {
         quiz[key] = btn.dataset.v;
       }
-      // enable when all required fields are set (state -> mood+energy counts as one question)
-      $('quizGo').disabled = !(quiz.mood != null && quiz.energy != null && quiz.time != null && quiz.train != null && quiz.environment != null);
+      updateQuizReady();
     });
   });
 
@@ -1454,6 +1771,10 @@
     if (quiz.train === 'travel') return 'travel';
     const score = Number(quiz.mood) + Number(quiz.energy);
     const t = Number(quiz.time || 0);
+    if (!isFitBaseline()) {
+      if (t > 0 && t <= 10) return 'fallback';
+      return score <= 1 ? 'fallback' : 'standard';
+    }
     // very short time -> momentum reset (keeps streak without overcommitting)
     if (t > 0 && t <= 10) return 'fallback';
     if (score <= 1) return 'fallback';
@@ -1465,22 +1786,33 @@
   let pending = null, pendingQuick = false;
 
   $('quizBtn').addEventListener('click', () => {
-    quiz.mood = quiz.energy = quiz.time = quiz.train = quiz.environment = null;
+    quiz.mood = quiz.energy = quiz.time = quiz.train = quiz.environment = quiz.profileSignal = null;
     document.querySelectorAll('.qopt').forEach(b => b.setAttribute('aria-pressed','false'));
-    $('quizGo').disabled = true;
-    $('quizGoalChip').textContent = 'Goal: ' + GOALS[state.goal];
+    configureCheckIn();
+    $('quizGoalChip').textContent = 'Focus: ' + activeFocusLabel();
     show('quiz');
   });
   $('quizCancel').addEventListener('click', () => show('today'));
   $('quizGo').addEventListener('click', () => {
-    const mode = modeFromQuiz();
+    const prepared = preparedCheckIn();
+    if (!prepared.complete) return;
+    const mode = prepared.modeOverride || modeFromQuiz();
     const emphasis = (quiz.train === 'travel' || quiz.train === 'goal') ? 'goal' : quiz.train;
+    const readiness = recordReadiness({
+      energyLevel:Number(quiz.energy),
+      timeBudgetChoice:Number(quiz.time),
+      trainingIntent:String(quiz.train || ''),
+      symptomFlags:prepared.readiness.symptomFlags,
+      confidenceLevel:prepared.readiness.confidenceLevel
+    });
     // pass time budget to the session builder so it can tune rests and length
     state.settings.lastEnvironment = quiz.environment;
     save();
-    pending = buildSession(mode, {emphasis, time:Number(quiz.time), environment:quiz.environment});
+    pending = buildSession(mode, Object.assign({emphasis, time:Number(quiz.time)}, prepared.plannerOptions));
     pending.sourceType = mode === 'fallback' ? 'fallback' : mode === 'travel' ? 'travel' : 'guided';
-    pending.reason = modeReason(mode, Number(quiz.time), emphasis, 'quiz');
+    pending.readinessId = readiness.id;
+    pending.reason = recommendationReason(pending, modeReason(pending.mode, Number(quiz.time), emphasis, 'quiz'));
+    attachPlanSync(pending, pending.reason);
     pendingQuick = false;
     renderPreview('Built from your check-in. Follow this, then get back off your phone.');
     show('preview');
@@ -1495,7 +1827,10 @@
     const emphasis = emphs[Math.floor(Math.random()*emphs.length)];
     pending = buildSession(mode, {emphasis, seed:Math.floor(Math.random()*997), environment:state.settings.lastEnvironment});
     pending.sourceType = 'quick_start';
-    pending.reason = modeReason(mode, null, emphasis, 'quick');
+    const readiness = recordReadiness({timeBudgetChoice:Number(pending.timeBudget) || null, trainingIntent:'quick_start'});
+    pending.readinessId = readiness.id;
+    pending.reason = recommendationReason(pending, modeReason(pending.mode, null, emphasis, 'quick'));
+    attachPlanSync(pending, pending.reason);
     pendingQuick = true;
     renderPreview('Rolled inside your limits and pointed at the goal. Start now; no extra planning.');
     show('preview');
@@ -1503,7 +1838,10 @@
   function momentumQuickStart(){
     pending = buildSession('fallback', {emphasis:'goal', time:10, environment:state.settings.lastEnvironment});
     pending.sourceType = 'quick_start';
-    pending.reason = 'The shortest viable reset. One completed round secures today.';
+    const readiness = recordReadiness({timeBudgetChoice:10, trainingIntent:'quick_start'});
+    pending.readinessId = readiness.id;
+    pending.reason = recommendationReason(pending, 'The shortest viable reset. One completed round secures today.');
+    attachPlanSync(pending, pending.reason);
     pendingQuick = false;
     renderPreview('Five focused minutes. Quick win, zero admin.');
     show('preview');
@@ -1512,7 +1850,7 @@
   $('reshuffleBtn').addEventListener('click', quickStart);
 
   function renderPreview(sayText){
-    $('previewChip').textContent = MODE_LABEL[pending.mode] + ' · week ' + pending.week + ' · ' + GOALS[state.goal];
+    $('previewChip').textContent = (MODE_LABEL[pending.mode] || 'Today’s plan') + ' · ' + (isFitBaseline() ? 'week ' : 'step ') + pending.week + ' · ' + activeFocusLabel();
     $('previewTitle').textContent = pending.mode === 'fallback' ? 'Your six minutes' : (timeOfDay() === 'am' ? 'Your circuit this morning' : 'Your circuit tonight');
     $('previewSay').textContent = sayText;
     $('previewReason').textContent = pending.reason || 'Built for your time, energy, and current goal.';
@@ -1540,7 +1878,9 @@
     const current = built.steps[index];
     if (!current || !current.exId) return null;
     const used = new Set(built.steps.map(step => step.exId));
+    const safePool = PROFILE_SAFE_EXERCISES[ACTIVE_ARCHETYPE_ID];
     const findCandidates = allowUsed => Object.keys(EX).filter(exId => {
+      if (safePool && !safePool.has(exId)) return false;
       if (exId === current.exId || (!allowUsed && used.has(exId)) || !environmentAllows(exId, built.environment)) return false;
       const sameFamily = EX_FAMILY[exId] === current.family;
       const sameCategory = EX[exId].cat === EX[current.exId].cat;
@@ -1594,6 +1934,13 @@
     window.scrollTo(0,0);
   }
   document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => { if (!session) show(b.dataset.view); }));
+  $('cloudStatusButton').addEventListener('click', () => {
+    if (session) return;
+    show('settings');
+    window.requestAnimationFrame(() => $('accountSettings').scrollIntoView({behavior:'smooth', block:'start'}));
+  });
+  $('syncNow').addEventListener('click', () => { if (cloudRuntime) cloudRuntime.syncNow(); });
+  $('signOut').addEventListener('click', () => { if (cloudRuntime) cloudRuntime.signOut(); });
 
   function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1600); }
 
@@ -1622,7 +1969,10 @@
   function defaultWorkout(){
     pending = buildSession('standard', {emphasis:'goal', time:20, environment:state.settings.lastEnvironment});
     pending.sourceType = 'guided';
-    pending.reason = modeReason('standard', 20, 'goal', 'quiz');
+    const readiness = recordReadiness({timeBudgetChoice:20, trainingIntent:'goal'});
+    pending.readinessId = readiness.id;
+    pending.reason = recommendationReason(pending, modeReason(pending.mode, 20, 'goal', 'quiz'));
+    attachPlanSync(pending, pending.reason);
     pendingQuick = false;
     renderPreview('A quick-win session with less thinking.');
     show('preview');
@@ -1640,12 +1990,17 @@
     const tod = timeOfDay();
     const snapshot = streakSnapshot();
     const summary = daySummary(todayISO());
+    const coachCopy = CheckInCore.userCopy(ACTIVE_ARCHETYPE_ID, tod);
     $('dayLabel').textContent = tod === 'am' ? 'AM reset' : tod === 'pm' ? 'PM full' : 'Daytime';
-    $('goalChip').textContent = 'Goal: ' + GOALS[state.goal];
-    $('coachHeadline').textContent = tod === 'am' ? 'Start before you overthink it.' : tod === 'pm' ? 'Move first. Then the evening is yours.' : 'Just enough structure to get you moving.';
+    $('goalChip').textContent = 'Focus: ' + activeFocusLabel();
+    $('coachHeadline').textContent = coachCopy.headline;
+    $('coachSay').textContent = coachCopy.supporting;
+    $('quickStartBtn').textContent = coachCopy.quickStartLabel;
     const t = targets();
-    $('sessionMeta').innerHTML = `<span>Week ${weekNumber()}</span><span>Push ${t.push}</span><span>Squat ${t.squatReps}×${t.squatKg} kg</span><span>Plank ${t.plank}s</span>`;
-    $('beerCheck').hidden = !(tod === 'pm' && !summary.isSecured);
+    $('sessionMeta').innerHTML = isFitBaseline()
+      ? `<span>Week ${weekNumber()}</span><span>Push ${t.push}</span><span>Squat ${t.squatReps}×${t.squatKg} kg</span><span>Plank ${t.plank}s</span>`
+      : `<span>Step ${Math.max(1, Number(state.adaptiveState.currentPhase) || 1)}</span><span>${activeFocusLabel()}</span><span>${Number(state.adaptiveState.preferredSessionLength) || 10} min starting point</span>`;
+    $('beerCheck').hidden = !isFitBaseline() || !(tod === 'pm' && !summary.isSecured);
     $('todayStatusKicker').textContent = 'Today · ' + (summary.isFreezeSaved ? 'protected' : summary.isSecured ? 'secured' : 'incomplete');
     $('todayLevelBadge').hidden = summary.level === 'L0';
     $('todayLevelBadge').textContent = summary.level;
@@ -1673,7 +2028,7 @@
   $('promptWorkout').addEventListener('click', defaultWorkout);
   $('promptQuick').addEventListener('click', momentumQuickStart);
   $('promptSport').addEventListener('click', logProvisionalSport);
-  $('goalChip').addEventListener('click', () => { show('plan'); });
+  $('goalChip').addEventListener('click', () => { show(isFitBaseline() ? 'plan' : 'quiz'); });
 
   /* ---------- provisional sport logging ---------- */
   let activeSportSessionId = null;
@@ -1720,7 +2075,10 @@
     entry.sportName = sport.name;
     SPORT_SCORE_FIELDS.forEach(([key]) => { entry[key] = clampInputScore(sport[key]); });
     entry.sessionScore = averageSportScores(entry);
+    entry.updatedAt = new Date().toISOString();
     save();
+    queueSessionCompletion(entry);
+    runProfileAdaptation(entry);
     renderToday(); renderStreak();
     renderSportScoreEditor(entry);
   });
@@ -1738,7 +2096,9 @@
     if (!entry) return;
     $('sportScoreFields').querySelectorAll('[data-score-field]').forEach(field => { entry[field.dataset.scoreField] = clampInputScore(field.value); });
     entry.sessionScore = averageSportScores(entry);
+    entry.updatedAt = new Date().toISOString();
     save(); renderToday(); renderStreak();
+    queueSessionCompletion(entry);
     $('sportDialog').close();
     toast(entry.sportName + ' logged at ' + entry.sessionScore.toFixed(1) + '.');
   });
@@ -1766,7 +2126,10 @@
     save();
     pending = buildSession('standard', {emphasis:'goal', time, environment});
     pending.sourceType = 'guided';
-    pending.reason = modeReason('standard', time, 'goal', 'quiz') + ' ' + environment.charAt(0).toUpperCase() + environment.slice(1) + ' plan.';
+    const readiness = recordReadiness({timeBudgetChoice:time, trainingIntent:'goal'});
+    pending.readinessId = readiness.id;
+    pending.reason = recommendationReason(pending, modeReason(pending.mode, time, 'goal', 'quiz') + ' ' + environment.charAt(0).toUpperCase() + environment.slice(1) + ' plan.');
+    attachPlanSync(pending, pending.reason);
     pendingQuick = false;
     renderPreview('Your plan is ready. Swap or scale any exercise before you begin.');
     show('preview');
@@ -1856,6 +2219,112 @@
         }).join(' · ')}</span>
       </div>`).join('') : '<p class="say">Completed exercises will appear here after your first session.</p>';
   }
+  function remoteCompletionToLocal(row, index){
+    const wrapper = row && row.completion_payload && typeof row.completion_payload === 'object' ? row.completion_payload : {};
+    const payload = wrapper.completionPayload && typeof wrapper.completionPayload === 'object' ? wrapper.completionPayload : wrapper;
+    return normaliseSession(Object.assign({}, payload, {
+      sessionId:String(row && row.id || payload.sessionId || 'remote-' + index),
+      sessionPlanId:row && row.session_plan_id || payload.sessionPlanId || null,
+      startedAt:row && row.started_at || payload.startedAt || null,
+      completedAtLocal:String(payload.completedAtLocal || row && row.completed_at || ''),
+      isProvisional:String(row && row.completion_status || '') === 'partial',
+      updatedAt:String(row && row.updated_at || payload.updatedAt || '')
+    }), index);
+  }
+  function remoteReadinessToLocal(row){
+    const payload = row && row.readiness_payload && typeof row.readiness_payload === 'object' ? row.readiness_payload : {};
+    return Object.assign({}, payload, {
+      id:String(row && row.id || payload.id || ''),
+      profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId,
+      loggedAt:String(row && row.logged_at || payload.loggedAt || ''),
+      updatedAt:String(row && row.updated_at || payload.updatedAt || '')
+    });
+  }
+  function remoteLiftToLocal(row){
+    const payload = row && row.snapshot_payload && typeof row.snapshot_payload === 'object' ? row.snapshot_payload : {};
+    return Object.assign({}, payload, {
+      id:String(row && row.id || payload.id || ''),
+      profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId,
+      updatedAt:String(row && row.updated_at || payload.updatedAt || '')
+    });
+  }
+  function remoteAdaptationToLocal(row){
+    return {
+      id:String(row && row.id || ''),
+      profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId,
+      createdAt:String(row && row.created_at || ''),
+      updatedAt:String(row && row.updated_at || ''),
+      triggerType:String(row && row.trigger_type || ''),
+      policyName:String(row && row.policy_name || ''),
+      oldValue:row && row.old_value,
+      newValue:row && row.new_value,
+      reason:String(row && row.reason || ''),
+      adaptationVersion:Number(row && row.adaptation_version) || 1
+    };
+  }
+  function remoteUserStateToLocal(row){
+    if (!row || typeof row !== 'object') return null;
+    const payload = row.state_payload && typeof row.state_payload === 'object' ? row.state_payload : {};
+    return Object.assign(defaultAdaptiveState(), payload, {
+      currentPhase:Number(row.current_phase) || Number(payload.currentPhase) || 1,
+      currentStreak:Number(row.current_streak) || Number(payload.currentStreak) || 0,
+      lastCompletedAt:row.last_completed_at || payload.lastCompletedAt || null,
+      readinessBaseline:row.readiness_baseline || payload.readinessBaseline || {},
+      complianceScore:row.compliance_score == null ? payload.complianceScore == null ? null : payload.complianceScore : Number(row.compliance_score),
+      preferredSessionLength:row.preferred_session_length == null ? payload.preferredSessionLength == null ? null : payload.preferredSessionLength : Number(row.preferred_session_length),
+      activeConstraints:Array.isArray(row.active_constraints) ? row.active_constraints : Array.isArray(payload.activeConstraints) ? payload.activeConstraints : [],
+      lastRecommendationType:String(row.last_recommendation_type || payload.lastRecommendationType || 'steady'),
+      stateVersion:Number(row.state_version) || Number(payload.stateVersion) || 1,
+      updatedAt:String(row.updated_at || payload.updatedAt || '')
+    });
+  }
+  function mergeRemoteSnapshot(remoteSnapshot){
+    const remote = remoteSnapshot && typeof remoteSnapshot === 'object' ? remoteSnapshot : {};
+    const reconciled = SyncCore.reconcileHistory({
+      local:{
+        userState:state.adaptiveState,
+        sessionPlans:[],
+        sessionCompletions:state.sessions,
+        readinessLogs:state.readinessHistory,
+        liftSnapshots:state.liftSnapshots,
+        adaptationEvents:state.adaptationEvents
+      },
+      remote:{
+        userState:remoteUserStateToLocal(remote.userState),
+        sessionPlans:[],
+        sessionCompletions:(remote.sessionCompletions || []).map(remoteCompletionToLocal),
+        readinessLogs:(remote.readinessLogs || []).map(remoteReadinessToLocal),
+        liftSnapshots:(remote.liftSnapshots || []).map(remoteLiftToLocal),
+        adaptationEvents:(remote.adaptationEvents || []).map(remoteAdaptationToLocal)
+      }
+    });
+    state.adaptiveState = reconciled.userState || state.adaptiveState;
+    state.sessions = reconciled.sessionCompletions.map(normaliseSession);
+    state.readinessHistory = reconciled.readinessLogs.slice(-40);
+    state.liftSnapshots = reconciled.liftSnapshots.slice(-80);
+    state.adaptationEvents = reconciled.adaptationEvents.slice(-80);
+    ensureMomentumState();
+    save();
+    renderToday(); renderPlan(); renderStreak(); renderSettings();
+  }
+  function renderCloudState(){
+    const mode = String(cloudUiState.mode || 'local');
+    const connected = !!cloudUiState.email || !!cloudProfileHint;
+    const shortLabels = {local:'Local', loading:'Checking', syncing:'Saving', synced:'Saved', pending:cloudUiState.offline ? 'Offline' : 'Pending', error:'Retry'};
+    $('cloudStatusButton').dataset.mode = mode;
+    $('cloudStatusShort').textContent = shortLabels[mode] || 'Local';
+    $('accountStatusTitle').textContent = connected ? (cloudUiState.offline ? 'Offline copy' : mode === 'synced' ? 'Cloud saved' : mode === 'syncing' ? 'Saving changes' : mode === 'error' ? 'Sync will retry' : 'Account connected') : 'Local only';
+    $('accountStatusCopy').textContent = String(cloudUiState.message || (connected ? 'Your history is available across signed-in devices.' : 'Your sessions are saved on this device.'));
+    $('accountEmail').textContent = cloudUiState.email || (connected ? 'Account details unavailable offline' : 'No account connected');
+    $('accountPending').textContent = connected ? String(Number(cloudUiState.pending) || 0) + ' waiting' : 'On device';
+    $('syncNow').hidden = !connected;
+    $('signOut').hidden = !connected;
+    $('accountSetupLink').hidden = connected;
+  }
+  function setCloudState(nextState){
+    cloudUiState = Object.assign({}, cloudUiState, nextState || {});
+    renderCloudState();
+  }
   function renderSettings(){
     const p = state.profile || {};
     $('goalSelect').value = state.goal;
@@ -1867,6 +2336,12 @@
     $('profileSex').value = p.sex || '';
     $('profileWeight').value = p.weight || '';
     $('profileLevel').value = p.fitnessLevel || '';
+    $('goalSetting').hidden = !isFitBaseline();
+    $('keyLiftSettings').hidden = !isFitBaseline();
+    const planTab = document.querySelector('.tab[data-view="plan"]');
+    if (planTab) planTab.hidden = !isFitBaseline();
+    const burstFilter = document.querySelector('.fchip[data-cat="Burst"]');
+    if (burstFilter) burstFilter.hidden = !isFitBaseline();
     selectedAvatar = p.avatar || 'preset:ocean';
     $('avatarPreview').src = avatarSource(selectedAvatar);
     renderAvatarPresets();
@@ -1880,6 +2355,7 @@
     renderSportSettings();
     renderLibrary();
     renderSessionHistory();
+    renderCloudState();
   }
   function renderSportSettings(){
     $('sportSettings').innerHTML = (state.settings.sports || []).map(sport => `
@@ -2046,7 +2522,8 @@
   /* ---------- library ---------- */
   let libFilter = 'all';
   function renderLibrary(){
-    const items = Object.values(EX).filter(e => libFilter === 'all' || e.cat === libFilter);
+    const safePool = PROFILE_SAFE_EXERCISES[ACTIVE_ARCHETYPE_ID];
+    const items = Object.keys(EX).filter(id => !safePool || safePool.has(id)).map(id => EX[id]).filter(e => libFilter === 'all' || e.cat === libFilter);
     $('exList').innerHTML = items.map(e => `
       <details class="ex">
         <summary>${e.name}<span class="cat">${e.cat}</span></summary>
@@ -2198,6 +2675,8 @@
   }
 
   function startSession(built){
+    if (!built.planId) attachPlanSync(built, recommendationReason(built, 'Built for today.'));
+    if (!built.startedAt) built.startedAt = new Date().toISOString();
     session = built;
     stepIdx = 0; elapsed = 0; paused = false; resting = false;
     session.steps.forEach(step => {
@@ -2207,7 +2686,7 @@
       if (!step.prescription) step.prescription = Prescription.create(step.target, step.prescribedSec);
     });
     document.body.classList.add('in-session');
-    $('phaseTxt').textContent = MODE_LABEL[session.mode];
+    $('phaseTxt').textContent = MODE_LABEL[session.mode] || 'Session';
     $('elapsedTxt').textContent = '0:00';
     $('sessionOvertime').textContent = 'OT 0:00';
     $('pauseIcon').hidden = false; $('playIcon').hidden = true;
@@ -2409,6 +2888,7 @@
     });
     const rec = {
       sessionId:newId('session'), date:todayISO(), mode:session.mode,
+      sessionPlanId:session.planId || null, startedAt:session.startedAt || null,
       sourceType:session.sourceType || (session.mode === 'fallback' ? 'fallback' : session.mode === 'travel' ? 'travel' : 'guided'),
       isProvisional:false, sessionScore:1, seconds:elapsed, overtimeSeconds, week:session.week,
       environment:session.environment, exercises, completedAtLocal:localDateTimeString()
@@ -2489,6 +2969,9 @@
         const pb = state.exercisePB[pbKey] || {};
         if (exercise.loggedSeconds > (Number(pb.durationSec) || 0)) state.exercisePB[pbKey] = Object.assign({}, pb, {durationSec:exercise.loggedSeconds, updatedAt:todayISO()});
       });
+      rec.updatedAt = new Date().toISOString();
+      queueSessionCompletion(rec);
+      queueLiftSnapshots(rec);
     }
     save();
     show('streak'); renderStreak(); renderToday(); renderPlan();
@@ -2637,7 +3120,31 @@
   })();
   checkVersion();
 
+  function initialiseCloudSync(){
+    cloudRuntime = CloudCore.createRuntime({
+      storage:localStorage,
+      resolveArchetype:Archetypes.resolveArchetype,
+      resolveActiveProfile:SupabaseSync.resolveActiveProfile,
+      createSyncAdapter:SupabaseSync.createAdapter,
+      documentObject:document
+    });
+    window.DoLessCloudSync = Object.freeze({
+      syncNow:function(){ return cloudRuntime.syncNow(); },
+      pendingCount:function(){ return syncQueue.list().length; }
+    });
+    cloudRuntime.init({
+      queue:syncQueue,
+      getProfileInstance:function(){ return ACTIVE_PROFILE_INSTANCE; },
+      mergeRemoteSnapshot,
+      setCloudState
+    }).catch(error => {
+      setCloudState({mode:'error', message:'Cloud sync will retry', pending:syncQueue.list().length, error:String(error && error.message || error)});
+      document.documentElement.removeAttribute('data-cloud-auth-pending');
+    });
+  }
+
   renderToday(); renderPlan(); renderLibrary(); renderStreak(); renderSettings(); show('today');
+  initialiseCloudSync();
   handleLaunchAction();
   scheduleDailyReminder();
   })();

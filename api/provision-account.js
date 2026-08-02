@@ -1,22 +1,10 @@
 'use strict';
 
-const {createHash, timingSafeEqual} = require('node:crypto');
 const {createClient:defaultCreateClient} = require('@supabase/supabase-js');
+const Guard = require('./_request-guard.js');
 const Matcher = require('../do-less-archetype-matcher.js');
 const Provisioning = require('../do-less-provisioning-core.js');
 const SupabaseProvisioning = require('../do-less-supabase-provisioning.js');
-
-function safeEqual(left, right){
-  const digest = value => createHash('sha256').update(String(value || ''), 'utf8').digest();
-  return timingSafeEqual(digest(left), digest(right));
-}
-
-function readBody(request){
-  const body = request && request.body;
-  if (body && typeof body === 'object' && !Array.isArray(body)) return body;
-  if (typeof body === 'string') return JSON.parse(body);
-  return {};
-}
 
 function createHandler(options){
   const config = options && typeof options === 'object' ? options : {};
@@ -27,30 +15,28 @@ function createHandler(options){
   const logger = config.logger || console;
 
   return async function provisionAccount(request, response){
-    response.setHeader('Cache-Control', 'no-store');
-    response.setHeader('Content-Type', 'application/json; charset=utf-8');
-    if (!request || request.method !== 'POST') {
-      response.setHeader('Allow', 'POST');
-      return response.status(405).json({error:'Method not allowed', code:'method_not_allowed'});
-    }
+    if (!Guard.acceptJsonPost(request, response)) return response;
 
-    const supabaseUrl = String(env.SUPABASE_URL || '').trim();
-    const secretKey = String(env.SUPABASE_SECRET_KEY || env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
-    const publishableKey = String(env.SUPABASE_PUBLISHABLE_KEY || env.SUPABASE_ANON_KEY || '').trim();
-    const setupAccessCode = String(env.DO_LESS_SETUP_ACCESS_CODE || '');
-    const siteUrl = String(env.DO_LESS_SITE_URL || '').trim();
-    if (!supabaseUrl || !secretKey || !publishableKey || !setupAccessCode || !siteUrl) {
+    const required = Guard.requiredEnvironment(env, {
+      supabaseUrl:'SUPABASE_URL',
+      secretKey:['SUPABASE_SECRET_KEY', 'SUPABASE_SERVICE_ROLE_KEY'],
+      publishableKey:['SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_ANON_KEY'],
+      setupAccessCode:'DO_LESS_SETUP_ACCESS_CODE',
+      siteUrl:'DO_LESS_SITE_URL'
+    });
+    if (!required.complete) {
       return response.status(503).json({
         error:'Account setup is not configured yet',
         code:'provisioning_unavailable'
       });
     }
+    const {supabaseUrl, secretKey, publishableKey, setupAccessCode, siteUrl} = required.values;
 
     let body;
-    try{ body = readBody(request); }catch(error){
+    try{ body = Guard.readBody(request); }catch(error){
       return response.status(400).json({error:'Request body must be valid JSON', code:'invalid_json'});
     }
-    if (!safeEqual(body.setupCode, setupAccessCode)) {
+    if (!Guard.safeEqual(body.setupCode, setupAccessCode)) {
       return response.status(403).json({error:'The setup code is not valid', code:'invalid_setup_code'});
     }
 

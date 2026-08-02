@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#01696f">
+  <title>Profile review — Do Less</title>
+  <meta name="description" content="Review and safely correct a Do Less starting-plan assignment.">
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="icon" href="./assets/icon-180.png" type="image/png">
+  <link rel="apple-touch-icon" href="./assets/icon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f7f6f2;--surface:#fdfcfa;--surface-2:#f1efe9;--text:#28251d;--muted:#66645f;--faint:#8e8b84;
+      --primary:#01696f;--primary-hover:#0c4e54;--primary-soft:#d8e4e1;--amber:#96500f;--amber-soft:#f0e2cd;
+      --line:rgba(40,37,29,.14);--good:#437a22;--display:'Instrument Serif',Georgia,serif;--body:'Inter',system-ui,sans-serif;
+    }
+    *,*::before,*::after{box-sizing:border-box}
+    [hidden]{display:none!important}
+    html{background:var(--bg)}
+    body{margin:0;color:var(--text);background:var(--bg);font-family:var(--body);font-size:1rem;line-height:1.55;-webkit-font-smoothing:antialiased}
+    a{color:inherit}button,input,select,textarea{font:inherit}button{cursor:pointer}
+    .shell{width:min(100%,680px);min-height:100dvh;margin:0 auto;padding:calc(1rem + env(safe-area-inset-top)) 1.15rem calc(3rem + env(safe-area-inset-bottom))}
+    .topline{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding-bottom:1rem;border-bottom:1px solid var(--line)}
+    .wordmark{font-family:var(--display);font-size:1.35rem;text-decoration:none}.navlinks{display:flex;gap:.9rem}.navlinks a{font-size:.76rem;font-weight:750;color:var(--muted);text-decoration:none}
+    .intro{padding:2.2rem 0 1.6rem}.eyebrow{margin:0;color:var(--primary);font-size:.73rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+    h1{max-width:12ch;margin:.35rem 0 .75rem;font-family:var(--display);font-weight:400;font-size:clamp(2.7rem,12vw,4.7rem);line-height:.92;letter-spacing:-.02em}
+    .introcopy{max-width:39rem;margin:0;color:var(--muted);font-size:.94rem}.securitynote{margin:1.1rem 0 0;padding:.8rem .9rem;border-left:3px solid var(--primary);background:var(--primary-soft);font-size:.78rem}
+    .offline{margin:0 0 1rem;padding:.7rem .85rem;background:var(--amber-soft);color:var(--amber);font-size:.78rem;font-weight:650}
+    .lookup{display:grid;gap:1rem;padding:1.35rem 0 1.7rem;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+    .fieldgrid{display:grid;grid-template-columns:1fr 1fr;gap:.85rem}.field{display:grid;gap:.35rem}.label{font-size:.78rem;font-weight:750;color:var(--muted)}
+    .hint{margin:0;color:var(--faint);font-size:.72rem;line-height:1.4}
+    input:not([type=checkbox]),select,textarea{width:100%;min-height:48px;border:1px solid var(--line);border-radius:.7rem;background:var(--surface);color:var(--text);padding:.72rem .8rem;outline:none}
+    textarea{min-height:96px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 13%,transparent)}
+    .primary{min-height:52px;border:0;border-radius:999px;background:var(--primary);color:#f9f8f4;padding:.65rem 1.25rem;font-weight:800}.primary:hover{background:var(--primary-hover)}.primary:disabled{cursor:wait;opacity:.65}
+    .formstatus{min-height:1.35rem;margin:0;color:var(--amber);font-size:.8rem;font-weight:650}.formstatus.success{color:var(--good)}
+    .review{padding-top:.4rem}.section{padding:1.45rem 0;border-bottom:1px solid var(--line)}.sectionhead{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:.8rem}
+    .section h2{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,7vw,2.45rem);line-height:1}.section h3{margin:0 0 .25rem;font-size:.8rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+    .statuschip{flex:none;padding:.28rem .58rem;border-radius:999px;background:var(--primary-soft);color:var(--primary);font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+    .meta{margin:.25rem 0 0;color:var(--faint);font-size:.74rem}.lead{margin:.2rem 0 0;color:var(--muted);font-size:.9rem}
+    .debugline{display:grid;grid-template-columns:8.5rem 1fr;gap:.7rem;margin:.65rem 0 0;font-size:.78rem}.debugline span{color:var(--faint)}code{overflow-wrap:anywhere;color:var(--primary);font-size:.75rem}
+    .reasonlist{margin:.55rem 0 0;padding-left:1.15rem;color:var(--muted);font-size:.83rem}.reasonlist li+li{margin-top:.4rem}
+    .trace{margin-top:1rem;padding-top:1rem;border-top:1px dashed var(--line)}
+    .override{display:grid;gap:1rem}.confirm{display:grid;grid-template-columns:1.2rem 1fr;gap:.65rem;align-items:start;font-size:.82rem}.confirm input{width:1.1rem;height:1.1rem;margin:.14rem 0 0;accent-color:var(--primary)}
+    .warning{margin:0;padding:.75rem .85rem;background:var(--amber-soft);color:var(--amber);font-size:.76rem}.footer{padding:1.3rem 0;color:var(--faint);font-size:.72rem}
+    @media(max-width:520px){.fieldgrid{grid-template-columns:1fr}.navlinks a:first-child{display:none}.debugline{grid-template-columns:1fr;gap:.15rem}.intro{padding-top:1.7rem}}
+    @media(prefers-reduced-motion:no-preference){.intro,.lookup,.review{animation:enter .35s ease both}@keyframes enter{from{opacity:0;transform:translateY(6px)}}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topline">
+      <a class="wordmark" href="/coach.html">Do Less</a>
+      <nav class="navlinks" aria-label="Admin navigation"><a href="/setup">New profile</a><a href="/coach.html">Back to app</a></nav>
+    </header>
+
+    <section class="intro">
+      <p class="eyebrow">Administrative view</p>
+      <h1>Review before you correct.</h1>
+      <p class="introcopy">Look up one exact account, inspect how its starting plan was chosen, and apply an auditable correction only when the match is wrong.</p>
+      <p class="securitynote"><strong>Private tool.</strong> The access code is sent only in the protected request body. It is never added to the URL or saved by this page.</p>
+    </section>
+
+    <p class="offline" id="offlineNote" hidden>You’ll need an internet connection to review or change a profile.</p>
+
+    <form class="lookup" id="adminLookupForm" novalidate>
+      <div class="fieldgrid">
+        <label class="field"><span class="label">Admin access code</span><input id="adminCode" name="adminCode" type="password" autocomplete="one-time-code" maxlength="120" required><span class="hint">Use the separate code reserved for profile administration.</span></label>
+        <label class="field"><span class="label">Account email</span><input id="accountEmail" name="accountEmail" type="email" inputmode="email" autocomplete="email" maxlength="254" required><span class="hint">Review is limited to this exact email.</span></label>
+      </div>
+      <button class="primary" id="reviewButton" type="submit">Review profile</button>
+      <p class="formstatus" id="lookupStatus" role="alert" aria-live="polite"></p>
+    </form>
+
+    <section class="review" id="reviewPanel" tabindex="-1" hidden>
+      <section class="section" aria-labelledby="accountReviewTitle">
+        <div class="sectionhead"><div><p class="eyebrow">Account</p><h2 id="accountReviewTitle"><span id="reviewAccountName">Profile</span></h2><p class="lead" id="reviewAccountEmail"></p></div><span class="statuschip" id="reviewAccountStatus">Active</span></div>
+      </section>
+
+      <section class="section" aria-labelledby="assignmentReviewTitle">
+        <p class="eyebrow">Current assignment</p>
+        <h2 id="assignmentReviewTitle"><span id="currentPlan">Starting plan</span></h2>
+        <p class="meta" id="assignmentMeta"></p>
+        <div class="debugline"><span>Internal archetype ID</span><code id="internalArchetypeId"></code></div>
+        <div class="debugline"><span>Matcher version</span><code id="matcherVersion"></code></div>
+        <div class="trace"><h3>Why it was chosen</h3><ul class="reasonlist" id="assignmentRationale"></ul></div>
+        <div class="trace"><h3>Intake signals used for review</h3><p class="lead" id="intakeSummary"></p></div>
+      </section>
+
+      <section class="section" aria-labelledby="recommendationReviewTitle">
+        <p class="eyebrow">Recommendation trace</p>
+        <h2 id="recommendationReviewTitle"><span id="latestPlan">Latest plan</span></h2>
+        <p class="meta" id="recommendationMeta"></p>
+        <ul class="reasonlist" id="latestRationale"></ul>
+      </section>
+
+      <section class="section" aria-labelledby="adaptationReviewTitle">
+        <p class="eyebrow">Adaptation state</p>
+        <h2 id="adaptationReviewTitle">What the engine changed.</h2>
+        <p class="lead" id="adaptiveSummary"></p>
+        <ul class="reasonlist" id="adaptationHistory"></ul>
+      </section>
+
+      <section class="section" aria-labelledby="overrideTitle">
+        <p class="eyebrow">Correction</p>
+        <h2 id="overrideTitle">Change the starting plan.</h2>
+        <p class="warning">This changes only this assigned profile. Existing activity remains in its history, while plan-specific progression restarts from a safe baseline.</p>
+        <form class="override" id="overrideForm" novalidate>
+          <label class="field"><span class="label">Correct starting plan</span><select id="overridePlan" required><option value="">Choose the corrected plan</option><option value="fit30something">Efficient strength baseline</option><option value="postpartum">Recovery-first foundation</option><option value="active_aging_female_60plus">Strength, mobility and balance</option><option value="active_aging_male_50plus">Healthy-ageing foundation</option></select></label>
+          <label class="field"><span class="label">Reason for correction</span><textarea id="overrideReason" minlength="8" maxlength="500" required placeholder="For example: intake was entered incorrectly and has now been reviewed."></textarea><span class="hint">This becomes part of the permanent assignment audit trail.</span></label>
+          <label class="confirm"><input id="overrideConfirmed" type="checkbox" required><span>I reviewed the account, matcher rationale, and selected plan, and I intend to correct this profile.</span></label>
+          <button class="primary" id="overrideButton" type="submit">Apply reviewed override</button>
+          <p class="formstatus success" id="overrideStatus" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+    </section>
+
+    <footer class="footer">Do Less admin · assignment details are intentionally kept out of the everyday workout UI.</footer>
+  </main>
+  <script src="./do-less-admin.js"></script>
+</body>
+</html>
