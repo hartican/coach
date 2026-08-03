@@ -33,3 +33,11 @@ test('manual backup controls are gone because signed-in state syncs automaticall
 test('the new account-state module is available offline', () => {
   assert.match(read('sw.js'), /do-less-account-state-core\.js/);
 });
+
+test('signed-out Settings offers a fresh existing-account sign-in link', () => {
+  const coach = read('coach.html');
+  ['accountSignIn', 'accountSignInEmail', 'sendSignInLink', 'accountSignInStatus']
+    .forEach(id => assert.match(coach, new RegExp(`id="${id}"`)));
+  assert.match(coach, /requestMagicLink/);
+  assert.match(coach, /one-time/i);
+});

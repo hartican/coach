@@ -236,3 +236,74 @@ test('an offline cloud profile reconnects and flushes its queue when the browser
   assert.equal(flushes, 1);
   assert.equal(pulls, 1);
 });
+
+test('a signed-out person can request a fresh one-time link for an existing account', async () => {
+  const local = storage();
+  const requests = [];
+  const fakeClient = {
+    auth:{
+      onAuthStateChange(){ return {data:{subscription:{unsubscribe(){}}}}; },
+      getSession:async () => ({data:{session:null}, error:null}),
+      signInWithOtp:async request => { requests.push(request); return {data:{user:null, session:null}, error:null}; }
+    }
+  };
+  const runtime = Cloud.createRuntime({
+    storage:local,
+    resolveArchetype:Archetypes.resolveArchetype,
+    fetchImpl:async () => ({ok:true, json:async () => ({url:'https://example.supabase.co', publishableKey:'public-key'})}),
+    loadSupabase:async () => ({createClient:() => fakeClient}),
+    resolveActiveProfile:async () => { throw new Error('signed-out requests do not resolve a profile'); },
+    createSyncAdapter:() => { throw new Error('signed-out requests do not create a sync adapter'); },
+    magicLinkRedirect:'https://coach-jack.vercel.app/coach.html?auth=magic-link',
+    setOnlineListener:() => {}
+  });
+
+  await runtime.init({
+    queue:{list:() => []},
+    getProfileInstance:() => ({profileInstanceId:'local-primary', userId:'local-user'}),
+    mergeRemoteSnapshot:() => {},
+    setCloudState:() => {}
+  });
+  const result = await runtime.requestMagicLink('  gina@example.com  ');
+
+  assert.deepEqual(requests, [{
+    email:'gina@example.com',
+    options:{
+      shouldCreateUser:false,
+      emailRedirectTo:'https://coach-jack.vercel.app/coach.html?auth=magic-link'
+    }
+  }]);
+  assert.deepEqual(result, {sent:true, email:'gina@example.com'});
+});
+
+test('signing out removes only this device session', async () => {
+  const local = storage();
+  const signOutOptions = [];
+  const fakeClient = {
+    auth:{
+      onAuthStateChange(){ return {data:{subscription:{unsubscribe(){}}}}; },
+      getSession:async () => ({data:{session:null}, error:null}),
+      signOut:async options => { signOutOptions.push(options); return {error:null}; }
+    }
+  };
+  const runtime = Cloud.createRuntime({
+    storage:local,
+    resolveArchetype:Archetypes.resolveArchetype,
+    fetchImpl:async () => ({ok:true, json:async () => ({url:'https://example.supabase.co', publishableKey:'public-key'})}),
+    loadSupabase:async () => ({createClient:() => fakeClient}),
+    resolveActiveProfile:async () => { throw new Error('signed-out requests do not resolve a profile'); },
+    createSyncAdapter:() => { throw new Error('signed-out requests do not create a sync adapter'); },
+    reload:() => {},
+    setOnlineListener:() => {}
+  });
+
+  await runtime.init({
+    queue:{list:() => []},
+    getProfileInstance:() => ({profileInstanceId:'local-primary', userId:'local-user'}),
+    mergeRemoteSnapshot:() => {},
+    setCloudState:() => {}
+  });
+  await runtime.signOut();
+
+  assert.deepEqual(signOutOptions, [{scope:'local'}]);
+});

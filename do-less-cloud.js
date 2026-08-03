@@ -97,6 +97,7 @@
     const timeout = config.setTimeout || (root && root.setTimeout ? root.setTimeout.bind(root) : setTimeout);
     const clearTimer = config.clearTimeout || (root && root.clearTimeout ? root.clearTimeout.bind(root) : clearTimeout);
     const documentObject = config.documentObject || (root && root.document);
+    const locationObject = config.locationObject || (root && root.location);
     if (!storage || typeof resolveArchetype !== 'function' || typeof fetchImpl !== 'function') {
       throw new TypeError('Cloud runtime requires storage, archetype resolution, and fetch');
     }
@@ -295,13 +296,43 @@
       scheduleSync();
     }
 
+    async function requestMagicLink(value){
+      const email = String(value || '').trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return {sent:false, email:'', message:'Enter a valid email address'};
+      }
+      if (!client || !client.auth || typeof client.auth.signInWithOtp !== 'function') {
+        return {sent:false, email, message:'Sign-in is unavailable right now. Try again when you are online.'};
+      }
+      let emailRedirectTo = String(config.magicLinkRedirect || '').trim();
+      if (!emailRedirectTo) {
+        try{ emailRedirectTo = new URL('/coach.html?auth=magic-link', locationObject && locationObject.href).toString(); }
+        catch(error){ return {sent:false, email, message:'Sign-in is unavailable right now.'}; }
+      }
+      try{
+        const response = await client.auth.signInWithOtp({
+          email,
+          options:{shouldCreateUser:false, emailRedirectTo}
+        });
+        if (response && response.error) throw response.error;
+        emit({mode:'local', message:'Fresh sign-in link sent. Check your email.', pending:pendingCount(), email:''});
+        return {sent:true, email};
+      }catch(error){
+        emit({mode:'error', message:'We could not send a sign-in link just now', pending:pendingCount(), email:''});
+        return {sent:false, email, message:'We could not send a sign-in link just now. Please try again.'};
+      }
+    }
+
     async function signOut(){
-      if (client && client.auth && typeof client.auth.signOut === 'function') await client.auth.signOut();
+      if (client && client.auth && typeof client.auth.signOut === 'function') {
+        const response = await client.auth.signOut({scope:'local'});
+        if (response && response.error) throw response.error;
+      }
       clearProfileHint(storage);
       reload();
     }
 
-    return Object.freeze({init, syncNow:requestSync, notifyPending, signOut});
+    return Object.freeze({init, syncNow:requestSync, notifyPending, requestMagicLink, signOut});
   }
 
   return Object.freeze({
