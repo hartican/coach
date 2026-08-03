@@ -47,3 +47,23 @@ test('setup errors are useful without exposing server details', () => {
   );
   assert.doesNotMatch(Setup.friendlyError(500, {error:'database secret'}), /database secret/i);
 });
+
+test('expanded setup derives matcher age band and carries Settings-compatible values', () => {
+  const payload = Setup.buildPayload({
+    setupCode:'code', email:'gina@example.com', displayName:'Gina', username:'GinaMoves',
+    avatar:'preset:gumleaf', height:'168', age:'36', sexOrGender:'female', weight:'72.5',
+    postpartumStatus:true, trainingExperience:'beginner', goal:'chain', appearance:'dark',
+    reminderEnabled:false, reminderTimeLocal:'20:15', trainingWindowStartLocal:'09:00',
+    trainingWindowEndLocal:'14:30', bleedEnabled:false, momentumExplanations:false,
+    lastEnvironment:'both', lifts:{push:{reps:'4'}, plank:{sec:'15'}}, consent:true
+  });
+
+  assert.equal(payload.ageBand, 'under_50');
+  assert.equal(payload.age, 36);
+  assert.equal(payload.height, 168);
+  assert.equal(payload.weight, 72.5);
+  assert.equal(payload.username, 'GinaMoves');
+  assert.equal(payload.appearance, 'dark');
+  assert.equal(payload.reminderEnabled, false);
+  assert.deepEqual(payload.lifts, {push:{reps:'4'}, plank:{sec:'15'}});
+});

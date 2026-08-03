@@ -45,6 +45,10 @@ function bundle(){
       assignmentReason:'Female age band starts at 60 in matcher v1.',
       isActive:true,
       updatedAt:'2026-08-02T10:00:00.000Z'
+    },
+    initialAppState:{
+      profile:{name:'Family Member', sex:'female', fitnessLevel:'beginner'},
+      adaptiveState:{activeConstraints:['balance_concern']}
     }
   };
 }
@@ -125,11 +129,15 @@ test('Supabase adapter creates the auth user and stages every Phase 3 record', a
     'upsert',
     'lookup',
     'upsert',
+    'upsert',
     'insert',
     'insert'
   ]);
   assert.equal(fake.inserted.user_accounts.user_id, fake.userId);
   assert.equal(fake.inserted.profile_instances.archetype_id, 'active_aging_female_60plus');
+  assert.equal(fake.inserted.user_state.state_payload.appState.profile.name, 'Family Member');
+  assert.equal(fake.inserted.user_state.state_payload.appStateVersion, 1);
+  assert.equal(fake.calls.find(call => call[0] === 'upsert' && call[1] === 'user_state')[2].ignoreDuplicates, true);
   assert.equal(fake.inserted.intake_records.user_id, fake.userId);
   assert.deepEqual(fake.inserted.archetype_assignment_events.rationale, ['Female age band starts at 60 in matcher v1.']);
 });

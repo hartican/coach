@@ -14,13 +14,25 @@
     return String(value == null ? '' : value).trim();
   }
 
+  function asNumber(value){
+    if (value === '' || value == null) return null;
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+  }
+
+  function ageBandFor(value){
+    const age = asNumber(value);
+    if (age == null) return '';
+    return age >= 60 ? '60_plus' : age >= 50 ? '50_59' : 'under_50';
+  }
+
   function buildPayload(values){
     const source = values && typeof values === 'object' ? values : {};
-    return {
+    const payload = {
       setupCode:asString(source.setupCode),
       email:asString(source.email).toLowerCase(),
       displayName:asString(source.displayName),
-      ageBand:asString(source.ageBand),
+      ageBand:ageBandFor(source.age) || asString(source.ageBand),
       sexOrGender:asString(source.sexOrGender),
       postpartumStatus:source.postpartumStatus === true,
       trainingExperience:asString(source.trainingExperience),
@@ -31,6 +43,22 @@
       manualOverrideArchetypeId:asString(source.manualOverrideArchetypeId),
       consent:source.consent === true
     };
+    if (Object.prototype.hasOwnProperty.call(source, 'username')) payload.username = asString(source.username);
+    if (Object.prototype.hasOwnProperty.call(source, 'avatar')) payload.avatar = asString(source.avatar) || 'preset:ocean';
+    if (Object.prototype.hasOwnProperty.call(source, 'height')) payload.height = asNumber(source.height);
+    if (Object.prototype.hasOwnProperty.call(source, 'age')) payload.age = asNumber(source.age);
+    if (Object.prototype.hasOwnProperty.call(source, 'weight')) payload.weight = asNumber(source.weight);
+    if (Object.prototype.hasOwnProperty.call(source, 'goal')) payload.goal = asString(source.goal) || 'abs';
+    if (Object.prototype.hasOwnProperty.call(source, 'appearance')) payload.appearance = asString(source.appearance) || 'auto';
+    if (Object.prototype.hasOwnProperty.call(source, 'reminderEnabled')) payload.reminderEnabled = source.reminderEnabled === true;
+    if (Object.prototype.hasOwnProperty.call(source, 'reminderTimeLocal')) payload.reminderTimeLocal = asString(source.reminderTimeLocal);
+    if (Object.prototype.hasOwnProperty.call(source, 'trainingWindowStartLocal')) payload.trainingWindowStartLocal = asString(source.trainingWindowStartLocal);
+    if (Object.prototype.hasOwnProperty.call(source, 'trainingWindowEndLocal')) payload.trainingWindowEndLocal = asString(source.trainingWindowEndLocal);
+    if (Object.prototype.hasOwnProperty.call(source, 'bleedEnabled')) payload.bleedEnabled = source.bleedEnabled === true;
+    if (Object.prototype.hasOwnProperty.call(source, 'momentumExplanations')) payload.momentumExplanations = source.momentumExplanations === true;
+    if (Object.prototype.hasOwnProperty.call(source, 'lastEnvironment')) payload.lastEnvironment = asString(source.lastEnvironment) || 'indoor';
+    if (Object.prototype.hasOwnProperty.call(source, 'lifts')) payload.lifts = source.lifts;
+    return payload;
   }
 
   function collectValues(form){
@@ -39,10 +67,30 @@
       setupCode:data.get('setupCode'),
       email:data.get('email'),
       displayName:data.get('displayName'),
-      ageBand:data.get('ageBand'),
+      username:data.get('username'),
+      avatar:data.get('avatar'),
+      height:data.get('height'),
+      age:data.get('age'),
       sexOrGender:data.get('sexOrGender'),
+      weight:data.get('weight'),
       postpartumStatus:data.get('postpartumStatus') === 'on',
       trainingExperience:data.get('trainingExperience'),
+      goal:data.get('goal'),
+      appearance:data.get('appearance'),
+      reminderEnabled:data.get('reminderEnabled') === 'on',
+      reminderTimeLocal:data.get('reminderTimeLocal'),
+      trainingWindowStartLocal:data.get('trainingWindowStartLocal'),
+      trainingWindowEndLocal:data.get('trainingWindowEndLocal'),
+      bleedEnabled:data.get('bleedEnabled') === 'on',
+      momentumExplanations:data.get('momentumExplanations') === 'on',
+      lastEnvironment:data.get('lastEnvironment'),
+      lifts:{
+        push:{reps:data.get('liftPushReps')},
+        squat:{reps:data.get('liftSquatReps'), kg:data.get('liftSquatKg')},
+        lunge:{reps:data.get('liftLungeReps'), kg:data.get('liftLungeKg')},
+        plank:{sec:data.get('liftPlankSec')},
+        bridge:{reps:data.get('liftBridgeReps')}
+      },
       equipmentSummary:data.get('equipmentSummary'),
       goalSummary:data.get('goalSummary'),
       constraintFlags:data.getAll('constraintFlags'),
@@ -113,5 +161,5 @@
     return {collectValues:() => collectValues(form), syncPostpartum, syncOnline};
   }
 
-  return Object.freeze({asString, buildPayload, friendlyError, init});
+  return Object.freeze({asString, ageBandFor, buildPayload, friendlyError, init});
 });

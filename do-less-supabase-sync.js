@@ -41,6 +41,32 @@
     });
   }
 
+  function mapAccount(row){
+    const source = isObject(row) ? row : {};
+    return Object.freeze({
+      userId:String(source.user_id || ''),
+      email:String(source.email || ''),
+      displayName:String(source.display_name || ''),
+      status:String(source.status || '')
+    });
+  }
+
+  function mapIntake(row){
+    const source = isObject(row) ? row : {};
+    return Object.freeze({
+      intakeId:String(source.intake_id || ''),
+      ageBand:String(source.age_band || ''),
+      sexOrGender:String(source.sex_or_gender || ''),
+      postpartumStatus:source.postpartum_status === true,
+      trainingExperience:String(source.training_experience || ''),
+      equipmentSummary:String(source.equipment_summary || ''),
+      goalSummary:String(source.goal_summary || ''),
+      constraintFlags:Object.freeze(Array.isArray(source.constraint_flags) ? source.constraint_flags.map(String) : []),
+      notes:String(source.notes || ''),
+      createdAt:String(source.created_at || '')
+    });
+  }
+
   async function resolveActiveProfile(client){
     if (!client || !client.auth || typeof client.auth.getUser !== 'function' || typeof client.from !== 'function') {
       throw new TypeError('A browser Supabase client is required');
@@ -60,7 +86,30 @@
     const row = throwIfError(profileResult);
     if (!row) throw new Error('No active Do Less profile is assigned to this account');
     if (String(row.user_id || '') !== userId) throw new RangeError('Supabase returned a profile owned by another user');
-    return Object.freeze({user:Object.freeze({id:userId, email:String(user.email || '')}), profileInstance:mapProfileInstance(row)});
+    const accountQuery = client
+      .from('user_accounts')
+      .select('user_id,email,display_name,status')
+      .eq('user_id', userId)
+      .maybeSingle();
+    const intakeQuery = client
+      .from('intake_records')
+      .select('intake_id,user_id,age_band,sex_or_gender,postpartum_status,training_experience,equipment_summary,goal_summary,constraint_flags,notes,created_at')
+      .eq('user_id', userId)
+      .order('created_at', {ascending:false})
+      .limit(1)
+      .maybeSingle();
+    const [accountResult, intakeResult] = await Promise.all([accountQuery, intakeQuery]);
+    const accountRow = throwIfError(accountResult);
+    const intakeRow = throwIfError(intakeResult);
+    return Object.freeze({
+      user:Object.freeze({id:userId, email:String(user.email || accountRow && accountRow.email || '')}),
+      profileInstance:mapProfileInstance(row),
+      profileDetails:Object.freeze({
+        account:mapAccount(accountRow),
+        intake:mapIntake(intakeRow),
+        profileInstance:mapProfileInstance(row)
+      })
+    });
   }
 
   function createAdapter(options){
@@ -68,6 +117,7 @@
     const client = config.client;
     const user = isObject(config.user) ? config.user : {};
     const profileInstance = isObject(config.profileInstance) ? config.profileInstance : {};
+    const profileDetails = isObject(config.profileDetails) ? config.profileDetails : null;
     const userId = userIdOf(user);
     const profileInstanceId = profileIdOf(profileInstance);
     const profileUserId = userIdOf({userId:profileInstance.userId || profileInstance.user_id});
@@ -252,6 +302,7 @@
         readinessLogs:Object.freeze(readinessLogs),
         liftSnapshots:Object.freeze(liftSnapshots),
         adaptationEvents:Object.freeze(adaptationEvents),
+        profileDetails,
         regeneratePlans:true
       });
     }
@@ -259,5 +310,5 @@
     return Object.freeze({userId, profileInstanceId, pushEvent, flushQueue, pullSnapshot});
   }
 
-  return Object.freeze({resolveActiveProfile, createAdapter, mapProfileInstance});
+  return Object.freeze({resolveActiveProfile, createAdapter, mapProfileInstance, mapAccount, mapIntake});
 });

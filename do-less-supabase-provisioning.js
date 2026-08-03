@@ -1,5 +1,7 @@
 'use strict';
 
+const AccountState = require('./do-less-account-state-core.js');
+
 function isObject(value){
   return !!value && typeof value === 'object' && !Array.isArray(value);
 }
@@ -99,6 +101,29 @@ function createAdapter(options){
     }, {onConflict:'user_id'}).select('profile_instance_id').single();
     const storedProfile = throwIfError(await profileResult);
 
+    const storedProfileInstanceId = String(storedProfile && storedProfile.profile_instance_id || profileInstanceId);
+    const initialPayload = AccountState.createUserStatePayload({
+      profileInstanceId:storedProfileInstanceId,
+      appState:isObject(source.initialAppState) ? source.initialAppState : {},
+      currentStreak:0,
+      updatedAt:profile.updatedAt || profile.assignedAt
+    });
+    throwIfError(await adminClient.from('user_state').upsert({
+      profile_instance_id:storedProfileInstanceId,
+      user_id:userId,
+      current_phase:initialPayload.currentPhase,
+      current_streak:initialPayload.currentStreak,
+      last_completed_at:initialPayload.lastCompletedAt,
+      readiness_baseline:initialPayload.readinessBaseline,
+      compliance_score:initialPayload.complianceScore,
+      preferred_session_length:initialPayload.preferredSessionLength,
+      active_constraints:initialPayload.activeConstraints,
+      last_recommendation_type:initialPayload.lastRecommendationType,
+      state_version:initialPayload.stateVersion,
+      state_payload:initialPayload,
+      updated_at:initialPayload.updatedAt
+    }, {onConflict:'profile_instance_id', ignoreDuplicates:true}));
+
     throwIfError(await adminClient.from('intake_records').insert({
       intake_id:intake.intakeId,
       user_id:userId,
@@ -127,7 +152,7 @@ function createAdapter(options){
 
     return Object.freeze({
       userId,
-      profileInstanceId:String(storedProfile && storedProfile.profile_instance_id || profileInstanceId)
+      profileInstanceId:storedProfileInstanceId
     });
   }
 

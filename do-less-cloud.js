@@ -228,7 +228,7 @@
       }
 
       account = {id:String(resolved.user.id), email:String(resolved.user.email || user.email || '')};
-      adapter = createSyncAdapter({client, user:account, profileInstance:resolved.profileInstance});
+      adapter = createSyncAdapter({client, user:account, profileInstance:resolved.profileInstance, profileDetails:resolved.profileDetails});
       const result = await syncAuthenticated();
       return {synced:true, result};
     }

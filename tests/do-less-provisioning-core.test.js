@@ -60,6 +60,10 @@ test('provisioning stores intake, assignment, account, and profile before sendin
   assert.equal(stagedBundle.assignmentEvent.assignmentMethod, 'matcher');
   assert.equal(stagedBundle.assignmentEvent.matchedArchetypeId, 'active_aging_female_60plus');
   assert.match(stagedBundle.assignmentEvent.rationale.join(' '), /Female age band starts at 60/);
+  assert.equal(stagedBundle.initialAppState.profile.name, 'New User');
+  assert.equal(stagedBundle.initialAppState.profile.sex, 'female');
+  assert.equal(stagedBundle.initialAppState.profile.fitnessLevel, 'beginner');
+  assert.deepEqual(stagedBundle.initialAppState.adaptiveState.activeConstraints, ['balance_concern']);
   assert.equal(result.status, 'magic_link_sent');
   assert.equal(result.email, 'new.user@example.com');
   assert.equal(result.assignment.matcherVersion, '1');

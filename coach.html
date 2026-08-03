@@ -326,7 +326,11 @@
     .sportsettingbody input[type="text"]{width:100%;border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);border-radius:.6rem;padding:.55rem}
     .settingsform{margin-top:.8rem;display:grid;gap:.65rem}
     .settingsform > label{display:grid;gap:.25rem;font-size:var(--text-xs);font-weight:750;color:var(--color-text-muted)}
-    .settingsform input,.settingsform select{width:100%;border:1px solid var(--color-line);background:var(--color-surface);color:var(--color-text);border-radius:.65rem;padding:.62rem}
+    .settingsform input,.settingsform select,.settingsform textarea{width:100%;border:1px solid var(--color-line);background:var(--color-surface);color:var(--color-text);border-radius:.65rem;padding:.62rem}
+    .settingsform textarea{min-height:82px;resize:vertical;font:inherit}
+    .contextchecks{display:grid;gap:.45rem;margin:.65rem 0}
+    .contextcheck{display:grid;grid-template-columns:1.2rem 1fr;gap:.55rem;align-items:start;font-size:var(--text-sm);color:var(--color-text-muted)}
+    .contextcheck input{width:1.05rem;height:1.05rem;margin:.15rem 0 0;accent-color:var(--color-primary)}
     .username-row{display:grid;grid-template-columns:1fr auto;gap:.45rem;align-items:end}
     .username-row label{display:grid;gap:.25rem;font-size:var(--text-xs);font-weight:750;color:var(--color-text-muted)}
     .smallaction{border:1px solid var(--color-line);background:var(--color-surface-2);color:var(--color-text);border-radius:999px;padding:.5rem .8rem;font-size:var(--text-xs);font-weight:750}
@@ -671,6 +675,24 @@
           <button class="startsecondary" id="saveProfile" type="button">Save profile</button>
         </section>
 
+        <section class="settingsblock" aria-labelledby="trainingContextTitle">
+          <h3 id="trainingContextTitle">Training context</h3>
+          <p>These details begin in Setup and stay editable on every signed-in device.</p>
+          <label>Age range <select id="profileAgeBand"><option value="">Not set</option><option value="under_50">Under 50</option><option value="50_59">50–59</option><option value="60_plus">60+</option></select></label>
+          <label class="contextcheck"><input id="profileRecoveryStatus" type="checkbox"><span>Recovering after pregnancy or birth</span></label>
+          <label>Goal notes <textarea id="profileGoalSummary" maxlength="500" placeholder="What you want training to support"></textarea></label>
+          <label>Equipment available <textarea id="profileEquipmentSummary" maxlength="500" placeholder="Mat, bands, dumbbells or other equipment"></textarea></label>
+          <div id="profileConstraintFlags" class="contextchecks" aria-label="Movement considerations">
+            <label class="contextcheck"><input data-context-constraint="fatigue_sensitive" type="checkbox"><span>Energy or fatigue varies significantly</span></label>
+            <label class="contextcheck"><input data-context-constraint="balance_concern" type="checkbox"><span>Balance needs extra care</span></label>
+            <label class="contextcheck"><input data-context-constraint="mobility_limitation" type="checkbox"><span>Some movements or positions are limited</span></label>
+            <label class="contextcheck"><input data-context-constraint="pain_or_injury" type="checkbox"><span>Current pain or injury</span></label>
+            <label class="contextcheck"><input data-context-constraint="recovery_symptoms" type="checkbox"><span>Symptoms after pregnancy or birth affect movement</span></label>
+          </div>
+          <label>Notes <textarea id="profileSetupNotes" maxlength="1000" placeholder="Practical context for future sessions"></textarea></label>
+          <button class="startsecondary" id="saveTrainingContext" type="button">Save training context</button>
+        </section>
+
         <section class="settingsblock" aria-labelledby="keyLiftSettingsTitle" id="keyLiftSettings">
           <h3 id="keyLiftSettingsTitle">Key lifts</h3>
           <p>Edit your baseline. Suggestions use only exercises you actually logged.</p>
@@ -723,14 +745,9 @@
         </div>
 
         <div class="localdata">
-          <h3>Local data</h3>
-          <p>This browser keeps an offline copy. If no account is connected, export a backup before clearing site data or moving phones.</p>
-          <div class="databtns">
-            <button class="databtn" id="exportData" type="button">Export backup</button>
-            <label class="databtn" for="importData">Import backup</label>
-            <input id="importData" type="file" accept="application/json" hidden>
-            <button class="databtn danger" id="resetData" type="button">Reset Do Less data</button>
-          </div>
+          <h3>Automatic account data</h3>
+          <p>Signed-in profiles save their account details, workouts, streaks and settings automatically. This browser also keeps an offline copy.</p>
+          <div class="databtns"><button class="databtn danger" id="resetData" type="button">Reset this device copy</button></div>
         </div>
       </div>
     </section>
@@ -784,6 +801,7 @@
   </div>
 
   <script src="./coach-state-core.js"></script>
+  <script src="./do-less-account-state-core.js"></script>
   <script src="./coach-prescription-core.js"></script>
   <script src="./do-less-archetype-core.js"></script>
   <script src="./do-less-exercise-catalog.js"></script>
@@ -800,6 +818,7 @@
   (function(){
   'use strict';
   const StateCore = window.CoachStateCore;
+  const AccountState = window.DoLessAccountState;
   const Prescription = window.CoachPrescriptionCore;
   const Archetypes = window.DoLessArchetypes;
   const ExerciseCatalog = window.DoLessExerciseCatalog;
@@ -832,6 +851,7 @@
   const ACTIVE_ARCHETYPE_ID = ACTIVE_PROFILE_INSTANCE.archetypeId;
   const ACTIVE_ARCHETYPE = Archetypes.resolveArchetype(ACTIVE_ARCHETYPE_ID);
   const KEY = localProfileStore.profileKey(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'state');
+  const hadPersistedProfileState = localStorage.getItem(KEY) != null;
   const SIGNALS_KEY = localProfileStore.profileKey(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'signals'); // optional: {dateISO, steps, alcoholUnits} fed by phone automation; never entered manually in-app
   const UI_PREFS_KEY = localProfileStore.profileKey(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'ui-prefs');
   function readUiPreferences(){
@@ -857,6 +877,8 @@
   });
   const adaptationEngine = AdaptationCore.create();
   let cloudRuntime = null;
+  let cloudHydrationReady = !cloudProfileHint;
+  let applyingRemoteSnapshot = false;
   let cloudUiState = {mode:'local', message:'Saved on this device', pending:0, email:''};
   function notifyCloudPending(){ if (cloudRuntime) cloudRuntime.notifyPending(); }
   const MOMENTUM_SYSTEM_VERSION = 1;
@@ -947,7 +969,7 @@
   function clampInputScore(value){ return Math.max(1, Math.min(3, Math.round((Number(value) || 1) * 2) / 2)); }
   function clampSessionScore(value){ return Math.max(1, Math.min(3, Math.round((Number(value) || 1) * 10) / 10)); }
   function defaultSettings(){
-    return {reminderEnabled:true, reminderTimeLocal:'19:00', trainingWindowStartLocal:'17:00', trainingWindowEndLocal:'21:30', bleedEnabled:true, momentumExplanations:true, lastEnvironment:'indoor', sports:DEFAULT_SPORTS.map(s => Object.assign({}, s))};
+    return {appearance:'auto', reminderEnabled:true, reminderTimeLocal:'19:00', trainingWindowStartLocal:'17:00', trainingWindowEndLocal:'21:30', bleedEnabled:true, momentumExplanations:true, lastEnvironment:'indoor', sports:DEFAULT_SPORTS.map(s => Object.assign({}, s))};
   }
   function defaultAdaptiveState(){
     return {
@@ -972,7 +994,9 @@
       lastHashes:[], exercisePreferences:{}, familyPreferences:{}, setPreferences:{}, exercisePB:{},
       streakFreezeCount:2, signupFreezeGranted:true, streakFreezeUses:[], bonusWorkoutCounter:0, dayRewardLedger:{}, freezeEarnedByDate:{},
       lastDayEvaluatedLocal:todayISO(), momentumSystemVersion:MOMENTUM_SYSTEM_VERSION, settings:defaultSettings(), maxStreak:0,
-      profile:StateCore.defaultProfile(), adaptiveState:defaultAdaptiveState(), readinessHistory:[], liftSnapshots:[], adaptationEvents:[]
+      profile:StateCore.defaultProfile(),
+      accountDetails:{ageBand:'', postpartumStatus:false, goalSummary:'', equipmentSummary:'', constraintFlags:[], notes:''},
+      adaptiveState:defaultAdaptiveState(), readinessHistory:[], liftSnapshots:[], adaptationEvents:[]
     };
   }
   let profileRewriteNeeded = false;
@@ -991,12 +1015,32 @@
       return merged;
     }catch(e){ return defaultState(); }
   }
-  function save(){
+  function fullStatePayload(timestamp){
+    const payload = AccountState.createUserStatePayload({
+      profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId,
+      appState:state,
+      uiPreferences:readUiPreferences(),
+      signals:localProfileStore.readProfileValue(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'signals'),
+      currentStreak:Number(state && state.adaptiveState && state.adaptiveState.currentStreak) || 0,
+      updatedAt:timestamp
+    });
+    return Object.assign(payload, {preferenceState:{
+      exercisePreferences:Object.assign({}, state.exercisePreferences),
+      familyPreferences:Object.assign({}, state.familyPreferences),
+      setPreferences:Object.assign({}, state.setPreferences)
+    }});
+  }
+  function save(options){
+    const config = options && typeof options === 'object' ? options : {};
     try{
       state.profile = StateCore.normaliseProfile(state.profile);
       state.profileSchemaVersion = StateCore.PROFILE_SCHEMA_VERSION;
       localStorage.setItem(KEY, JSON.stringify(state));
     }catch(e){}
+    if (cloudProfileHint && cloudHydrationReady && !applyingRemoteSnapshot && config.skipCloud !== true){
+      const timestamp = new Date().toISOString();
+      enqueueSync('user_state', fullStatePayload(timestamp), {id:'queue-user-state', updatedAt:timestamp});
+    }
   }
   let state = load();
   function enqueueSync(type, payload, options){
@@ -1006,18 +1050,6 @@
     }), options || {});
     notifyCloudPending();
     return event;
-  }
-  function adaptiveStatePayload(){
-    return Object.assign({}, state.adaptiveState, {
-      profileInstanceId:ACTIVE_PROFILE_INSTANCE.profileInstanceId,
-      currentStreak:streakSnapshot ? streakSnapshot().count : Number(state.adaptiveState.currentStreak) || 0,
-      preferenceState:{
-        exercisePreferences:Object.assign({}, state.exercisePreferences),
-        familyPreferences:Object.assign({}, state.familyPreferences),
-        setPreferences:Object.assign({}, state.setPreferences)
-      },
-      updatedAt:state.adaptiveState.updatedAt || new Date().toISOString()
-    });
   }
   function normaliseSport(sport, index){
     const safe = {id:String(sport && sport.id || 'sport-' + index), name:String(sport && sport.name || 'Sport ' + (index + 1))};
@@ -1076,6 +1108,8 @@
     state.readinessHistory = Array.isArray(state.readinessHistory) ? state.readinessHistory : [];
     state.liftSnapshots = Array.isArray(state.liftSnapshots) ? state.liftSnapshots : [];
     state.adaptationEvents = Array.isArray(state.adaptationEvents) ? state.adaptationEvents : [];
+    state.accountDetails = Object.assign({ageBand:'', postpartumStatus:false, goalSummary:'', equipmentSummary:'', constraintFlags:[], notes:''}, state.accountDetails && typeof state.accountDetails === 'object' ? state.accountDetails : {});
+    state.accountDetails.constraintFlags = Array.isArray(state.accountDetails.constraintFlags) ? state.accountDetails.constraintFlags.map(String) : [];
     if (state.signupFreezeGranted !== true) state.signupFreezeGranted = true;
 
     if (state.momentumSystemVersion !== MOMENTUM_SYSTEM_VERSION){
@@ -1242,7 +1276,6 @@
     });
     state.adaptationEvents = state.adaptationEvents.slice(-80);
     save();
-    enqueueSync('user_state', adaptiveStatePayload(), {id:'queue-user-state', updatedAt:timestamp});
     return result;
   }
   function queueLiftSnapshots(rec){
@@ -2297,7 +2330,8 @@
   function remoteUserStateToLocal(row){
     if (!row || typeof row !== 'object') return null;
     const payload = row.state_payload && typeof row.state_payload === 'object' ? row.state_payload : {};
-    return Object.assign(defaultAdaptiveState(), payload, {
+    const adaptivePayload = payload.adaptiveState && typeof payload.adaptiveState === 'object' ? payload.adaptiveState : payload;
+    const result = Object.assign(defaultAdaptiveState(), adaptivePayload, {
       currentPhase:Number(row.current_phase) || Number(payload.currentPhase) || 1,
       currentStreak:Number(row.current_streak) || Number(payload.currentStreak) || 0,
       lastCompletedAt:row.last_completed_at || payload.lastCompletedAt || null,
@@ -2309,9 +2343,32 @@
       stateVersion:Number(row.state_version) || Number(payload.stateVersion) || 1,
       updatedAt:String(row.updated_at || payload.updatedAt || '')
     });
+    delete result.appState;
+    delete result.appStateVersion;
+    delete result.uiPreferences;
+    delete result.signals;
+    return result;
   }
   function mergeRemoteSnapshot(remoteSnapshot){
     const remote = remoteSnapshot && typeof remoteSnapshot === 'object' ? remoteSnapshot : {};
+    const storedPayload = remote.userState && remote.userState.state_payload && typeof remote.userState.state_payload === 'object'
+      ? remote.userState.state_payload
+      : {};
+    const remoteAppState = storedPayload.appState && typeof storedPayload.appState === 'object' ? storedPayload.appState : null;
+    const setupState = remote.profileDetails ? AccountState.setupStateFromDetails(remote.profileDetails) : null;
+    applyingRemoteSnapshot = true;
+    state = AccountState.mergeAppState({
+      localState:state,
+      setupState,
+      setupMode:'fill_blanks',
+      remoteState:remoteAppState
+    });
+    if (storedPayload.uiPreferences && typeof storedPayload.uiPreferences === 'object') {
+      localProfileStore.writeProfileValue(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'ui-prefs', storedPayload.uiPreferences);
+    }
+    if (storedPayload.signals && typeof storedPayload.signals === 'object') {
+      localProfileStore.writeProfileValue(ACTIVE_PROFILE_INSTANCE.profileInstanceId, 'signals', storedPayload.signals);
+    }
     const reconciled = SyncCore.reconcileHistory({
       local:{
         userState:state.adaptiveState,
@@ -2344,7 +2401,11 @@
     state.liftSnapshots = reconciled.liftSnapshots.slice(-80);
     state.adaptationEvents = reconciled.adaptationEvents.slice(-80);
     ensureMomentumState();
-    save();
+    save({skipCloud:true});
+    applyingRemoteSnapshot = false;
+    cloudHydrationReady = true;
+    if (!remoteAppState) save();
+    applyAppearance(state.settings.appearance || readUiPreferences().theme || 'auto');
     renderToday(); renderPlan(); renderStreak(); renderSettings();
   }
   function renderCloudState(){
@@ -2354,7 +2415,7 @@
     $('cloudStatusButton').dataset.mode = mode;
     $('cloudStatusShort').textContent = shortLabels[mode] || 'Local';
     $('accountStatusTitle').textContent = connected ? (cloudUiState.offline ? 'Offline copy' : mode === 'synced' ? 'Cloud saved' : mode === 'syncing' ? 'Saving changes' : mode === 'error' ? 'Sync will retry' : 'Account connected') : 'Local only';
-    $('accountStatusCopy').textContent = String(cloudUiState.message || (connected ? 'Your history is available across signed-in devices.' : 'Your sessions are saved on this device.'));
+    $('accountStatusCopy').textContent = String(cloudUiState.message || (connected ? 'Your account, workouts, streaks and settings are available across signed-in devices.' : 'Your sessions are saved on this device.'));
     $('accountEmail').textContent = cloudUiState.email || (connected ? 'Account details unavailable offline' : 'No account connected');
     $('accountPending').textContent = connected ? String(Number(cloudUiState.pending) || 0) + ' waiting' : 'On device';
     $('syncNow').hidden = !connected;
@@ -2363,12 +2424,14 @@
   }
   function setCloudState(nextState){
     cloudUiState = Object.assign({}, cloudUiState, nextState || {});
+    if (cloudProfileHint && cloudUiState.offline && hadPersistedProfileState) cloudHydrationReady = true;
     renderCloudState();
   }
   function renderSettings(){
     const p = state.profile || {};
+    const details = state.accountDetails || {};
     $('goalSelect').value = state.goal;
-    $('themeSelect').value = readUiPreferences().theme || 'auto';
+    $('themeSelect').value = state.settings.appearance || readUiPreferences().theme || 'auto';
     $('profileUsername').value = p.username || '';
     $('profileName').value = p.name || '';
     $('profileHeight').value = p.height || '';
@@ -2376,6 +2439,16 @@
     $('profileSex').value = p.sex || '';
     $('profileWeight').value = p.weight || '';
     $('profileLevel').value = p.fitnessLevel || '';
+    $('profileAgeBand').value = details.ageBand || '';
+    $('profileRecoveryStatus').checked = details.postpartumStatus === true;
+    $('profileGoalSummary').value = details.goalSummary || '';
+    $('profileEquipmentSummary').value = details.equipmentSummary || '';
+    $('profileSetupNotes').value = details.notes || '';
+    const detailFlags = new Set(Array.isArray(details.constraintFlags) ? details.constraintFlags : []);
+    $('profileConstraintFlags').querySelectorAll('[data-context-constraint]').forEach(input => {
+      const storedFlag = input.dataset.contextConstraint === 'recovery_symptoms' ? 'postpartum_symptoms' : input.dataset.contextConstraint;
+      input.checked = detailFlags.has(storedFlag);
+    });
     $('goalSetting').hidden = !isFitBaseline();
     $('keyLiftSettings').hidden = !isFitBaseline();
     const planTab = document.querySelector('.tab[data-view="plan"]');
@@ -2503,47 +2576,26 @@
       p.weight = $('profileWeight').value || null;
       p.fitnessLevel = $('profileLevel').value || '';
       state.profile = StateCore.normaliseProfile(p);
+      if (state.profile.age) state.accountDetails.ageBand = state.profile.age >= 60 ? '60_plus' : state.profile.age >= 50 ? '50_59' : 'under_50';
       save(); renderSettings(); toast('Profile saved');
     }
-    if (e.target && e.target.id === 'exportData'){ exportCoachData(); }
+    if (e.target && e.target.id === 'saveTrainingContext'){
+      const constraintFlags = Array.from($('profileConstraintFlags').querySelectorAll('[data-context-constraint]:checked')).map(input => input.dataset.contextConstraint === 'recovery_symptoms' ? 'postpartum_symptoms' : input.dataset.contextConstraint);
+      state.accountDetails = {
+        ageBand:$('profileAgeBand').value || '',
+        postpartumStatus:$('profileRecoveryStatus').checked,
+        goalSummary:$('profileGoalSummary').value.trim(),
+        equipmentSummary:$('profileEquipmentSummary').value.trim(),
+        constraintFlags,
+        notes:$('profileSetupNotes').value.trim()
+      };
+      state.adaptiveState.activeConstraints = constraintFlags.slice();
+      save(); renderSettings(); toast('Training context saved');
+    }
     if (e.target && e.target.id === 'resetData'){ resetCoachData(); }
   });
-
-  function exportCoachData(){
-    state = StateCore.mergeSnapshot(defaultState(), state);
-    const payload = {app:'Do Less', exportedAt:new Date().toISOString(), version:localStorage.getItem('hwc_deployed_version') || null, state};
-    const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'do-less-backup-' + todayISO() + '.json';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    toast('Backup exported');
-  }
-  function importCoachData(file){
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try{
-        const parsed = JSON.parse(String(reader.result || '{}'));
-        const imported = parsed.state || parsed;
-        state = StateCore.importSnapshot(defaultState(), parsed);
-        if (!Object.prototype.hasOwnProperty.call(imported, 'momentumSystemVersion')) state.momentumSystemVersion = 0;
-        ensureMomentumState();
-        save();
-        toast('Backup imported');
-        window.setTimeout(() => window.location.reload(), 500);
-      }catch(e){
-        toast('Import failed');
-      }
-    };
-    reader.readAsText(file);
-  }
   function resetCoachData(){
-    if (!window.confirm('Reset all Do Less data in this browser? This clears sessions, lifts, profile, signals, and preferences.')) return;
+    if (!window.confirm('Reset the Do Less copy on this device? Signed-in account data will download again.')) return;
     localProfileStore.clearAllProfileData();
     localStorage.removeItem('hwc_state_v1');
     localStorage.removeItem('hwc_signals');
@@ -2551,13 +2603,9 @@
     localStorage.removeItem('hwc_reminder_enabled');
     localProfileStore.ensureProfileInstance(ACTIVE_PROFILE_INSTANCE);
     state = StateCore.resetSnapshot(defaultState());
-    save();
+    save({skipCloud:true});
     window.location.reload();
   }
-  $('importData').addEventListener('change', e => {
-    importCoachData(e.target.files && e.target.files[0]);
-    e.target.value = '';
-  });
 
   /* ---------- library ---------- */
   let libFilter = 'all';
@@ -3033,21 +3081,24 @@
   });
 
   /* ---------- theme: time-of-day with Settings control ---------- */
+  function applyAppearance(mode){
+    if (mode === 'auto'){
+      const h = hourNow();
+      document.documentElement.setAttribute('data-theme', (h >= 17 || h < 6) ? 'dark' : 'light');
+    } else {
+      document.documentElement.setAttribute('data-theme', mode);
+    }
+  }
   (function(){
-    const apply = (mode) => {
-      if (mode === 'auto'){
-        const h = hourNow();
-        document.documentElement.setAttribute('data-theme', (h >= 17 || h < 6) ? 'dark' : 'light');
-      } else {
-        document.documentElement.setAttribute('data-theme', mode);
-      }
-    };
-    let pref = readUiPreferences().theme || 'auto';
-    apply(pref);
+    let pref = state.settings.appearance || readUiPreferences().theme || 'auto';
+    state.settings.appearance = pref;
+    applyAppearance(pref);
     $('themeSelect').addEventListener('change', event => {
       pref = event.target.value;
+      state.settings.appearance = pref;
       writeUiPreferences({theme:pref});
-      apply(pref);
+      save();
+      applyAppearance(pref);
       toast(pref === 'auto' ? 'Theme: Auto' : (pref === 'dark' ? 'Theme: Night' : 'Theme: Day'));
     });
   })();

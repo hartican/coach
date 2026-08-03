@@ -86,8 +86,8 @@
       <div class="intro">
         <p class="eyebrow">Family profile setup</p>
         <h1>Start with the right plan.</h1>
-        <p class="introcopy">Tell us the useful bits. We’ll assign a starting plan, create the profile, then send the secure sign-in link.</p>
-        <div class="sequence" aria-label="Setup sequence"><span>1</span> Details <span>2</span> Plan <span>3</span> Email link</div>
+        <p class="introcopy">Set the same profile, training and app preferences you’ll see in Settings. We’ll save them to the account before sending the secure sign-in link.</p>
+        <div class="sequence" aria-label="Setup sequence"><span>1</span> Details <span>2</span> Preferences <span>3</span> Email link</div>
       </div>
 
       <p class="offline" id="offlineNote" hidden>You’ll need an internet connection to create this profile.</p>
@@ -99,19 +99,54 @@
             <label class="field full"><span class="label">Setup access code</span><input name="setupCode" type="password" autocomplete="one-time-code" required maxlength="120"><span class="hint">Use the private code supplied by the family account admin.</span></label>
             <label class="field"><span class="label">Name</span><input name="displayName" type="text" autocomplete="name" required maxlength="80"></label>
             <label class="field"><span class="label">Email</span><input name="email" type="email" inputmode="email" autocomplete="email" required maxlength="254"></label>
+            <label class="field"><span class="label">Username</span><input name="username" type="text" autocomplete="nickname" maxlength="40" placeholder="Your training name"></label>
+            <label class="field"><span class="label">Avatar</span><select name="avatar"><option value="preset:ocean">Ocean</option><option value="preset:sunrise">Sunrise</option><option value="preset:gumleaf">Gumleaf</option><option value="preset:night">Night</option></select></label>
           </div>
         </fieldset>
 
         <fieldset>
           <legend>Starting point</legend>
           <div class="fieldgrid">
-            <label class="field"><span class="label">Age range</span><select name="ageBand" required><option value="">Choose one</option><option value="under_50">Under 50</option><option value="50_59">50–59</option><option value="60_plus">60+</option></select></label>
+            <label class="field"><span class="label">Age</span><input name="age" type="number" inputmode="numeric" min="13" max="120" required></label>
+            <label class="field"><span class="label">Height (cm)</span><input name="height" type="number" inputmode="decimal" min="100" max="250" step="0.1"></label>
             <label class="field"><span class="label">Sex or gender</span><select name="sexOrGender" required><option value="prefer_not_to_say">Prefer not to say</option><option value="female">Female</option><option value="male">Male</option><option value="other">Other</option></select></label>
+            <label class="field"><span class="label">Weight (kg)</span><input name="weight" type="number" inputmode="decimal" min="30" max="400" step="0.1"></label>
             <label class="field"><span class="label">Training experience</span><select name="trainingExperience" required><option value="new">Brand new</option><option value="beginner">Beginner</option><option value="intermediate">Intermediate</option><option value="experienced">Experienced</option></select></label>
+            <label class="field"><span class="label">Primary goal</span><select name="goal" required><option value="abs">Visible abs</option><option value="chain">Anterior &amp; posterior chain</option><option value="upper">Upper body</option></select></label>
             <label class="check field"><input id="postpartumStatus" name="postpartumStatus" type="checkbox"><span>Postpartum now <small>This changes the starting plan before anything else.</small></span></label>
             <p class="postpartum-note field full" id="postpartumNote" hidden>We’ll prioritise a recovery-first starting plan. Add any symptoms or movement concerns below.</p>
-            <label class="field full"><span class="label">Main goal</span><textarea name="goalSummary" maxlength="500" placeholder="For example: feel stronger, move more consistently, or return to training"></textarea></label>
+            <label class="field full"><span class="label">Goal notes</span><textarea name="goalSummary" maxlength="500" placeholder="For example: feel stronger, move more consistently, or return to training"></textarea></label>
             <label class="field full"><span class="label">Equipment available</span><textarea name="equipmentSummary" maxlength="500" placeholder="For example: mat, resistance bands, two dumbbells"></textarea></label>
+            <label class="field"><span class="label">Usual environment</span><select name="lastEnvironment"><option value="indoor">Indoor</option><option value="outdoor">Outdoor</option><option value="both">Both</option></select></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>App preferences</legend>
+          <div class="fieldgrid">
+            <label class="field"><span class="label">Appearance</span><select name="appearance"><option value="auto">Auto</option><option value="light">Day</option><option value="dark">Night</option></select></label>
+            <label class="field"><span class="label">Reminder time</span><input name="reminderTimeLocal" type="time" value="19:00"></label>
+            <label class="field"><span class="label">Training window starts</span><input name="trainingWindowStartLocal" type="time" value="17:00"></label>
+            <label class="field"><span class="label">Training window ends</span><input name="trainingWindowEndLocal" type="time" value="21:30"></label>
+          </div>
+          <div class="checks" style="margin-top:1rem">
+            <label class="check"><input name="reminderEnabled" type="checkbox" checked><span>Daily movement reminder enabled</span></label>
+            <label class="check"><input name="bleedEnabled" type="checkbox" checked><span>Calendar momentum carry-over enabled</span></label>
+            <label class="check"><input name="momentumExplanations" type="checkbox" checked><span>Show momentum explanations</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Starting workout baselines</legend>
+          <p class="hint" style="margin:0 0 1rem">These match the editable key lifts in Settings. Keep the suggested values unless you already know your comfortable baseline.</p>
+          <div class="fieldgrid">
+            <label class="field"><span class="label">Push reps</span><input name="liftPushReps" type="number" min="1" step="1" value="8"></label>
+            <label class="field"><span class="label">Squat reps</span><input name="liftSquatReps" type="number" min="1" step="1" value="12"></label>
+            <label class="field"><span class="label">Squat kg</span><input name="liftSquatKg" type="number" min="0.5" step="0.5" value="12.5"></label>
+            <label class="field"><span class="label">Lunge reps</span><input name="liftLungeReps" type="number" min="1" step="1" value="8"></label>
+            <label class="field"><span class="label">Lunge kg</span><input name="liftLungeKg" type="number" min="0.5" step="0.5" value="7.5"></label>
+            <label class="field"><span class="label">Plank seconds</span><input name="liftPlankSec" type="number" min="1" step="1" value="30"></label>
+            <label class="field"><span class="label">Bridge reps</span><input name="liftBridgeReps" type="number" min="1" step="1" value="12"></label>
           </div>
         </fieldset>
 

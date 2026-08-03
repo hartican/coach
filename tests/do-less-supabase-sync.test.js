@@ -93,18 +93,19 @@ test('active profile resolution validates the authenticated owner returned throu
   const client = {
     auth:{getUser:async () => ({data:{user:{id:USER_ID, email:'family@example.com'}}, error:null})},
     from(table){
-      assert.equal(table, 'profile_instances');
       const builder = {
         select(){ return builder; },
-        eq(column, value){ filters.push([column, value]); return builder; },
-        maybeSingle:async () => ({data:{
-          profile_instance_id:PROFILE_ID,
-          user_id:USER_ID,
-          archetype_id:'postpartum',
-          archetype_version:1,
-          assignment_method:'matcher',
-          assignment_reason:'Postpartum status takes priority.',
-          is_active:true
+        eq(column, value){ filters.push([table, column, value]); return builder; },
+        order(){ return builder; },
+        limit(){ return builder; },
+        maybeSingle:async () => ({data:table === 'profile_instances' ? {
+          profile_instance_id:PROFILE_ID, user_id:USER_ID, archetype_id:'postpartum', archetype_version:1,
+          assignment_method:'matcher', assignment_reason:'Postpartum status takes priority.', is_active:true
+        } : table === 'user_accounts' ? {
+          user_id:USER_ID, email:'family@example.com', display_name:'Gina', status:'active'
+        } : {
+          intake_id:'intake-1', user_id:USER_ID, age_band:'under_50', sex_or_gender:'female',
+          training_experience:'beginner', constraint_flags:['fatigue_sensitive'], created_at:'2026-08-02T10:00:00.000Z'
         }, error:null})
       };
       return builder;
@@ -115,5 +116,8 @@ test('active profile resolution validates the authenticated owner returned throu
 
   assert.equal(result.user.id, USER_ID);
   assert.equal(result.profileInstance.profileInstanceId, PROFILE_ID);
-  assert.deepEqual(filters, [['user_id', USER_ID], ['is_active', true]]);
+  assert.equal(result.profileDetails.account.displayName, 'Gina');
+  assert.equal(result.profileDetails.intake.trainingExperience, 'beginner');
+  assert.deepEqual(result.profileDetails.intake.constraintFlags, ['fatigue_sensitive']);
+  assert.deepEqual(filters.slice(0, 2), [['profile_instances', 'user_id', USER_ID], ['profile_instances', 'is_active', true]]);
 });

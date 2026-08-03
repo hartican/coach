@@ -1,8 +1,11 @@
 (function(root, factory){
-  const api = factory();
+  const accountState = typeof module === 'object' && module.exports
+    ? require('./do-less-account-state-core.js')
+    : root && root.DoLessAccountState;
+  const api = factory(accountState);
   if (typeof module === 'object' && module.exports) module.exports = api;
   if (root) root.DoLessProvisioningCore = api;
-})(typeof globalThis !== 'undefined' ? globalThis : this, function(){
+})(typeof globalThis !== 'undefined' ? globalThis : this, function(AccountState){
   'use strict';
 
   const AGE_BANDS = Object.freeze(['under_50', '50_59', '60_plus']);
@@ -50,6 +53,21 @@
     return selected;
   }
 
+  function optionalNumber(value, minimum, maximum, field){
+    if (value === '' || value == null) return null;
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed < minimum || parsed > maximum) {
+      throw new ProvisioningValidationError('Enter a valid ' + field, field);
+    }
+    return parsed;
+  }
+
+  function setupTime(value, fallback, field){
+    const selected = cleanString(value, 5, field, false) || fallback;
+    if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(selected)) throw new ProvisioningValidationError('Enter a valid ' + field, field);
+    return selected;
+  }
+
   function normaliseRedirect(value){
     let url;
     try{ url = new URL(String(value || '')); }catch(error){
@@ -71,13 +89,30 @@
     if (flags.some(flag => !CONSTRAINT_FLAGS.includes(flag))) {
       throw new ProvisioningValidationError('Choose only supported constraint flags', 'constraintFlags');
     }
+    const age = optionalNumber(source.age, 13, 120, 'age');
+    const derivedAgeBand = age == null ? null : age >= 60 ? '60_plus' : age >= 50 ? '50_59' : 'under_50';
     return Object.freeze({
       email:normaliseEmail(source.email),
       displayName:cleanString(source.displayName, 80, 'display name', true),
-      ageBand:choice(source.ageBand, AGE_BANDS, 'age band'),
+      username:cleanString(source.username, 40, 'username', false),
+      avatar:['preset:sunrise', 'preset:ocean', 'preset:gumleaf', 'preset:night'].includes(String(source.avatar || '')) ? String(source.avatar) : 'preset:ocean',
+      height:optionalNumber(source.height, 100, 250, 'height'),
+      age,
+      ageBand:choice(derivedAgeBand || source.ageBand, AGE_BANDS, 'age band'),
       sexOrGender:choice(source.sexOrGender, SEX_OR_GENDER_VALUES, 'sex or gender'),
+      weight:optionalNumber(source.weight, 30, 400, 'weight'),
       postpartumStatus:source.postpartumStatus === true,
       trainingExperience:choice(source.trainingExperience, TRAINING_EXPERIENCE_VALUES, 'training experience'),
+      goal:['abs', 'chain', 'upper'].includes(String(source.goal || '')) ? String(source.goal) : 'abs',
+      appearance:['auto', 'light', 'dark'].includes(String(source.appearance || '')) ? String(source.appearance) : 'auto',
+      reminderEnabled:source.reminderEnabled !== false,
+      reminderTimeLocal:setupTime(source.reminderTimeLocal, '19:00', 'reminder time'),
+      trainingWindowStartLocal:setupTime(source.trainingWindowStartLocal, '17:00', 'training window start'),
+      trainingWindowEndLocal:setupTime(source.trainingWindowEndLocal, '21:30', 'training window end'),
+      bleedEnabled:source.bleedEnabled !== false,
+      momentumExplanations:source.momentumExplanations !== false,
+      lastEnvironment:['indoor', 'outdoor', 'both'].includes(String(source.lastEnvironment || '')) ? String(source.lastEnvironment) : 'indoor',
+      lifts:isObject(source.lifts) ? source.lifts : {},
       equipmentSummary:cleanString(source.equipmentSummary, 500, 'equipment summary', false),
       goalSummary:cleanString(source.goalSummary, 500, 'goal summary', false),
       constraintFlags:Object.freeze(flags),
@@ -165,7 +200,9 @@
         updatedAt:timestamp
       };
 
-      const staged = await stageProfile({userAccount, intakeRecord, assignmentEvent, profileInstance});
+      if (!AccountState || typeof AccountState.buildInitialAppState !== 'function') throw new Error('Account state contract is unavailable');
+      const initialAppState = AccountState.buildInitialAppState(intake);
+      const staged = await stageProfile({userAccount, intakeRecord, assignmentEvent, profileInstance, initialAppState});
       if (!staged || !staged.userId || !staged.profileInstanceId) {
         throw new Error('Profile staging did not return the created user and profile instance');
       }
