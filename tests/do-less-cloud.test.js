@@ -237,7 +237,7 @@ test('an offline cloud profile reconnects and flushes its queue when the browser
   assert.equal(pulls, 1);
 });
 
-test('a signed-out person can request a fresh one-time link for an existing account', async () => {
+test('a signed-out person can request a fresh sign-in email for an existing account', async () => {
   const local = storage();
   const requests = [];
   const fakeClient = {
@@ -306,4 +306,80 @@ test('signing out removes only this device session', async () => {
   await runtime.signOut();
 
   assert.deepEqual(signOutOptions, [{scope:'local'}]);
+});
+
+test('an installed app verifies an emailed code inside its own browser session', async () => {
+  const local = storage();
+  const verifications = [];
+  let reloads = 0;
+  const fakeClient = {
+    auth:{
+      onAuthStateChange(){ return {data:{subscription:{unsubscribe(){}}}}; },
+      getSession:async () => ({data:{session:null}, error:null}),
+      verifyOtp:async request => {
+        verifications.push(request);
+        return {data:{session:{user:{id:USER_ID, email:'gina@example.com'}}}, error:null};
+      }
+    }
+  };
+  const runtime = Cloud.createRuntime({
+    storage:local,
+    resolveArchetype:Archetypes.resolveArchetype,
+    fetchImpl:async () => ({ok:true, json:async () => ({url:'https://example.supabase.co', publishableKey:'public-key'})}),
+    loadSupabase:async () => ({createClient:() => fakeClient}),
+    resolveActiveProfile:async () => { throw new Error('verification reloads before profile resolution'); },
+    createSyncAdapter:() => { throw new Error('verification reloads before sync setup'); },
+    reload:() => { reloads++; },
+    setOnlineListener:() => {}
+  });
+
+  await runtime.init({
+    queue:{list:() => []},
+    getProfileInstance:() => ({profileInstanceId:'local-primary', userId:'local-user'}),
+    mergeRemoteSnapshot:() => {},
+    setCloudState:() => {}
+  });
+  const result = await runtime.verifySignInCode('  GINA@example.com ', ' 123456 ');
+
+  assert.deepEqual(verifications, [{email:'gina@example.com', token:'123456', type:'email'}]);
+  assert.deepEqual(result, {verified:true, email:'gina@example.com'});
+  assert.equal(reloads, 1);
+});
+
+test('an installed app can verify a copied Supabase magic link inside its own browser session', async () => {
+  const local = storage();
+  const verifications = [];
+  let reloads = 0;
+  const fakeClient = {
+    auth:{
+      onAuthStateChange(){ return {data:{subscription:{unsubscribe(){}}}}; },
+      getSession:async () => ({data:{session:null}, error:null}),
+      verifyOtp:async request => {
+        verifications.push(request);
+        return {data:{session:{user:{id:USER_ID, email:'gina@example.com'}}}, error:null};
+      }
+    }
+  };
+  const runtime = Cloud.createRuntime({
+    storage:local,
+    resolveArchetype:Archetypes.resolveArchetype,
+    fetchImpl:async () => ({ok:true, json:async () => ({url:'https://example.supabase.co', publishableKey:'public-key'})}),
+    loadSupabase:async () => ({createClient:() => fakeClient}),
+    resolveActiveProfile:async () => { throw new Error('verification reloads before profile resolution'); },
+    createSyncAdapter:() => { throw new Error('verification reloads before sync setup'); },
+    reload:() => { reloads++; },
+    setOnlineListener:() => {}
+  });
+
+  await runtime.init({
+    queue:{list:() => []},
+    getProfileInstance:() => ({profileInstanceId:'local-primary', userId:'local-user'}),
+    mergeRemoteSnapshot:() => {},
+    setCloudState:() => {}
+  });
+  const result = await runtime.verifySignInLink('https://example.supabase.co/auth/v1/verify?token=abc123tokenhash&type=magiclink&redirect_to=https%3A%2F%2Fcoach-jack.vercel.app%2Fcoach.html');
+
+  assert.deepEqual(verifications, [{token_hash:'abc123tokenhash', type:'magiclink'}]);
+  assert.deepEqual(result, {verified:true});
+  assert.equal(reloads, 1);
 });

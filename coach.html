@@ -310,6 +310,9 @@
     .accountsignin > label{font-size:var(--text-xs);font-weight:750;color:var(--color-text-muted)}
     .accountsigninrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.5rem;align-items:center}
     .accountsigninrow input{min-width:0;width:100%;border:1px solid var(--color-line);background:var(--color-surface);color:var(--color-text);border-radius:.65rem;padding:.62rem}
+    .accountcode{margin-top:.1rem}
+    .accountcode input{font-size:var(--text-lg);font-weight:750;letter-spacing:.22em;font-variant-numeric:tabular-nums}
+    .accountsigninor{margin:.15rem 0 0!important;font-size:var(--text-xs)!important;color:var(--color-text-faint)!important}
     .accountsigninstatus{min-height:1.25rem;margin:0!important;font-size:var(--text-xs)!important;color:var(--color-text-muted)}
     .settingrow{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.65rem 0;border-bottom:1px solid var(--color-line);font-size:var(--text-sm)}
     .settingrow input[type="time"]{border:1px solid var(--color-line);border-radius:.6rem;background:var(--color-surface-2);color:var(--color-text);padding:.45rem}
@@ -645,9 +648,20 @@
             <label for="accountSignInEmail">Already have an account?</label>
             <div class="accountsigninrow">
               <input id="accountSignInEmail" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required>
-              <button class="smallaction" id="sendSignInLink" type="submit">Email me a link</button>
+              <button class="smallaction" id="sendSignInCode" type="submit">Send code</button>
             </div>
-            <p class="accountsigninstatus" id="accountSignInStatus" role="status">Each one-time link signs one browser into your saved account.</p>
+            <div class="accountsigninrow accountcode" id="accountCodeEntry" hidden>
+              <label class="visually-hidden" for="accountSignInCode">Six-digit sign-in code</label>
+              <input id="accountSignInCode" type="text" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="123456">
+              <button class="smallaction" id="verifySignInCode" type="button">Sign in</button>
+            </div>
+            <p class="accountsigninor" id="accountLinkPrompt" hidden>Or copy the one-time link from the email and paste it here.</p>
+            <div class="accountsigninrow" id="accountLinkEntry" hidden>
+              <label class="visually-hidden" for="accountSignInLink">One-time sign-in link</label>
+              <input id="accountSignInLink" type="url" inputmode="url" autocomplete="off" placeholder="Paste sign-in link">
+              <button class="smallaction" id="verifySignInLink" type="button">Use link</button>
+            </div>
+            <p class="accountsigninstatus" id="accountSignInStatus" role="status">We’ll email a sign-in code or one-time link. Finish signing in here without leaving the installed app.</p>
           </form>
         </section>
 
@@ -751,7 +765,7 @@
 
         <div class="localdata">
           <h3>Family account setup</h3>
-          <p>Create an assigned profile before its secure sign-in link is sent. The existing local app keeps working without an account.</p>
+          <p>Create an assigned profile before its secure sign-in email is sent. The existing local app keeps working without an account.</p>
           <div class="databtns">
             <a class="databtn" href="/setup">Set up a family profile</a>
           </div>
@@ -2019,19 +2033,55 @@
   $('signOut').addEventListener('click', () => { if (cloudRuntime) cloudRuntime.signOut(); });
   $('accountSignIn').addEventListener('submit', async event => {
     event.preventDefault();
-    const button = $('sendSignInLink');
+    const button = $('sendSignInCode');
     const status = $('accountSignInStatus');
     if (!cloudRuntime) {
       status.textContent = 'Sign-in is still loading. Please try again in a moment.';
       return;
     }
     button.disabled = true;
-    status.textContent = 'Sending a fresh link…';
-    const result = await cloudRuntime.requestMagicLink($('accountSignInEmail').value);
-    status.textContent = result.sent
-      ? 'Link sent. Open the new email on this device; the link works once.'
-      : result.message;
+    status.textContent = 'Sending a sign-in email…';
+    const result = await cloudRuntime.requestSignInCode($('accountSignInEmail').value);
+    if (result.sent) {
+      $('accountCodeEntry').hidden = false;
+      $('accountLinkPrompt').hidden = false;
+      $('accountLinkEntry').hidden = false;
+      $('accountSignInCode').focus();
+      status.textContent = 'Email sent. Enter the code, or copy and paste its one-time link.';
+    } else status.textContent = result.message;
     button.disabled = false;
+  });
+  $('accountSignInCode').addEventListener('input', event => {
+    event.target.value = event.target.value.replace(/\D/g, '').slice(0, 6);
+  });
+  $('accountSignInCode').addEventListener('keydown', event => {
+    if (event.key === 'Enter') { event.preventDefault(); $('verifySignInCode').click(); }
+  });
+  $('verifySignInCode').addEventListener('click', async () => {
+    const button = $('verifySignInCode');
+    const status = $('accountSignInStatus');
+    if (!cloudRuntime) {
+      status.textContent = 'Sign-in is still loading. Please try again in a moment.';
+      return;
+    }
+    button.disabled = true;
+    status.textContent = 'Checking the code…';
+    const result = await cloudRuntime.verifySignInCode($('accountSignInEmail').value, $('accountSignInCode').value);
+    status.textContent = result.verified ? 'Signed in. Opening your saved plan…' : result.message;
+    if (!result.verified) button.disabled = false;
+  });
+  $('verifySignInLink').addEventListener('click', async () => {
+    const button = $('verifySignInLink');
+    const status = $('accountSignInStatus');
+    if (!cloudRuntime) {
+      status.textContent = 'Sign-in is still loading. Please try again in a moment.';
+      return;
+    }
+    button.disabled = true;
+    status.textContent = 'Checking the link…';
+    const result = await cloudRuntime.verifySignInLink($('accountSignInLink').value);
+    status.textContent = result.verified ? 'Signed in. Opening your saved plan…' : result.message;
+    if (!result.verified) button.disabled = false;
   });
 
   function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1600); }

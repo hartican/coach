@@ -1,4 +1,4 @@
-const CACHE_NAME = 'do-less-cache-20260803T035609Z';
+const CACHE_NAME = 'do-less-cache-20260803T051613Z';
 const PRECACHE_URLS = [
   '/',
   '/index.html',

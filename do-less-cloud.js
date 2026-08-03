@@ -114,6 +114,7 @@
     let initInFlight = null;
     let authReady = false;
     let onlineListenerRegistered = false;
+    let authApiOrigin = '';
 
     function releasePrivacyShield(){
       if (documentObject && documentObject.documentElement) documentObject.documentElement.removeAttribute('data-cloud-auth-pending');
@@ -260,6 +261,8 @@
         localMode('Saved on this device');
         return {local:true};
       }
+      try{ authApiOrigin = new URL(publicConfig.url).origin; }
+      catch(error){ authApiOrigin = ''; }
 
       const supabaseLibrary = await loadSupabase();
       client = supabaseLibrary.createClient(publicConfig.url, publicConfig.publishableKey, {
@@ -296,7 +299,7 @@
       scheduleSync();
     }
 
-    async function requestMagicLink(value){
+    async function requestSignInCode(value){
       const email = String(value || '').trim().toLowerCase();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return {sent:false, email:'', message:'Enter a valid email address'};
@@ -315,13 +318,66 @@
           options:{shouldCreateUser:false, emailRedirectTo}
         });
         if (response && response.error) throw response.error;
-        emit({mode:'local', message:'Fresh sign-in link sent. Check your email.', pending:pendingCount(), email:''});
+        emit({mode:'local', message:'Sign-in email sent. Check your inbox.', pending:pendingCount(), email:''});
         return {sent:true, email};
       }catch(error){
-        emit({mode:'error', message:'We could not send a sign-in link just now', pending:pendingCount(), email:''});
-        return {sent:false, email, message:'We could not send a sign-in link just now. Please try again.'};
+        emit({mode:'error', message:'We could not send a sign-in email just now', pending:pendingCount(), email:''});
+        return {sent:false, email, message:'We could not send a sign-in email just now. Please try again.'};
       }
     }
+
+    async function verifySignInCode(emailValue, codeValue){
+      const email = String(emailValue || '').trim().toLowerCase();
+      const token = String(codeValue || '').replace(/\s+/g, '');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return {verified:false, email:'', message:'Enter the email address that received the code'};
+      }
+      if (!/^\d{6}$/.test(token)) {
+        return {verified:false, email, message:'Enter the six-digit code from the email'};
+      }
+      if (!client || !client.auth || typeof client.auth.verifyOtp !== 'function') {
+        return {verified:false, email, message:'Sign-in is unavailable right now. Try again when you are online.'};
+      }
+      try{
+        const response = await client.auth.verifyOtp({email, token, type:'email'});
+        if (response && response.error) throw response.error;
+        const session = response && response.data && response.data.session;
+        if (!session || !session.user) throw new Error('A session was not returned');
+        emit({mode:'loading', message:'Code accepted. Opening your saved plan…', pending:pendingCount(), email});
+        reload();
+        return {verified:true, email};
+      }catch(error){
+        emit({mode:'error', message:'That code is invalid or has expired', pending:pendingCount(), email:''});
+        return {verified:false, email, message:'That code is invalid or has expired. Request a new code and try again.'};
+      }
+    }
+
+    async function verifySignInLink(value){
+      let url;
+      try{ url = new URL(String(value || '').trim()); }
+      catch(error){ return {verified:false, message:'Paste the full one-time link from the email'}; }
+      const tokenHash = String(url.searchParams.get('token') || '').trim();
+      if (!authApiOrigin || url.origin !== authApiOrigin || url.pathname !== '/auth/v1/verify' || url.searchParams.get('type') !== 'magiclink' || !tokenHash) {
+        return {verified:false, message:'Paste the full Do Less sign-in link from the email'};
+      }
+      if (!client || !client.auth || typeof client.auth.verifyOtp !== 'function') {
+        return {verified:false, message:'Sign-in is unavailable right now. Try again when you are online.'};
+      }
+      try{
+        const response = await client.auth.verifyOtp({token_hash:tokenHash, type:'magiclink'});
+        if (response && response.error) throw response.error;
+        const session = response && response.data && response.data.session;
+        if (!session || !session.user) throw new Error('A session was not returned');
+        emit({mode:'loading', message:'Link accepted. Opening your saved plan…', pending:pendingCount(), email:String(session.user.email || '')});
+        reload();
+        return {verified:true};
+      }catch(error){
+        emit({mode:'error', message:'That link is invalid or has expired', pending:pendingCount(), email:''});
+        return {verified:false, message:'That link is invalid or has expired. Request a new email and try again.'};
+      }
+    }
+
+    const requestMagicLink = requestSignInCode;
 
     async function signOut(){
       if (client && client.auth && typeof client.auth.signOut === 'function') {
@@ -332,7 +388,7 @@
       reload();
     }
 
-    return Object.freeze({init, syncNow:requestSync, notifyPending, requestMagicLink, signOut});
+    return Object.freeze({init, syncNow:requestSync, notifyPending, requestSignInCode, requestMagicLink, verifySignInCode, verifySignInLink, signOut});
   }
 
   return Object.freeze({

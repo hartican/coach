@@ -34,10 +34,19 @@ test('the new account-state module is available offline', () => {
   assert.match(read('sw.js'), /do-less-account-state-core\.js/);
 });
 
-test('signed-out Settings offers a fresh existing-account sign-in link', () => {
+test('signed-out Settings can finish sign-in inside an installed app', () => {
   const coach = read('coach.html');
-  ['accountSignIn', 'accountSignInEmail', 'sendSignInLink', 'accountSignInStatus']
+  ['accountSignIn', 'accountSignInEmail', 'sendSignInCode', 'accountSignInCode', 'verifySignInCode', 'accountSignInLink', 'verifySignInLink', 'accountSignInStatus']
     .forEach(id => assert.match(coach, new RegExp(`id="${id}"`)));
-  assert.match(coach, /requestMagicLink/);
-  assert.match(coach, /one-time/i);
+  assert.match(coach, /requestSignInCode/);
+  assert.match(coach, /verifySignInCode/);
+  assert.match(coach, /verifySignInLink/);
+  assert.match(coach, /six-digit/i);
+});
+
+test('the hosted sign-in email supports both installed-app codes and browser links', () => {
+  const template = read('supabase/templates/magic-link.html');
+  assert.match(template, /{{\s*\.Token\s*}}/);
+  assert.match(template, /{{\s*\.ConfirmationURL\s*}}/);
+  assert.match(read('supabase/config.toml'), /\[auth\.email\.template\.magic_link\][\s\S]*magic-link\.html/);
 });
